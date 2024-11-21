@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useLocation, Link } from "react-router-dom";
 import {
   AppBar,
@@ -8,15 +8,22 @@ import {
   IconButton,
   Menu,
   MenuItem,
+  useTheme,
+  useMediaQuery,
 } from "@mui/material";
 import PurrLogo from "../assets/logo_colored.png";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import AuthModal from "./AuthModal";
 
 const Navbar = () => {
-  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
   const location = useLocation();
+
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -25,6 +32,9 @@ const Navbar = () => {
   const handleMenuClose = () => {
     setAnchorEl(null);
   };
+
+  const openAuthModal = () => setAuthModalOpen(true);
+  const closeAuthModal = () => setAuthModalOpen(false);
 
   const isJoinUsActive =
     location.pathname === "/volunteer" || location.pathname === "/about-us";
@@ -48,16 +58,19 @@ const Navbar = () => {
             flexGrow: 1,
             display: "flex",
             alignItems: "center",
-            paddingLeft: "200px",
+            paddingLeft: isSmallScreen ? "20px" : "200px",
           }}
         >
           <img
             src={PurrLogo}
             alt="Logo"
-            style={{ height: "60px", marginRight: "10px" }}
+            style={{
+              height: isSmallScreen ? "40px" : "60px",
+              marginRight: "10px",
+            }}
           />
           <Typography
-            variant="h4"
+            variant={isSmallScreen ? "h5" : "h4"}
             component="div"
             color="primary"
             sx={{ fontWeight: "bold", fontFamily: "'Caramel', sans-serif" }}
@@ -74,6 +87,7 @@ const Navbar = () => {
             transform: "translateX(-50%)",
             display: "flex",
             justifyContent: "center",
+            gap: "10px",
           }}
         >
           {["Home", "Adopt", "Donate", "Lost and Found"].map((text) => {
@@ -85,15 +99,15 @@ const Navbar = () => {
                 component={Link}
                 to={linkPath}
                 sx={{
-                  marginX: 1,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  padding: "10px 20px",
-                  borderRadius: "20px", // Rounded corners
+                  padding: isSmallScreen ? "5px 10px" : "10px 20px",
+                  borderRadius: "20px",
                   backgroundColor: isActive ? "primary.main" : "white",
                   color: isActive ? "white" : "primary.main",
                   fontWeight: "bold",
+                  fontSize: isSmallScreen ? "0.8rem" : "1rem",
                   textDecoration: "none",
                   "&:hover": {
                     backgroundColor: "lightgray",
@@ -107,15 +121,15 @@ const Navbar = () => {
           <Box
             onClick={handleMenuOpen}
             sx={{
-              marginX: 1,
               display: "flex",
               alignItems: "center",
-              padding: "10px 20px",
+              padding: isSmallScreen ? "5px 10px" : "10px 20px",
               borderRadius: "20px",
               backgroundColor: isJoinUsActive ? "primary.main" : "white",
               color: isJoinUsActive ? "white" : "primary.main",
-              cursor: "pointer",
               fontWeight: "bold",
+              fontSize: isSmallScreen ? "0.8rem" : "1rem",
+              cursor: "pointer",
               "&:hover": {
                 backgroundColor: "lightgray",
               },
@@ -159,13 +173,17 @@ const Navbar = () => {
 
         {/* Right Section: Notifications and Login/Register */}
         <Box
-          sx={{ display: "flex", alignItems: "center", paddingRight: "100px" }}
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            paddingRight: isSmallScreen ? "10px" : "100px",
+            gap: "10px",
+          }}
         >
           <IconButton
             color="primary"
             sx={{
-              marginX: 1,
-              padding: "10px 15px",
+              padding: isSmallScreen ? "5px" : "10px",
               backgroundColor: "white",
               color: "primary.main",
               cursor: "pointer",
@@ -178,18 +196,20 @@ const Navbar = () => {
             <NotificationsIcon />
           </IconButton>
           <Box
+            onClick={openAuthModal}
             component={Link}
             to="/login"
             sx={{
               display: "flex",
               alignItems: "center",
-              padding: "10px 20px",
+              padding: isSmallScreen ? "5px 10px" : "10px 20px",
               backgroundColor: "white",
               color: "primary.main",
               cursor: "pointer",
               borderRadius: "50px",
               border: "2px solid",
               borderColor: "primary.main",
+              fontSize: isSmallScreen ? "0.8rem" : "1rem",
               "&:hover": { backgroundColor: "lightgray" },
             }}
           >
@@ -197,11 +217,10 @@ const Navbar = () => {
             Login | Register
           </Box>
         </Box>
+        <AuthModal open={authModalOpen} handleClose={closeAuthModal} />
       </Toolbar>
     </AppBar>
   );
 };
 
 export default Navbar;
-
-//hellooooo

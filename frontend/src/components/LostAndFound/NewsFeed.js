@@ -155,13 +155,13 @@ const NewsFeed = () => {
               borderRadius: "8px",
               "& .MuiOutlinedInput-root": {
                 "& .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "primary.main", // Set initial border color here
+                  borderColor: "primary.main",
                 },
                 "&:hover .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "primary.dark", // Set hover border color
+                  borderColor: "primary.dark",
                 },
                 "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "primary.light", // Set focused border color
+                  borderColor: "primary.light",
                 },
               },
             }}
