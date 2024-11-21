@@ -17,6 +17,7 @@ const CreateOpportunity = () => {
   });
   const [openDialog, setOpenDialog] = useState(false); // State for dialog visibility
   const [isSubmitting, setIsSubmitting] = useState(false); // State to prevent multiple submissions
+  const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -34,18 +35,26 @@ const CreateOpportunity = () => {
     setOpenDialog(true); // Open confirmation dialog before submitting
   };
 
+  
   const handleConfirm = async () => {
     try {
       setIsSubmitting(true);
+      setErrorMessage(''); // Clear any previous error messages
       await axios.post('http://localhost:8080/api/volunteer/opportunity', formData);
-      navigate('/volunteer'); // Redirect to the Volunteer page after successful submission
+      
+      // After successful submission, navigate to /volunteer and refresh the page
+      navigate('/volunteer', { replace: true });
+      window.location.reload(); // Force a page refresh
     } catch (error) {
       console.error("Error creating opportunity:", error);
+      setErrorMessage('Failed to create opportunity. Please try again.');
     } finally {
       setIsSubmitting(false);
-      setOpenDialog(false); // Close the dialog after submission attempt
+      setOpenDialog(false); // Close the confirmation dialog after submission
     }
   };
+  
+
 
   const handleCancel = () => {
     setOpenDialog(false); // Close the dialog without submitting
@@ -59,15 +68,15 @@ const CreateOpportunity = () => {
   const today = new Date().toISOString().split('T')[0];
 
   return (
-    <Container maxWidth="sm" sx={{ mt: 12, py: 4 }}> {/* Added top margin and padding */}
-      
+    <Container maxWidth="sm"> {/* Added top margin and padding */}
+
       <Fade in timeout={700}>
         <Box mb={3} textAlign="center">
           <Typography variant="h4" gutterBottom>
             Schedule Volunteer Work
           </Typography>
           <Typography variant="body1" paragraph>
-            Use this form to create a volunteer opportunity for others. Please provide details like title, description, date, location, and required volunteers.
+            Fill this form to create a volunteer opportunity for others. Please provide details like title, description, date, location, and required volunteers.
           </Typography>
         </Box>
       </Fade>
@@ -135,7 +144,7 @@ const CreateOpportunity = () => {
               },
             }}
           />
-          
+
           {/* Hours Worked and Volunteers Needed on the Same Line */}
           <Grid container spacing={2}>
             <Grid item xs={6}>
@@ -175,22 +184,7 @@ const CreateOpportunity = () => {
               />
             </Grid>
           </Grid>
-
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
-            <Button
-              variant="outlined"
-              color="secondary"
-              onClick={handleBack}
-              sx={{
-                borderRadius: '30px',
-                width: '48%', // Set width to 48% for both buttons
-                py: 1.5, // Set the vertical padding for consistent height
-                height: '100%', // Ensure both buttons have the same height
-              }}
-            >
-              Back
-            </Button>
-            
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
             <Button
               type="submit"
               variant="contained"
@@ -209,13 +203,14 @@ const CreateOpportunity = () => {
                 },
                 '&:disabled': {
                   background: '#ddd',
-                  color: '#888'
-                }
+                  color: '#888',
+                },
               }}
             >
               {isSubmitting ? 'Submitting...' : 'Create Opportunity'}
             </Button>
           </Box>
+
 
         </form>
       </Fade>

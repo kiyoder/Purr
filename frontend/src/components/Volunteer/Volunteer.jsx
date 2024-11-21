@@ -17,13 +17,37 @@ import axios from 'axios';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { motion } from 'framer-motion'; // Importing motion
 import './Volunteer.css';
+import CreateOpportunity from './CreateOpportunity';
+import { Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
+import IconButton from '@mui/material/IconButton'; // Add this import
+import CloseIcon from '@mui/icons-material/Close'; // Make sure you have this too
+
+
 
 const Volunteer = () => {
   const [volunteerOpportunities, setVolunteerOpportunities] = useState([]);
   const [visibleOpportunities, setVisibleOpportunities] = useState(4); // Default: Show 4 cards initially
   const [isExpanded, setIsExpanded] = useState(false); // Track Show More / Show Less state
-
+  const [openFormDialog, setOpenFormDialog] = useState(false);
   const navigate = useNavigate();
+
+  // Function to handle dialog open
+  const handleOpenFormDialog = () => {
+    setOpenFormDialog(true);
+  };
+
+  // Function to handle dialog close
+  const handleCloseFormDialog = () => {
+    setOpenFormDialog(false);
+  };
+
+  // Function to handle form submission success
+  const handleFormSubmitSuccess = () => {
+    setOpenFormDialog(false); // Close the dialog
+    navigate('/volunteer', { replace: true }); // Navigate to the volunteer page
+    window.location.reload(); // Force a page refresh
+  };
+
 
   // FAQ data
   const faqData = [
@@ -114,23 +138,24 @@ const Volunteer = () => {
               color="secondary"
               size="small"
               sx={{
-                padding: '6px 16px', // Adds padding around the text
-                fontSize: '0.875rem', // Smaller text size
-                borderRadius: '18px', // Rounded corners
-                boxShadow: 'none', // Removes shadow
+                padding: '6px 16px',
+                fontSize: '0.875rem',
+                borderRadius: '18px',
+                boxShadow: 'none',
                 '&:hover': {
-                  backgroundColor: '#e1bee7', // Light purple hover effect
-                  borderColor: '#9575cd', // Slightly darker border on hover
+                  backgroundColor: '#e1bee7',
+                  borderColor: '#9575cd',
                 },
-                width: 'fit-content', // Ensures the button only takes as much space as the text + padding
-                display: 'inline-flex', // Makes sure the button size adjusts to content
-                alignItems: 'center', // Centers the text vertically
-                marginTop: '1rem', // Adds some space between the button and the text above
+                width: 'fit-content',
+                display: 'inline-flex',
+                alignItems: 'center',
+                marginTop: '1rem',
               }}
-              onClick={() => navigate('/book')} // This should work if routes are set correctly
+              onClick={handleOpenFormDialog} // Open the form dialog
             >
               Book
             </Button>
+
           </Grid>
         </Grid>
       </Container>
@@ -188,9 +213,7 @@ const Volunteer = () => {
         ))}
       </Container>
 
-      {/* Volunteer Opportunities Section */}
-      {/* Volunteer Opportunities Section */}
-      <Container maxWidth="lg" sx={{ padding: '1rem 0' }}>
+      {/* Volunteer Opportunities Section */}      <Container maxWidth="lg" sx={{ padding: '1rem 0' }}>
         <Typography variant="h4" gutterBottom className="my-5" align="center" sx={{ fontWeight: 'bold', marginBottom: '2rem' }}>
           Volunteer Opportunities
         </Typography>
@@ -221,9 +244,21 @@ const Volunteer = () => {
                   <Typography variant="h5" gutterBottom>
                     {opportunity.title}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary" paragraph>
-                    {opportunity.description.slice(0, 80)}...
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    paragraph
+                    sx={{
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2, // Limit to 2 lines
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}
+                  >
+                    {opportunity.description}
                   </Typography>
+
                   <Typography variant="body2" color="text.secondary">
                     Date: {new Date(opportunity.date).toLocaleDateString()}
                   </Typography>
@@ -289,11 +324,37 @@ const Volunteer = () => {
           >
             {isExpanded ? 'Show Less' : 'Show More'}
           </Button>
-
-
         )}
       </Container>
-
+      {/* Dialog for the CreateOpportunity form */}
+      <Dialog
+        open={openFormDialog}
+        onClose={handleCloseFormDialog}
+        aria-labelledby="form-dialog-title"
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle id="form-dialog-title" sx={{ position: 'relative' }}>
+          Schedule Volunteer Work
+          <IconButton
+            onClick={handleCloseFormDialog}
+            sx={{
+              position: 'absolute',
+              right: 8,
+              top: 8,
+              color: 'gray',
+              '&:hover': {
+                backgroundColor: 'transparent',
+              }
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent>
+          <CreateOpportunity onSubmitSuccess={handleFormSubmitSuccess} />
+        </DialogContent>
+      </Dialog>
 
     </motion.div>
   );

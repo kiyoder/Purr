@@ -17,17 +17,24 @@ import {
     Typography,
     Box,
     IconButton,
+    MenuItem,
+    Select,
+    InputLabel,
+    FormControl,
 } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
 
 const VolunteerSignUpList = () => {
     const [signUps, setSignUps] = useState([]);
+    const [opportunities, setOpportunities] = useState([]);
+    const [selectedOpportunityId, setSelectedOpportunityId] = useState('');
     const [openEditDialog, setOpenEditDialog] = useState(false);
     const [selectedSignUp, setSelectedSignUp] = useState(null);
     const [openConfirmationDialog, setOpenConfirmationDialog] = useState(false); // State for confirmation dialog
-
+    console.log("Volunteer Sign-ups:", signUps);
     useEffect(() => {
         fetchSignUps();
+        fetchOpportunities();
     }, []);
 
     const fetchSignUps = async () => {
@@ -37,6 +44,15 @@ const VolunteerSignUpList = () => {
             setSignUps(response.data);
         } catch (error) {
             console.error('Error fetching sign-ups:', error);
+        }
+    };
+
+    const fetchOpportunities = async () => {
+        try {
+            const response = await axios.get('http://localhost:8080/api/volunteer/opportunity');
+            setOpportunities(response.data); // Assuming the response contains opportunity data
+        } catch (error) {
+            console.error('Error fetching opportunities:', error);
         }
     };
 
@@ -95,11 +111,40 @@ const VolunteerSignUpList = () => {
         }));
     };
 
+    const handleOpportunityChange = (event) => {
+        setSelectedOpportunityId(event.target.value);
+    };
+
+    // Filter sign-ups by selected opportunity
+    const filteredSignUps = selectedOpportunityId
+        ? signUps.filter((signUp) => signUp.opportunityId === selectedOpportunityId)
+        : signUps;
+
     return (
         <Box p={4}>
             <Typography variant="h4" gutterBottom>
                 Volunteer Sign-Ups
             </Typography>
+
+            {/* Dropdown to select Opportunity */}
+            <FormControl fullWidth margin="normal">
+                <InputLabel>Opportunity</InputLabel>
+                <Select
+                    value={selectedOpportunityId}
+                    onChange={handleOpportunityChange}
+                    label="Opportunity"
+                >
+                    <MenuItem value="">
+                        <em>All Opportunities</em>
+                    </MenuItem>
+                    {opportunities.map((opportunity) => (
+                        <MenuItem key={opportunity.opportunityId} value={opportunity.opportunityId}>
+                            {opportunity.name} {/* Assuming `name` is a field in opportunity */}
+                        </MenuItem>
+                    ))}
+                </Select>
+            </FormControl>
+
             <TableContainer component={Paper}>
                 <Table>
                     <TableHead>
@@ -114,7 +159,7 @@ const VolunteerSignUpList = () => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {signUps.map((signUp) => (
+                        {filteredSignUps.map((signUp) => (
                             <TableRow key={signUp.signUpID}>
                                 <TableCell>{signUp.signUpID}</TableCell>
                                 <TableCell>{signUp.firstName}</TableCell>

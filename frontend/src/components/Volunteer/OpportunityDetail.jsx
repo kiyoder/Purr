@@ -23,7 +23,7 @@ import EventIcon from '@mui/icons-material/Event';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import GroupIcon from '@mui/icons-material/Group';
 import { motion } from 'framer-motion';
-import petImg from '../images/example.jpg';
+import petImg from '/public/example.jpg';
 
 const OpportunityDetail = () => {
     const { id } = useParams();
@@ -220,7 +220,6 @@ const OpportunityDetail = () => {
                                 Sign Up
                             </Button>
                         </Box>
-
                         </form>
                     </Paper>
                 </Grid>
