@@ -24,6 +24,9 @@ public class VolunteerOpportunity {
     @JsonManagedReference
     private List<VolunteerSignUp> volunteerSignUps;
 
+    // New field for volunteer image URL
+    private String volunteerImageUrl;  // The URL of the volunteer image (instead of byte array)
+
     // Getters and Setters
 
     public int getOpportunityID() {
@@ -90,4 +93,13 @@ public class VolunteerOpportunity {
         this.volunteerSignUps = volunteerSignUps;
     }
 
+    // Getter and Setter for volunteerImageUrl
+
+    public String getVolunteerImageUrl() {
+        return volunteerImageUrl;
+    }
+
+    public void setVolunteerImageUrl(String volunteerImageUrl) {
+        this.volunteerImageUrl = volunteerImageUrl;
+    }
 }

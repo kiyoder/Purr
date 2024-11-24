@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import {
   Button, TextField, Container, Typography,
   Box, Grow, Fade, Dialog, DialogTitle, DialogContent, DialogActions, Grid
-} from '@mui/material';  // Added Grid import
+} from '@mui/material'; // Added Grid import
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -13,21 +13,29 @@ const CreateOpportunity = () => {
     date: '',
     location: '',
     hoursWorked: 0,
-    volunteersNeeded: 0
+    volunteersNeeded: 0,
   });
+  const [imageFile, setImageFile] = useState(null); // State for the image file
+  const [imageUrl, setImageUrl] = useState(''); // State for the image URL after upload
   const [openDialog, setOpenDialog] = useState(false); // State for dialog visibility
   const [isSubmitting, setIsSubmitting] = useState(false); // State to prevent multiple submissions
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState(''); // State for error messages
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prevData => ({
+    setFormData((prevData) => ({
       ...prevData,
-      [name]: name === "hoursWorked" || name === "volunteersNeeded"
+      [name]: name === 'hoursWorked' || name === 'volunteersNeeded'
         ? Math.max(0, value) // Prevent negative values
-        : value
+        : value,
     }));
+  };
+
+  const handleImageChange = (e) => {
+    setImageFile(e.target.files[0]); // Update state with the selected image file
+    const imageUrl = URL.createObjectURL(e.target.files[0]);
+    setImageUrl(imageUrl); // Set image preview URL
   };
 
   const handleSubmit = async (e) => {
@@ -35,26 +43,35 @@ const CreateOpportunity = () => {
     setOpenDialog(true); // Open confirmation dialog before submitting
   };
 
-  
   const handleConfirm = async () => {
     try {
       setIsSubmitting(true);
-      setErrorMessage(''); // Clear any previous error messages
-      await axios.post('http://localhost:8080/api/volunteer/opportunity', formData);
-      
-      // After successful submission, navigate to /volunteer and refresh the page
+      setErrorMessage(''); // Clear previous errors
+
+      const requestData = new FormData();
+      // Append form data fields to FormData
+      for (const [key, value] of Object.entries(formData)) {
+        requestData.append(key, value);
+      }
+
+      // Append image file if selected
+      if (imageFile) {
+        requestData.append('volunteerImage', imageFile); // Add image file to FormData
+      }
+
+      // Send request without specifying Content-Type (FormData automatically sets it)
+      await axios.post('http://localhost:8080/api/volunteer/opportunity', requestData);
+
       navigate('/volunteer', { replace: true });
-      window.location.reload(); // Force a page refresh
+      window.location.reload(); // Refresh page after submission
     } catch (error) {
-      console.error("Error creating opportunity:", error);
+      console.error('Error creating opportunity:', error);
       setErrorMessage('Failed to create opportunity. Please try again.');
     } finally {
       setIsSubmitting(false);
-      setOpenDialog(false); // Close the confirmation dialog after submission
+      setOpenDialog(false); // Close confirmation dialog
     }
   };
-  
-
 
   const handleCancel = () => {
     setOpenDialog(false); // Close the dialog without submitting
@@ -68,15 +85,14 @@ const CreateOpportunity = () => {
   const today = new Date().toISOString().split('T')[0];
 
   return (
-    <Container maxWidth="sm"> {/* Added top margin and padding */}
-
+    <Container maxWidth="sm">
       <Fade in timeout={700}>
         <Box mb={3} textAlign="center">
           <Typography variant="h4" gutterBottom>
             Schedule Volunteer Work
           </Typography>
           <Typography variant="body1" paragraph>
-            Fill this form to create a volunteer opportunity for others. Please provide details like title, description, date, location, and required volunteers.
+            Use this form to create a volunteer opportunity for others. Please provide details like title, description, date, location, and required volunteers.
           </Typography>
         </Box>
       </Fade>
@@ -91,11 +107,6 @@ const CreateOpportunity = () => {
             onChange={handleChange}
             required
             margin="normal"
-            sx={{
-              '& .MuiInputBase-root': {
-                borderRadius: '20px', // Apply more circular border radius to the input field
-              },
-            }}
           />
           <TextField
             label="Description"
@@ -107,11 +118,6 @@ const CreateOpportunity = () => {
             margin="normal"
             multiline
             rows={4}
-            sx={{
-              '& .MuiInputBase-root': {
-                borderRadius: '20px', // Apply more circular border radius to the input field
-              },
-            }}
           />
           <TextField
             label="Date"
@@ -123,12 +129,7 @@ const CreateOpportunity = () => {
             required
             margin="normal"
             InputLabelProps={{ shrink: true }}
-            inputProps={{ min: today }} // Prevent selecting past dates
-            sx={{
-              '& .MuiInputBase-root': {
-                borderRadius: '20px', // Apply more circular border radius to the input field
-              },
-            }}
+            inputProps={{ min: today }}
           />
           <TextField
             label="Location"
@@ -138,14 +139,8 @@ const CreateOpportunity = () => {
             onChange={handleChange}
             required
             margin="normal"
-            sx={{
-              '& .MuiInputBase-root': {
-                borderRadius: '20px', // Apply more circular border radius to the input field
-              },
-            }}
           />
 
-          {/* Hours Worked and Volunteers Needed on the Same Line */}
           <Grid container spacing={2}>
             <Grid item xs={6}>
               <TextField
@@ -157,12 +152,7 @@ const CreateOpportunity = () => {
                 onChange={handleChange}
                 required
                 margin="normal"
-                inputProps={{ min: 0 }} // Prevent negative input
-                sx={{
-                  '& .MuiInputBase-root': {
-                    borderRadius: '20px', // Apply more circular border radius to the input field
-                  },
-                }}
+                inputProps={{ min: 0 }}
               />
             </Grid>
             <Grid item xs={6}>
@@ -175,47 +165,35 @@ const CreateOpportunity = () => {
                 onChange={handleChange}
                 required
                 margin="normal"
-                inputProps={{ min: 0 }} // Prevent negative input
-                sx={{
-                  '& .MuiInputBase-root': {
-                    borderRadius: '20px', // Apply more circular border radius to the input field
-                  },
-                }}
+                inputProps={{ min: 0 }}
               />
             </Grid>
           </Grid>
+
+          <Typography variant="subtitle1" sx={{ mt: 2 }}>
+            Upload Volunteer Image (Optional):
+          </Typography>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
+            style={{ margin: '15px 0' }}
+          />
+          {imageUrl && <img src={imageUrl} alt="Preview" style={{ maxWidth: '100%', height: 'auto', marginTop: '15px' }} />}
+
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
             <Button
               type="submit"
               variant="contained"
               color="primary"
               disabled={isSubmitting}
-              sx={{
-                borderRadius: '30px',
-                width: '48%', // Set width to 48% for both buttons
-                py: 1.5, // Set the vertical padding for consistent height
-                height: '100%', // Ensure both buttons have the same height
-                background: 'linear-gradient(45deg, #B39DDB 30%, #D1C4E9 90%)',
-                color: '#fff',
-                boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.12)',
-                '&:hover': {
-                  background: 'linear-gradient(45deg, #9575CD 30%, #C5CAE9 90%)',
-                },
-                '&:disabled': {
-                  background: '#ddd',
-                  color: '#888',
-                },
-              }}
             >
               {isSubmitting ? 'Submitting...' : 'Create Opportunity'}
             </Button>
           </Box>
-
-
         </form>
       </Fade>
 
-      {/* Confirmation Dialog with Grow Animation */}
       <Dialog
         open={openDialog}
         onClose={handleCancel}

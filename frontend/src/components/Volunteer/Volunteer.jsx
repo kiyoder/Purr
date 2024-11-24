@@ -29,6 +29,7 @@ const Volunteer = () => {
   const [visibleOpportunities, setVisibleOpportunities] = useState(4); // Default: Show 4 cards initially
   const [isExpanded, setIsExpanded] = useState(false); // Track Show More / Show Less state
   const [openFormDialog, setOpenFormDialog] = useState(false);
+
   const navigate = useNavigate();
 
   // Function to handle dialog open
@@ -78,6 +79,7 @@ const Volunteer = () => {
     const fetchVolunteerOpportunities = async () => {
       try {
         const response = await axios.get('http://localhost:8080/api/volunteer/opportunities');
+        console.log(response.data);  // Log the response to check the structure and values
         setVolunteerOpportunities(response.data);
       } catch (error) {
         console.error('Error fetching volunteer opportunities:', error);
@@ -235,30 +237,24 @@ const Volunteer = () => {
                 <CardMedia
                   component="img"
                   alt={opportunity.title}
-                  height="180"
-                  image={opportunity.imageUrl || "src/images/petimg.png"} // Use a fallback image if the opportunity has no image URL
-                  sx={{ objectFit: 'cover' }} // Keeps the image in uniform size
+                  height="200"
+                  image={
+                    opportunity.volunteerImageUrl
+                      ? `http://localhost:8080${opportunity.volunteerImageUrl}`  // Use the volunteerImageUrl if available
+                      : "http://localhost:8080/images/1732455964146-3e7d590dee53420c03d360908dd289dc.jpg"  // Fallback to default image
+                  }
+                  title={opportunity.title}
                 />
+
+
 
                 <CardContent sx={{ flexGrow: 1 }}>
                   <Typography variant="h5" gutterBottom>
                     {opportunity.title}
                   </Typography>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    paragraph
-                    sx={{
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2, // Limit to 2 lines
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                    }}
-                  >
-                    {opportunity.description}
+                  <Typography variant="body2" color="text.secondary" paragraph>
+                    {opportunity.description.slice(0, 80)}...
                   </Typography>
-
                   <Typography variant="body2" color="text.secondary">
                     Date: {new Date(opportunity.date).toLocaleDateString()}
                   </Typography>

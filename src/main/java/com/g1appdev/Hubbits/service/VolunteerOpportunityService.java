@@ -6,7 +6,12 @@ import com.g1appdev.Hubbits.repository.VolunteerOpportunityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,56 +21,104 @@ public class VolunteerOpportunityService {
     @Autowired
     private VolunteerOpportunityRepository opportunityRepository;
 
-    // Create or save a new opportunity
-    public VolunteerOpportunity createOpportunity(VolunteerOpportunity opportunity) {
+    private static final String UPLOAD_DIR = "src\\main\\resources\\images";  // Define folder to store images in the backend
+
+    // Upload image method
+    public String uploadImage(MultipartFile file) throws IOException {
+        // Create the directory if it doesn't exist
+        Path uploadPath = Path.of(UPLOAD_DIR);
+        if (!Files.exists(uploadPath)) {
+            Files.createDirectories(uploadPath);  // Create directories if they don't exist
+        }
+
+        // Generate a unique filename to avoid conflicts
+        String originalFilename = file.getOriginalFilename();
+        String newFilename = System.currentTimeMillis() + "-" + originalFilename;
+
+        // Define the target path where the file will be saved
+        Path targetPath = uploadPath.resolve(newFilename);
+
+        // Save the file to the local storage
+        Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
+
+        // Return the relative path to the image (URL can be modified if necessary)
+        return "/images/" + newFilename;  // Frontend can access the image via this URL
+    }
+
+    // Create or save a new volunteer opportunity
+    public VolunteerOpportunity createOpportunity(VolunteerOpportunity opportunity, MultipartFile volunteerImage) {
+        if (volunteerImage != null && !volunteerImage.isEmpty()) {
+            try {
+                // Upload the image and retrieve the URL
+                String imageUrl = uploadImage(volunteerImage);
+                opportunity.setVolunteerImageUrl(imageUrl); // Set the image URL (relative path to the saved image)
+            } catch (IOException e) {
+                throw new RuntimeException("Error processing volunteer image", e);
+            }
+        }
         return opportunityRepository.save(opportunity);
     }
 
-    // Retrieve all opportunities
+    // Retrieve all volunteer opportunities
     public List<VolunteerOpportunity> getAllOpportunities() {
         return opportunityRepository.findAll();
     }
 
-    // Retrieve an opportunity by ID, now returns Optional
+    // Retrieve a volunteer opportunity by its ID (returns Optional)
     public Optional<VolunteerOpportunity> getOpportunityById(int id) {
-        return opportunityRepository.findById(id);  // Return Optional to allow better null handling
+        return opportunityRepository.findById(id);
     }
 
-    // Update an existing opportunity
+    // Update an existing volunteer opportunity, including the volunteer image URL
     @Transactional
-    public VolunteerOpportunity updateOpportunity(int id, VolunteerOpportunity updatedOpportunity) {
-        Optional<VolunteerOpportunity> existingOpportunity = opportunityRepository.findById(id);
-        
-        if (existingOpportunity.isPresent()) {
-            VolunteerOpportunity opportunity = existingOpportunity.get();
-            
-            // Update the existing opportunity with new values
-            opportunity.setTitle(updatedOpportunity.getTitle());
-            opportunity.setDescription(updatedOpportunity.getDescription());
-            opportunity.setDate(updatedOpportunity.getDate());
-            opportunity.setLocation(updatedOpportunity.getLocation());
-            opportunity.setHoursWorked(updatedOpportunity.getHoursWorked());  // Assuming you want to update this too
-            opportunity.setVolunteersNeeded(updatedOpportunity.getVolunteersNeeded()); // Update volunteers needed
+    public VolunteerOpportunity updateOpportunity(int id, VolunteerOpportunity updatedOpportunity, MultipartFile volunteerImage) {
+        return opportunityRepository.findById(id)
+                .map(existingOpportunity -> {
+                    // Update existing fields only if they're not null or empty
+                    if (updatedOpportunity.getTitle() != null) {
+                        existingOpportunity.setTitle(updatedOpportunity.getTitle());
+                    }
+                    if (updatedOpportunity.getDescription() != null) {
+                        existingOpportunity.setDescription(updatedOpportunity.getDescription());
+                    }
+                    if (updatedOpportunity.getDate() != null) {
+                        existingOpportunity.setDate(updatedOpportunity.getDate());
+                    }
+                    if (updatedOpportunity.getLocation() != null) {
+                        existingOpportunity.setLocation(updatedOpportunity.getLocation());
+                    }
+                    if (updatedOpportunity.getHoursWorked() > 0) {
+                        existingOpportunity.setHoursWorked(updatedOpportunity.getHoursWorked());
+                    }
+                    if (updatedOpportunity.getVolunteersNeeded() > 0) {
+                        existingOpportunity.setVolunteersNeeded(updatedOpportunity.getVolunteersNeeded());
+                    }
+                    // Update the volunteer image URL if a new image is provided
+                    if (volunteerImage != null && !volunteerImage.isEmpty()) {
+                        try {
+                            // Upload the image and retrieve the URL
+                            String imageUrl = uploadImage(volunteerImage);
+                            existingOpportunity.setVolunteerImageUrl(imageUrl); // Set the image URL
+                        } catch (IOException e) {
+                            throw new RuntimeException("Error processing volunteer image", e);
+                        }
+                    }
+                    return opportunityRepository.save(existingOpportunity);
+                })
+                .orElseThrow(() -> new IllegalArgumentException("Opportunity with ID " + id + " not found"));
+    }
 
-            // Save and return the updated opportunity
-            return opportunityRepository.save(opportunity);
+    // Delete a volunteer opportunity by its ID
+    public String deleteOpportunity(int id) {
+        if (opportunityRepository.existsById(id)) {
+            opportunityRepository.deleteById(id);
+            return "Opportunity with ID " + id + " deleted successfully";
         } else {
-            // If opportunity not found, throw an exception
             throw new IllegalArgumentException("Opportunity with ID " + id + " not found");
         }
     }
 
-    // Delete an opportunity by ID
-    public String deleteOpportunity(int id) {
-        if (opportunityRepository.existsById(id)) {
-            opportunityRepository.deleteById(id);
-            return "Opportunity with ID " + id + " deleted successfully"; // Added a message to clarify deletion success
-        } else {
-            throw new IllegalArgumentException("Opportunity with ID " + id + " not found"); // Better error handling
-        }
-    }
-
-    // Get all sign-ups for a specific opportunity
+    // Get all volunteer sign-ups for a specific opportunity
     public List<VolunteerSignUp> getSignUpsForOpportunity(int opportunityId) {
         VolunteerOpportunity opportunity = opportunityRepository.findById(opportunityId)
                 .orElseThrow(() -> new IllegalArgumentException("Opportunity with ID " + opportunityId + " not found"));
