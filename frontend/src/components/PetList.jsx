@@ -287,9 +287,10 @@ const PetList = () => {
           </IconButton>
         </DialogTitle>
         <DialogContent>
-          <PetForm onClose={handleRehomeClose} />
+          <PetForm refreshPets={fetchPets} onClose={handleRehomeClose} />
         </DialogContent>
       </Dialog>
+
 
       {/* Rehome Button at the Bottom */}
       <Box

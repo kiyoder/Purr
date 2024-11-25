@@ -1,10 +1,9 @@
-// PetForm Component
-import React, { useState } from 'react'; // Import useState from React
-import { useNavigate } from 'react-router-dom'; // Import useNavigate for navigation
-import axios from 'axios'; // Import axios for HTTP requests
-import { Button, Snackbar } from '@mui/material'; // Import Material UI components
+import React, { useState } from 'react'; 
+import { useNavigate } from 'react-router-dom'; 
+import axios from 'axios'; 
+import { Button, Snackbar, TextField, MenuItem } from '@mui/material'; 
 
-const PetForm = ({ refreshPets }) => {
+const PetForm = ({ refreshPets, onClose }) => {
   const [formData, setFormData] = useState({
     name: '',
     type: '',
@@ -19,25 +18,28 @@ const PetForm = ({ refreshPets }) => {
   const navigate = useNavigate();
 
   const petTypes = ['Dog', 'Cat', 'Bird', 'Rabbit', 'Reptile', 'Fish', 'Other'];
+  const petStatuses = ['Available', 'Adopted', 'Pending'];
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Add new pet
+      // Send POST request to the Spring Boot backend
       await axios.post('http://localhost:8080/api/pet/postpetrecord', formData);
       setSuccessMessage('Pet added successfully!');
-      
-      // Call refreshPets to reload the pet list in PetList
+
+      // Refresh the pet list
       refreshPets();
 
-      setTimeout(() => navigate('/adopt'), 2000);
+      // Close the form dialog
+      if (onClose) onClose();
     } catch (error) {
-      console.error('Error saving pet data', error);
+      console.error('Error saving pet data:', error);
       setSuccessMessage('Failed to save pet data.');
     }
   };
@@ -50,18 +52,101 @@ const PetForm = ({ refreshPets }) => {
     <div style={styles.container}>
       <h2>Add Pet</h2>
       <form onSubmit={handleSubmit}>
-        {/* Form fields for pet data (name, type, breed, etc.) */}
-        
-        <Button type="submit" variant="contained" color="primary" sx={{ mr: 2 }}>
-          Add Pet
-        </Button>
-        <Button
-          variant="outlined"
-          color="secondary"
-          onClick={() => navigate('/adopt')}
+        <TextField
+          label="Name"
+          name="name"
+          value={formData.name}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+        />
+        <TextField
+          select
+          label="Type"
+          name="type"
+          value={formData.type}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
         >
-          Cancel
-        </Button>
+          {petTypes.map((type) => (
+            <MenuItem key={type} value={type}>
+              {type}
+            </MenuItem>
+          ))}
+        </TextField>
+        <TextField
+          label="Breed"
+          name="breed"
+          value={formData.breed}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+        />
+        <TextField
+          label="Age"
+          name="age"
+          type="number"
+          value={formData.age}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+        />
+        <TextField
+          select
+          label="Gender"
+          name="gender"
+          value={formData.gender}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+        >
+          <MenuItem value="Male">Male</MenuItem>
+          <MenuItem value="Female">Female</MenuItem>
+        </TextField>
+        <TextField
+          label="Description"
+          name="description"
+          value={formData.description}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+        />
+        <TextField
+          label="Photo URL"
+          name="photo"
+          value={formData.photo}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+        />
+        <TextField
+          select
+          label="Status"
+          name="status"
+          value={formData.status}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+        >
+          {petStatuses.map((status) => (
+            <MenuItem key={status} value={status}>
+              {status}
+            </MenuItem>
+          ))}
+        </TextField>
+        <div style={{ marginTop: '20px' }}>
+          <Button type="submit" variant="contained" color="primary" sx={{ mr: 2 }}>
+            Add Pet
+          </Button>
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={() => navigate('/adopt')}
+          >
+            Cancel
+          </Button>
+        </div>
       </form>
       <Snackbar
         open={!!successMessage}
@@ -74,7 +159,6 @@ const PetForm = ({ refreshPets }) => {
 };
 
 
-// Define styles here
 const styles = {
   container: {
     display: 'flex',
@@ -87,4 +171,5 @@ const styles = {
     maxWidth: '600px',
   },
 };
+
 export default PetForm;
