@@ -17,15 +17,38 @@ import axios from 'axios';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { motion } from 'framer-motion'; // Importing motion
 import './Volunteer.css';
-import petImg from '../images/petimg.png';  // Adjust the path based on your folder structure
-import petImg2 from '../images/example.jpg'; 
+import CreateOpportunity from './CreateOpportunity';
+import { Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
+import IconButton from '@mui/material/IconButton'; // Add this import
+import CloseIcon from '@mui/icons-material/Close'; // Make sure you have this too
+
+
 
 const Volunteer = () => {
   const [volunteerOpportunities, setVolunteerOpportunities] = useState([]);
   const [visibleOpportunities, setVisibleOpportunities] = useState(4); // Default: Show 4 cards initially
   const [isExpanded, setIsExpanded] = useState(false); // Track Show More / Show Less state
+  const [openFormDialog, setOpenFormDialog] = useState(false);
 
   const navigate = useNavigate();
+
+  // Function to handle dialog open
+  const handleOpenFormDialog = () => {
+    setOpenFormDialog(true);
+  };
+
+  // Function to handle dialog close
+  const handleCloseFormDialog = () => {
+    setOpenFormDialog(false);
+  };
+
+  // Function to handle form submission success
+  const handleFormSubmitSuccess = () => {
+    setOpenFormDialog(false); // Close the dialog
+    navigate('/volunteer', { replace: true }); // Navigate to the volunteer page
+    window.location.reload(); // Force a page refresh
+  };
+
 
   // FAQ data
   const faqData = [
@@ -56,6 +79,7 @@ const Volunteer = () => {
     const fetchVolunteerOpportunities = async () => {
       try {
         const response = await axios.get('http://localhost:8080/api/volunteer/opportunities');
+        console.log(response.data);  // Log the response to check the structure and values
         setVolunteerOpportunities(response.data);
       } catch (error) {
         console.error('Error fetching volunteer opportunities:', error);
@@ -86,16 +110,15 @@ const Volunteer = () => {
         <Grid container spacing={4} alignItems="flex-start">
           <Grid item xs={12} md={6}>
             <motion.img
-              src={petImg}  // Use the imported image reference
+              src="src/images/petimg.png"
               alt="Volunteer"
               className="img-fluid rounded"
-              style={{ width: '100%', borderRadius: '20px' }}
+              style={{ width: '100%', borderRadius: '8px' }}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2, duration: 1 }}
             />
           </Grid>
-
           <Grid
             item
             xs={12}
@@ -117,23 +140,24 @@ const Volunteer = () => {
               color="secondary"
               size="small"
               sx={{
-                padding: '6px 16px', // Adds padding around the text
-                fontSize: '0.875rem', // Smaller text size
-                borderRadius: '18px', // Rounded corners
-                boxShadow: 'none', // Removes shadow
+                padding: '6px 16px',
+                fontSize: '0.875rem',
+                borderRadius: '18px',
+                boxShadow: 'none',
                 '&:hover': {
-                  backgroundColor: '#e1bee7', // Light purple hover effect
-                  borderColor: '#9575cd', // Slightly darker border on hover
+                  backgroundColor: '#e1bee7',
+                  borderColor: '#9575cd',
                 },
-                width: 'fit-content', // Ensures the button only takes as much space as the text + padding
-                display: 'inline-flex', // Makes sure the button size adjusts to content
-                alignItems: 'center', // Centers the text vertically
-                marginTop: '1rem', // Adds some space between the button and the text above
+                width: 'fit-content',
+                display: 'inline-flex',
+                alignItems: 'center',
+                marginTop: '1rem',
               }}
-              onClick={() => navigate('/book')} // This should work if routes are set correctly
+              onClick={handleOpenFormDialog} // Open the form dialog
             >
               Book
             </Button>
+
           </Grid>
         </Grid>
       </Container>
@@ -191,8 +215,7 @@ const Volunteer = () => {
         ))}
       </Container>
 
-      {/* Volunteer Opportunities Section */}
-      <Container maxWidth="lg" sx={{ padding: '1rem 0' }}>
+      {/* Volunteer Opportunities Section */}      <Container maxWidth="lg" sx={{ padding: '1rem 0' }}>
         <Typography variant="h4" gutterBottom className="my-5" align="center" sx={{ fontWeight: 'bold', marginBottom: '2rem' }}>
           Volunteer Opportunities
         </Typography>
@@ -214,10 +237,16 @@ const Volunteer = () => {
                 <CardMedia
                   component="img"
                   alt={opportunity.title}
-                  height="180"
-                  image={opportunity.imageUrl || petImg2}  // Use the imported image reference
-                  sx={{ objectFit: 'cover' }}  // Keeps the image in uniform size
+                  height="200"
+                  image={
+                    opportunity.volunteerImageUrl
+                      ? `http://localhost:8080${opportunity.volunteerImageUrl}`  // Use the volunteerImageUrl if available
+                      : "http://localhost:8080/images/1732455964146-3e7d590dee53420c03d360908dd289dc.jpg"  // Fallback to default image
+                  }
+                  title={opportunity.title}
                 />
+
+
 
                 <CardContent sx={{ flexGrow: 1 }}>
                   <Typography variant="h5" gutterBottom>
@@ -291,11 +320,37 @@ const Volunteer = () => {
           >
             {isExpanded ? 'Show Less' : 'Show More'}
           </Button>
-
-
         )}
       </Container>
-
+      {/* Dialog for the CreateOpportunity form */}
+      <Dialog
+        open={openFormDialog}
+        onClose={handleCloseFormDialog}
+        aria-labelledby="form-dialog-title"
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle id="form-dialog-title" sx={{ position: 'relative' }}>
+          Schedule Volunteer Work
+          <IconButton
+            onClick={handleCloseFormDialog}
+            sx={{
+              position: 'absolute',
+              right: 8,
+              top: 8,
+              color: 'gray',
+              '&:hover': {
+                backgroundColor: 'transparent',
+              }
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent>
+          <CreateOpportunity onSubmitSuccess={handleFormSubmitSuccess} />
+        </DialogContent>
+      </Dialog>
 
     </motion.div>
   );

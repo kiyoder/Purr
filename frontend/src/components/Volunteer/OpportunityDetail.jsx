@@ -23,7 +23,7 @@ import EventIcon from '@mui/icons-material/Event';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import GroupIcon from '@mui/icons-material/Group';
 import { motion } from 'framer-motion';
-import petImg from '../images/example.jpg';
+import petImg from '/public/example.jpg';
 
 const OpportunityDetail = () => {
     const { id } = useParams();
@@ -138,31 +138,51 @@ const OpportunityDetail = () => {
                 {/* Opportunity Details */}
                 <Grid item xs={12} md={7} sx={{ marginTop: 3 }}>
                     <Paper elevation={0} sx={{ padding: 3, borderRadius: 2 }}>
-                        <Typography variant="h4" gutterBottom color='purple'>
+                        <Typography variant="h4" gutterBottom color="purple">
                             {opportunity.title}
                         </Typography>
                         <Typography variant="body1" gutterBottom>
                             {opportunity.description}
                         </Typography>
                         <Box sx={{ marginTop: 3, height: 'auto' }}>
-                            <img src={petImg} alt="Opportunity" style={{ width: '100%', height: '600px', borderRadius: 8 }} />
+                            <img
+                                src={
+                                    opportunity.volunteerImageUrl
+                                        ? `http://localhost:8080${opportunity.volunteerImageUrl}`  // Use the volunteerImageUrl if available
+                                        : "/images/default-image.jpg"  // Fallback to default image
+                                }
+                                alt="Opportunity"
+                                style={{
+                                    width: '100%',
+                                    height: '600px',
+                                    borderRadius: 8
+                                }}
+                            />
                         </Box>
                         <Box sx={{ marginTop: 3, padding: 2, borderRadius: 2, border: '1px solid lightgray' }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: 1 }}>
                                 <LocationOnIcon sx={{ marginRight: 1, color: '#9B4D96' }} />
-                                <Typography variant="body2" sx={{ color: '#9B4D96' }}><strong>Location:</strong> {opportunity.location}</Typography>
+                                <Typography variant="body2" sx={{ color: '#9B4D96' }}>
+                                    <strong>Location:</strong> {opportunity.location}
+                                </Typography>
                             </Box>
                             <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: 1 }}>
                                 <EventIcon sx={{ marginRight: 1, color: '#9B4D96' }} />
-                                <Typography variant="body2" sx={{ color: '#9B4D96' }}><strong>Date:</strong> {opportunity.date}</Typography>
+                                <Typography variant="body2" sx={{ color: '#9B4D96' }}>
+                                    <strong>Date:</strong> {opportunity.date}
+                                </Typography>
                             </Box>
                             <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: 1 }}>
                                 <AccessTimeIcon sx={{ marginRight: 1, color: '#9B4D96' }} />
-                                <Typography variant="body2" sx={{ color: '#9B4D96' }}><strong>Hours:</strong> {opportunity.hoursWorked}</Typography>
+                                <Typography variant="body2" sx={{ color: '#9B4D96' }}>
+                                    <strong>Hours:</strong> {opportunity.hoursWorked}
+                                </Typography>
                             </Box>
                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                 <GroupIcon sx={{ marginRight: 1, color: '#9B4D96' }} />
-                                <Typography variant="body2" sx={{ color: '#9B4D96' }}><strong>Volunteers Needed:</strong> {opportunity.volunteersNeeded}</Typography>
+                                <Typography variant="body2" sx={{ color: '#9B4D96' }}>
+                                    <strong>Volunteers Needed:</strong> {opportunity.volunteersNeeded}
+                                </Typography>
                             </Box>
                         </Box>
                     </Paper>
@@ -202,25 +222,24 @@ const OpportunityDetail = () => {
                             </Stack>
 
                             <Box sx={{ marginTop: 3, display: 'flex', justifyContent: 'flex-end' }}>
-                            <Button
-                                type="submit"
-                                variant="contained"
-                                color="primary"
-                                sx={{
-                                    paddingX: 4,
-                                    paddingY: 1.5,
-                                    backgroundColor: '#9B4D96',
-                                    borderRadius: '8px',
-                                    color: 'white',
-                                    '&:hover': {
-                                        backgroundColor: '#7A3B7B', // Darker purple on hover
-                                    },
-                                }}
-                            >
-                                Sign Up
-                            </Button>
-                        </Box>
-
+                                <Button
+                                    type="submit"
+                                    variant="contained"
+                                    color="primary"
+                                    sx={{
+                                        paddingX: 4,
+                                        paddingY: 1.5,
+                                        backgroundColor: '#9B4D96',
+                                        borderRadius: '8px',
+                                        color: 'white',
+                                        '&:hover': {
+                                            backgroundColor: '#7A3B7B', // Darker purple on hover
+                                        },
+                                    }}
+                                >
+                                    Sign Up
+                                </Button>
+                            </Box>
                         </form>
                     </Paper>
                 </Grid>

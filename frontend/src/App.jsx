@@ -2,19 +2,21 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 // import { Route, Routes, Router } from "react-router-dom";
+
 import { Box } from "@mui/material";
 import Home from "./components/Home";
 import LostAndFound from "./components/LostAndFound";
 import Sponsor from "./components/Sponsor";
 import PetList from "./components/PetList"
-import Volunteer from "./components/Volunteer";
 import Login from "./components/Login";
-import VolunteerOpportunities from "./components/VolunteerOpportunities";
-import OpportunityDetail from "./components/OpportunityDetail"; // Ensure this import is present
 
+import Volunteer from "./components/Volunteer";
+import VolunteerOpportunities from "./components/Volunteer/VolunteerOpportunities"
+import OpportunityDetail from "./components/Volunteer/OpportunityDetail";
+import VolunteerSignUp from "./components/Volunteer/VolunteerSignUpList";
+
+import CreateOpportunity from "./components/Volunteer/CreateOpportunity";
 import AppMenu from "./components/AppMenu";
-import VolunteerSignUp from "./components/VolunteerSignUpList";
-import CreateOpportunity from "./components/CreateOpportunity";
 import Menu from "./components/Menu";
 import AdminDashboard from "./components/AdminDashboard";
 
@@ -33,13 +35,9 @@ const App = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/admin/manage-opportunities" element={<VolunteerOpportunities />} />
           <Route path="/admin/manage-volunteers" element={<VolunteerSignUp />} />
-          <Route path="/opportunity/:id" element={<OpportunityDetail />} /> {/* Ensure this is correct */}
+          <Route path="/opportunity/:id" element={<OpportunityDetail />} />
           <Route path="/book" element={<CreateOpportunity />} />
           <Route path="*" element={<div>Page Not Found</div>} />
-
-
-
-
         </Routes>
       </Box>
     </div>
