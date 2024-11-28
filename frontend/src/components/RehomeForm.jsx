@@ -1,14 +1,15 @@
-import React, { useState } from 'react';
-import { TextField, Button, Snackbar, Select, MenuItem, InputLabel, FormControl } from '@mui/material';
+import React, { useState } from "react";
+import { TextField, Button, Snackbar, Select, MenuItem, InputLabel, FormControl, Typography } from "@mui/material";
 
-const RehomeForm = ({ onClose }) => {
+const RehomeForm = ({ onNewRehome }) => {
     const [formData, setFormData] = useState({
-        petType: '',
-        breed: '',
-        image: '',
-        description: '',
+        petType: "",
+        breed: "",
+        image: null, // Correct for file handling
+        description: "",
     });
-    const [successMessage, setSuccessMessage] = useState('');
+    const [successMessage, setSuccessMessage] = useState("");
+    const [errorMessage, setErrorMessage] = useState("");
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -17,43 +18,66 @@ const RehomeForm = ({ onClose }) => {
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
-        setFormData({ ...formData, image: file });
+        setFormData({ ...formData, image: URL.createObjectURL(file) }); // Store image preview URL
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        // Simulate form submission success
-        setSuccessMessage('Rehome form submitted successfully!');
+        if (!formData.petType || !formData.breed || !formData.image || !formData.description) {
+            setErrorMessage("All fields are required. Please fill out all fields.");
+            return;
+        }
+
+        const newRehome = {
+            id: Date.now(),
+            petType: formData.petType,
+            breed: formData.breed,
+            image: formData.image,
+            description: formData.description,
+            status: "PENDING_REHOME",
+        };
+
+        // Pass data to parent
+        onNewRehome(newRehome);
+
+        setSuccessMessage("Rehome form submitted successfully!");
         resetForm();
 
-        // Close snackbar and form after a delay
         setTimeout(() => {
-            setSuccessMessage('');
-            if (onClose) {
-                onClose(); // Close the form if onClose function is provided
-            }
-        }, 2000); // Adjust delay as needed
+            setSuccessMessage("");
+        }, 2000);
     };
 
     const resetForm = () => {
         setFormData({
-            petType: '',
-            breed: '',
-            image: '',
-            description: '',
+            petType: "",
+            breed: "",
+            image: null,
+            description: "",
         });
+        setErrorMessage("");
     };
 
     const handleSnackbarClose = () => {
-        setSuccessMessage('');
+        setSuccessMessage("");
+        setErrorMessage("");
     };
 
     return (
         <div style={styles.container}>
-            <h2>Rehome Form</h2>
+            <Typography
+                variant="h4"
+                sx={{
+                    color: "#5A20A8",
+                    marginBottom: 2,
+                    fontFamily: "'Caramel', sans-serif",
+                    fontWeight: "bold",
+                }}
+            >
+                Rehome Form
+            </Typography>
             <form onSubmit={handleSubmit}>
-                {/* Dropdown for Pet Type */}
                 <FormControl variant="outlined" fullWidth sx={{ marginBottom: 2 }}>
                     <InputLabel id="pet-type-label">Type of Pet</InputLabel>
                     <Select
@@ -62,6 +86,7 @@ const RehomeForm = ({ onClose }) => {
                         value={formData.petType}
                         onChange={handleChange}
                         label="Type of Pet"
+                        required
                     >
                         <MenuItem value="Dog">Dog</MenuItem>
                         <MenuItem value="Bird">Bird</MenuItem>
@@ -70,68 +95,67 @@ const RehomeForm = ({ onClose }) => {
                     </Select>
                 </FormControl>
 
-                {/* Text box for Breed of Pet */}
-                <TextField 
-                    label="Breed of Pet" 
-                    name="breed" 
-                    value={formData.breed} 
-                    onChange={handleChange} 
-                    variant="outlined" 
-                    fullWidth 
-                    sx={{ marginBottom: 2 }} 
+                <TextField
+                    label="Breed of Pet"
+                    name="breed"
+                    value={formData.breed}
+                    onChange={handleChange}
+                    variant="outlined"
+                    fullWidth
+                    sx={{ marginBottom: 2 }}
+                    required
                 />
 
-                {/* Image upload */}
-                <Button
-                    variant="contained"
-                    component="label"
-                    sx={{ marginBottom: 2 }}
-                >
+                <Button variant="contained" component="label" sx={{ marginBottom: 2 }}>
                     Upload Image
-                    <input
-                        type="file"
-                        accept="image/*"
-                        hidden
-                        onChange={handleFileChange}
-                    />
+                    <input type="file" accept="image/*" hidden onChange={handleFileChange} required />
                 </Button>
 
-                {/* Text box for Pet Description */}
-                <TextField 
-                    label="Pet Description" 
-                    name="description" 
-                    value={formData.description} 
-                    onChange={handleChange} 
-                    variant="outlined" 
-                    multiline 
-                    rows={4} 
-                    fullWidth 
-                    sx={{ marginBottom: 2 }} 
+                <TextField
+                    label="Pet Description"
+                    name="description"
+                    value={formData.description}
+                    onChange={handleChange}
+                    variant="outlined"
+                    multiline
+                    rows={4}
+                    fullWidth
+                    sx={{ marginBottom: 2 }}
+                    required
                 />
 
-                <Button variant="contained" type="submit">Confirm Rehome</Button>
+                <Button
+                    variant="contained"
+                    type="submit"
+                    sx={{
+                        backgroundColor: "#5A20A8",
+                        color: "white",
+                        "&:disabled": {
+                            backgroundColor: "#ccc",
+                            color: "#666",
+                        },
+                    }}
+                >
+                    Confirm Rehome
+                </Button>
             </form>
-            <Snackbar 
-                open={!!successMessage} 
-                autoHideDuration={6000} 
-                onClose={handleSnackbarClose} 
-                message={successMessage} 
-            />
+            <Snackbar open={!!successMessage} autoHideDuration={6000} onClose={handleSnackbarClose} message={successMessage} />
+            <Snackbar open={!!errorMessage} autoHideDuration={6000} onClose={handleSnackbarClose} message={errorMessage} />
         </div>
     );
 };
 
 const styles = {
     container: {
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        textAlign: 'center',
-        padding: '20px',
-        margin: '0 auto',
-        maxWidth: '600px',
-    }
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        textAlign: "center",
+        padding: "20px",
+        margin: "0 auto",
+        maxWidth: "600px",
+    },
 };
 
 export default RehomeForm;

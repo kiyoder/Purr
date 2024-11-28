@@ -6,7 +6,7 @@ import { Box } from "@mui/material";
 import Home from "./components/Home";
 import LostAndFound from "./components/LostAndFound";
 import Sponsor from "./components/Sponsor";
-import PetList from "./components/PetList"
+import PetList from "./components/PetList";
 import Volunteer from "./components/Volunteer";
 import Login from "./components/Login";
 import VolunteerOpportunities from "./components/VolunteerOpportunities";
