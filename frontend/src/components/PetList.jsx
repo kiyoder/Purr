@@ -19,6 +19,7 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import AdoptionForm from './AdoptionForm';
 import PetForm from './PetForm';
+import PetFormUpdate from './PetFormUpdate';
 
 // Import predetermined images for each pet type
 import dogImage from '../assets/golden_retriever.jpg';
@@ -36,7 +37,9 @@ const PetList = () => {
   const [selectedPet, setSelectedPet] = useState(null);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false); // State for delete confirmation modal
   const [petToDelete, setPetToDelete] = useState(null); // State to hold pet that is selected for deletion
-
+  const [openEdit, setOpenEdit] = useState(false); // State for edit modal
+  const [petToEdit, setPetToEdit] = useState(null); // Pet data to edit
+  
   const staticPets = [
     {
       pid: 97,
@@ -92,10 +95,6 @@ const PetList = () => {
     Fish: fishImage,
   };
 
-  useEffect(() => {
-    fetchPets();
-  }, []);
-
   const handleAdoptionOpen = (pet) => {
     setSelectedPet(pet);
     setOpenAdoption(true);
@@ -134,84 +133,115 @@ const PetList = () => {
     }
   };
 
+  const handleEditOpen = (pet) => {
+    setPetToEdit({ pid: pet.pid }); // Pass only the pet ID
+    setOpenEdit(true); // Open the modal
+  };
+  
+  
+  const handleEditClose = () => {
+    setOpenEdit(false); // Close the modal
+    setPetToEdit(null); // Clear the selected pet
+  };
+  
   const getPetImage = (type) => petTypeToImage[type] || defaultImage;
 
   return (
-    <Box sx={{ padding: '20px' }}>
+    <div style={styles.pageContainer}>
       <Typography variant="h6" sx={{ mb: 3, color: '#5A20A8', fontWeight: 'bold' }}>
         List of Pets to Adopt
       </Typography>
-      <Grid container spacing={3}>
+      <div style={styles.listContainer}>
         {pets.length > 0 ? (
-          pets.map((pet) => (
-            <Grid item xs={12} sm={6} md={4} key={pet.pid}>
-              <Card
-                sx={{ height: 400, display: 'flex', flexDirection: 'column', cursor: 'pointer' }}
-                onClick={() => handleAdoptionOpen(pet)}
-              >
-                <CardMedia
-                  component="img"
-                  height="140"
-                  image={getPetImage(pet.type)}
-                  alt={pet.type}
-                  sx={{ objectFit: 'cover' }}
-                />
-                <CardContent sx={{ flexGrow: 1, overflow: 'hidden' }}>
-                  <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
-                    <Chip
-                      label={pet.type}
-                      variant="outlined"
-                      color="primary"
-                      sx={{
-                        fontWeight: 'bold',
-                        borderWidth: 1.5,
-                        borderColor: 'primary.main',
-                      }}
-                    />
-                    <Chip
-                      label={pet.breed}
-                      variant="outlined"
-                      color="primary"
-                      sx={{
-                        fontWeight: 'bold',
-                        borderWidth: 1.5,
-                        borderColor: 'primary.main',
-                      }}
-                    />
-                  </Stack>
-                  <Typography color="#5A20A8" fontSize="12px" fontWeight="bold">
-                    Name: {pet.name}
-                  </Typography>
-                  <Typography color="#5A20A8" fontSize="12px" fontWeight="bold">
-                    Age: {pet.age}
-                  </Typography>
-                  <Typography color="#5A20A8" fontSize="12px" fontWeight="bold">
-                    Status: {pet.status}
-                  </Typography>
-                  <Typography color="#5A20A8" fontStyle="italic" fontWeight="bold" noWrap>
-                    {pet.description}
-                  </Typography>
-                  <Button
+          pets.map((pet, index) => (
+            <Card
+              key={index}
+              sx={{ width: 300, height: 400, display: 'flex', flexDirection: 'column', cursor: 'pointer' }}
+              onClick={() => handleAdoptionOpen(pet)}
+            >
+              <CardMedia
+                component="img"
+                height="140"
+                image={getPetImage(pet.type)}
+                alt={pet.type}
+                sx={{ objectFit: 'cover' }}
+              />
+              <CardContent sx={{ flexGrow: 1, overflow: 'hidden' }}>
+                <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
+                  <Chip
+                    label={pet.type}
                     variant="outlined"
-                    color="secondary"
-                    sx={{ marginTop: '8px' }}
-                    onClick={(e) => {
-                      e.stopPropagation(); // Prevent opening the pet detail modal
-                      handleDeleteOpen(pet);
+                    color="primary"
+                    sx={{
+                      fontWeight: 'bold',
+                      borderWidth: 1.5,
+                      borderColor: 'primary.main',
                     }}
-                  >
-                    Delete
-                  </Button>
-                </CardContent>
-              </Card>
-            </Grid>
+                  />
+                  <Chip
+                    label={pet.breed}
+                    variant="outlined"
+                    color="primary"
+                    sx={{
+                      fontWeight: 'bold',
+                      borderWidth: 1.5,
+                      borderColor: 'primary.main',
+                    }}
+                  />
+                </Stack>
+                <Typography color="#5A20A8" fontSize="12px" fontWeight="bold">
+                  Name:
+                </Typography>
+                <Typography color="#5A20A8" fontWeight="bold" sx={{ ml: 2 }}>
+                  {pet.name}
+                </Typography>
+                <Typography color="#5A20A8" fontSize="12px" fontWeight="bold">
+                  Age:
+                </Typography>
+                <Typography color="#5A20A8" fontWeight="bold" sx={{ ml: 2 }}>
+                  {pet.age}
+                </Typography>
+                <Typography color="#5A20A8" fontSize="12px" fontWeight="bold">
+                  Status:
+                </Typography>
+                <Typography color="#5A20A8" fontWeight="bold" sx={{ ml: 2 }}>
+                  {pet.status}
+                </Typography>
+                <Typography color="#5A20A8" fontStyle="italic" fontWeight="bold" noWrap>
+                  {pet.description}
+                </Typography>
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  sx={{ marginTop: '8px', marginRight: '8px' }}
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent opening the pet detail modal
+                    handleEditOpen(pet); // Pass the selected pet
+                  }}
+                >
+                  Edit
+                </Button>
+
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  sx={{ marginTop: '8px' }}
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent opening the pet detail modal
+                    handleDeleteOpen(pet);
+                  }}
+                >
+                  Delete
+                </Button>
+              </CardContent>
+            </Card>
           ))
         ) : (
           <Typography variant="body1" color="#5A20A8" fontWeight="bold">
             No pets available for adoption at the moment.
           </Typography>
         )}
-      </Grid>
+      </div>
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={openDeleteDialog} onClose={handleDeleteClose}>
@@ -291,6 +321,31 @@ const PetList = () => {
         </DialogContent>
       </Dialog>
 
+      {/*Modal for Edit Pet*/}
+      <Dialog open={openEdit} onClose={handleEditClose} fullWidth maxWidth="md">
+        <DialogTitle>
+          Edit Pet
+          <IconButton
+            aria-label="close"
+            onClick={handleEditClose}
+            sx={{
+              position: 'absolute',
+              right: 8,
+              top: 8,
+              color: (theme) => theme.palette.grey[500],
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent>
+          <PetFormUpdate
+            petId={petToEdit?.pid} // Pass petId
+            refreshPets={fetchPets} // Refresh pets list after update
+            onClose={handleEditClose} // Close the modal when done
+          />
+        </DialogContent>
+      </Dialog>
 
       {/* Rehome Button at the Bottom */}
       <Box
@@ -329,8 +384,26 @@ const PetList = () => {
           Rehome
         </ToggleButton>
       </Box>
-    </Box>
+    </div>
   );
+};
+
+const styles = {
+  pageContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    width: '100%',
+    padding: '20px',
+    paddingBottom: '80px', // Add padding to avoid overlap with the rehome bar
+  },
+  listContainer: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '20px',
+    justifyContent: 'flex-start',
+    width: '100%',
+  },
 };
 
 export default PetList;
