@@ -1,10 +1,14 @@
 package com.g1appdev.Hubbits.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
+@Table(name = "volunteer_opportunities")
 public class VolunteerOpportunity {
 
     @Id
@@ -12,11 +16,26 @@ public class VolunteerOpportunity {
     private int opportunityID;
 
     private String title;
+
+    @Lob
+    @Column(nullable = false, columnDefinition = "TEXT")
+    @Size(max = 5000, message = "Description cannot exceed 500 characters.")
     private String description;
-    private String date;
+
+    // Registration Period (start and end date for registration)
+    @Column(nullable = false)
+    private LocalDateTime registrationStartDate; // Start date and time for registration
+
+    @Column(nullable = false)
+    private LocalDateTime registrationEndDate; // End date and time for registration
+
+    // Volunteer Work Date (actual event date)
+    @Column(nullable = false)
+    private LocalDateTime volunteerDatetime; // Date and time of the volunteer event
+
     private String location;
     
-    // New fields for hours worked and volunteers needed
+    // Fields for hours worked and volunteers needed
     private int hoursWorked;  // The number of hours a volunteer will work
     private int volunteersNeeded;  // The number of volunteers needed for the opportunity
 
@@ -24,8 +43,12 @@ public class VolunteerOpportunity {
     @JsonManagedReference
     private List<VolunteerSignUp> volunteerSignUps;
 
-    // New field for volunteer image URL
+    // Field for volunteer image URL
     private String volunteerImageUrl;  // The URL of the volunteer image (instead of byte array)
+
+    // New field for the creator (User)
+    @Column(nullable = false)
+    private int creatorId; // The ID of the user who created this opportunity
 
     // Getters and Setters
 
@@ -53,12 +76,28 @@ public class VolunteerOpportunity {
         this.description = description;
     }
 
-    public String getDate() {
-        return date;
+    public LocalDateTime getRegistrationStartDate() {
+        return registrationStartDate;
     }
 
-    public void setDate(String date) {
-        this.date = date;
+    public void setRegistrationStartDate(LocalDateTime registrationStartDate) {
+        this.registrationStartDate = registrationStartDate;
+    }
+
+    public LocalDateTime getRegistrationEndDate() {
+        return registrationEndDate;
+    }
+
+    public void setRegistrationEndDate(LocalDateTime registrationEndDate) {
+        this.registrationEndDate = registrationEndDate;
+    }
+
+    public LocalDateTime getVolunteerDatetime() {
+        return volunteerDatetime;
+    }
+
+    public void setVolunteerDatetime(LocalDateTime volunteerDatetime) {
+        this.volunteerDatetime = volunteerDatetime;
     }
 
     public String getLocation() {
@@ -93,13 +132,25 @@ public class VolunteerOpportunity {
         this.volunteerSignUps = volunteerSignUps;
     }
 
-    // Getter and Setter for volunteerImageUrl
-
     public String getVolunteerImageUrl() {
         return volunteerImageUrl;
     }
 
     public void setVolunteerImageUrl(String volunteerImageUrl) {
         this.volunteerImageUrl = volunteerImageUrl;
+    }
+
+    // New getter and setter for creatorId
+    public int getCreatorId() {
+        return creatorId;
+    }
+
+    public void setCreatorId(int creatorId) {
+        this.creatorId = creatorId;
+    }
+
+    // Method to get the number of sign-ups
+    public int getNumberOfSignUps() {
+        return volunteerSignUps != null ? volunteerSignUps.size() : 0;
     }
 }

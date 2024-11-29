@@ -10,11 +10,15 @@ import AdoptionForm from "./components/AdoptionForm";
 import AdoptionList from "./components/AdoptionList";
 import DonationForm from "./components/DonationForm";
 import DonationTable from "./components/DonationTable";
-import VolunteerSignUp from "./components/VolunteerSignUpList";
-import CreateOpportunity from "./components/CreateOpportunity";
-import Volunteer from "./components/Volunteer";
-import VolunteerOpportunities from "./components/VolunteerOpportunities";
-import OpportunityDetail from "./components/OpportunityDetail";
+
+
+import VolunteerSignUp from "./components/Volunteer/VolunteerSignUpList";
+import CreateOpportunity from "./components/Volunteer/CreateOpportunity";
+import Volunteer from "./components/Volunteer/Volunteer";
+import VolunteerOpportunities from "./components/Volunteer/VolunteerOpportunities";
+import OpportunityDetail from "./components/Volunteer/OpportunityDetail";
+
+
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import NoMatch from "./components/NoMatch";
 import Profile from "./components/Profile";

@@ -53,7 +53,6 @@ public class VolunteerSignUpService {
                 signUp.setFirstName(updatedSignUp.getFirstName());
                 signUp.setLastName(updatedSignUp.getLastName());
                 signUp.setEmail(updatedSignUp.getEmail());
-                signUp.setPassword(updatedSignUp.getPassword());
                 signUp.setAddress(updatedSignUp.getAddress());
                 signUp.setPhoneNumber(updatedSignUp.getPhoneNumber());
 

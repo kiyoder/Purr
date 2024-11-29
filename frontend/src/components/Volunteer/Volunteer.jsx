@@ -10,35 +10,40 @@ import {
   CardMedia,
   Accordion,
   AccordionSummary,
-  AccordionDetails
+  AccordionDetails,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import CloseIcon from '@mui/icons-material/Close'; // Close Icon
 import { motion } from 'framer-motion'; // Importing motion
 import './Volunteer.css';
 import CreateOpportunity from './CreateOpportunity';
-import { Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
-import IconButton from '@mui/material/IconButton'; // Add this import
-import CloseIcon from '@mui/icons-material/Close'; // Make sure you have this too
-
-
+import AuthModal from '../AuthModal';
 
 const Volunteer = () => {
   const [volunteerOpportunities, setVolunteerOpportunities] = useState([]);
   const [visibleOpportunities, setVisibleOpportunities] = useState(4); // Default: Show 4 cards initially
   const [isExpanded, setIsExpanded] = useState(false); // Track Show More / Show Less state
   const [openFormDialog, setOpenFormDialog] = useState(false);
-
+  const [isBlurred, setIsBlurred] = useState(false); // New state for blur effect
   const navigate = useNavigate();
+  const [authModalOpen, setAuthModalOpen] = useState(false);
 
   // Function to handle dialog open
   const handleOpenFormDialog = () => {
+    setIsBlurred(true); // Set blur effect when dialog is opened
     setOpenFormDialog(true);
   };
 
   // Function to handle dialog close
   const handleCloseFormDialog = () => {
+    setIsBlurred(false); // Remove blur effect when dialog is closed
     setOpenFormDialog(false);
   };
 
@@ -48,7 +53,6 @@ const Volunteer = () => {
     navigate('/volunteer', { replace: true }); // Navigate to the volunteer page
     window.location.reload(); // Force a page refresh
   };
-
 
   // FAQ data
   const faqData = [
@@ -83,7 +87,9 @@ const Volunteer = () => {
         setVolunteerOpportunities(response.data);
       } catch (error) {
         console.error('Error fetching volunteer opportunities:', error);
-      }
+        setVolunteerOpportunities([]); // Optionally handle fallback state
+        alert('Failed to load volunteer opportunities. Please try again later.'); // Add user-friendly feedback
+      }      
     };
     fetchVolunteerOpportunities();
   }, []);
@@ -98,6 +104,19 @@ const Volunteer = () => {
     setIsExpanded((prev) => !prev); // Toggle the state of expanded
   };
 
+  // Handle "Book" button click
+  const handleBookButtonClick = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      // If no token found, open the AuthModal
+      setAuthModalOpen(true);
+    } else {
+      // Proceed to booking functionality or form dialog
+      handleOpenFormDialog();
+    }
+  };
+  
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -106,11 +125,11 @@ const Volunteer = () => {
       transition={{ duration: 1 }}
     >
       {/* Header Section */}
-      <Container maxWidth="lg" sx={{ paddingTop: '4rem', paddingBottom: '1rem' }}>
+      <Container maxWidth="lg" sx={{ paddingTop: '4rem', paddingBottom: '1rem', filter: isBlurred ? 'blur(5px)' : 'none' }}>
         <Grid container spacing={4} alignItems="flex-start">
           <Grid item xs={12} md={6}>
             <motion.img
-              src="src/images/petimg.png"
+              src="petimg.png"
               alt="Volunteer"
               className="img-fluid rounded"
               style={{ width: '100%', borderRadius: '8px' }}
@@ -153,17 +172,21 @@ const Volunteer = () => {
                 alignItems: 'center',
                 marginTop: '1rem',
               }}
-              onClick={handleOpenFormDialog} // Open the form dialog
+              onClick={handleBookButtonClick} // Call the updated function
             >
               Book
             </Button>
-
+            {/* Auth Modal */}
+      <AuthModal
+        open={authModalOpen}
+        handleClose={() => setAuthModalOpen(false)} // Close the modal when needed
+      />
           </Grid>
         </Grid>
       </Container>
 
       {/* FAQ Section */}
-      <Container maxWidth="md" sx={{ padding: '2rem 0' }}>
+      <Container maxWidth="md" sx={{ padding: '2rem 0', filter: isBlurred ? 'blur(5px)' : 'none' }}>
         <Typography variant="h4" gutterBottom align="center" sx={{ fontWeight: 'bold', marginBottom: '2rem' }}>
           Volunteer Orientation FAQ
         </Typography>
@@ -206,7 +229,7 @@ const Volunteer = () => {
               </AccordionSummary>
 
               <AccordionDetails sx={{ padding: '12px 20px', backgroundColor: '#fafafa' }}>
-                <Typography variant="body2" sx={{ color: 'purple' }}> {/* Set color to purple */}
+                <Typography variant="body2" sx={{ color: 'purple' }}>
                   {item.answer}
                 </Typography>
               </AccordionDetails>
@@ -215,7 +238,8 @@ const Volunteer = () => {
         ))}
       </Container>
 
-      {/* Volunteer Opportunities Section */}      <Container maxWidth="lg" sx={{ padding: '1rem 0' }}>
+      {/* Volunteer Opportunities Section */}      
+      <Container maxWidth="lg" sx={{ padding: '1rem 0', filter: isBlurred ? 'blur(5px)' : 'none' }}>
         <Typography variant="h4" gutterBottom className="my-5" align="center" sx={{ fontWeight: 'bold', marginBottom: '2rem' }}>
           Volunteer Opportunities
         </Typography>
@@ -241,12 +265,10 @@ const Volunteer = () => {
                   image={
                     opportunity.volunteerImageUrl
                       ? `http://localhost:8080${opportunity.volunteerImageUrl}`  // Use the volunteerImageUrl if available
-                      : "http://localhost:8080/images/1732455964146-3e7d590dee53420c03d360908dd289dc.jpg"  // Fallback to default image
+                      : "http://localhost:8080/images/default.png"  // Fallback to default image
                   }
                   title={opportunity.title}
                 />
-
-
 
                 <CardContent sx={{ flexGrow: 1 }}>
                   <Typography variant="h5" gutterBottom>
@@ -287,9 +309,8 @@ const Volunteer = () => {
             </Grid>
           ))}
         </Grid>
-
-        {/* Show More / Show Less Button */}
-        {volunteerOpportunities.length > 4 && (
+{/* Show More / Show Less Button */}
+{volunteerOpportunities.length > 4 && (
           <Button
             variant="outlined"
             onClick={handleShowMoreLess}

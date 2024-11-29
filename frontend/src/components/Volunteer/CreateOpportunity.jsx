@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Button, TextField, Container, Typography,
-  Box, Grow, Fade, Dialog, DialogTitle, DialogContent, DialogActions, Grid
-} from '@mui/material'; // Added Grid import
+  Box, Grow, Fade, Dialog, DialogTitle, DialogContent, DialogActions, Grid,
+} from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -10,78 +10,121 @@ const CreateOpportunity = () => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    date: '',
     location: '',
     hoursWorked: 0,
     volunteersNeeded: 0,
+    registrationStartDate: '',
+    registrationEndDate: '',
+    volunteerDatetime: '',
   });
-  const [imageFile, setImageFile] = useState(null); // State for the image file
-  const [imageUrl, setImageUrl] = useState(''); // State for the image URL after upload
-  const [openDialog, setOpenDialog] = useState(false); // State for dialog visibility
-  const [isSubmitting, setIsSubmitting] = useState(false); // State to prevent multiple submissions
-  const [errorMessage, setErrorMessage] = useState(''); // State for error messages
+  const [imageFile, setImageFile] = useState(null);
+  const [imageUrl, setImageUrl] = useState('');
+  const [openDialog, setOpenDialog] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [descriptionError, setDescriptionError] = useState('');
+  const [userId, setUserId] = useState(null); // State for storing user ID
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Fetch user data from localStorage
+    try {
+      const storedUser = JSON.parse(localStorage.getItem('user')); // Parse the user object
+      if (storedUser?.userId) {
+        setUserId(storedUser.userId); // Extract userId from parsed object
+      } else {
+        setErrorMessage('User is not logged in.');
+      }
+    } catch (err) {
+      setErrorMessage('Invalid user data in localStorage.');
+    }
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
       ...prevData,
       [name]: name === 'hoursWorked' || name === 'volunteersNeeded'
-        ? Math.max(0, value) // Prevent negative values
+        ? Math.max(0, value)
         : value,
     }));
+
+    if (name === 'description') {
+      const wordCount = value.trim().split(/\s+/).length;
+      setDescriptionError(wordCount > 500 ? 'Description exceeds the maximum word limit of 500.' : '');
+    }
   };
 
   const handleImageChange = (e) => {
-    setImageFile(e.target.files[0]); // Update state with the selected image file
-    const imageUrl = URL.createObjectURL(e.target.files[0]);
-    setImageUrl(imageUrl); // Set image preview URL
+    setImageFile(e.target.files[0]);
+    const previewUrl = URL.createObjectURL(e.target.files[0]);
+    setImageUrl(previewUrl);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setOpenDialog(true); // Open confirmation dialog before submitting
+  
+    if (descriptionError) {
+      setErrorMessage('Please fix the errors before submitting.');
+      return;
+    }
+  
+    if (!userId) {
+      setErrorMessage('User is not logged in.');
+      return;
+    }
+  
+    // Validate date logic
+    if (new Date(formData.registrationEndDate) <= new Date(formData.registrationStartDate)) {
+      setErrorMessage('Registration end date must be after the start date.');
+      return;
+    }
+  
+    if (new Date(formData.volunteerDatetime) <= new Date(formData.registrationEndDate)) {
+      setErrorMessage('Volunteer event date must be after the registration end date.');
+      return;
+    }
+  
+    setOpenDialog(true);
   };
-
+  
   const handleConfirm = async () => {
     try {
       setIsSubmitting(true);
-      setErrorMessage(''); // Clear previous errors
-
+      setErrorMessage('');
+  
       const requestData = new FormData();
-      // Append form data fields to FormData
       for (const [key, value] of Object.entries(formData)) {
         requestData.append(key, value);
       }
-
-      // Append image file if selected
-      if (imageFile) {
-        requestData.append('volunteerImage', imageFile); // Add image file to FormData
+  
+      // Append the userId as the creatorId in the form data
+      if (userId) {
+        requestData.append('creatorId', userId); // Make sure this is the correct ID you want to send
       }
-
-      // Send request without specifying Content-Type (FormData automatically sets it)
+  
+      if (imageFile) {
+        requestData.append('volunteerImage', imageFile);
+      }
+  
+      // Perform the POST request
       await axios.post('http://localhost:8080/api/volunteer/opportunity', requestData);
-
+  
+      // Navigate and reload the page after successful submission
       navigate('/volunteer', { replace: true });
-      window.location.reload(); // Refresh page after submission
+      window.location.reload();
     } catch (error) {
-      console.error('Error creating opportunity:', error);
-      setErrorMessage('Failed to create opportunity. Please try again.');
+      const serverError = error.response?.data?.message || 'Failed to create opportunity. Please try again.';
+      setErrorMessage(serverError);
     } finally {
       setIsSubmitting(false);
-      setOpenDialog(false); // Close confirmation dialog
+      setOpenDialog(false);
     }
   };
+  
+  const handleCancel = () => setOpenDialog(false);
+  const handleBack = () => navigate('/volunteer');
 
-  const handleCancel = () => {
-    setOpenDialog(false); // Close the dialog without submitting
-  };
-
-  const handleBack = () => {
-    navigate('/volunteer'); // Redirect to the Volunteer page when the Back button is clicked
-  };
-
-  // Get today's date in YYYY-MM-DD format
   const today = new Date().toISOString().split('T')[0];
 
   return (
@@ -92,7 +135,7 @@ const CreateOpportunity = () => {
             Schedule Volunteer Work
           </Typography>
           <Typography variant="body1" paragraph>
-            Use this form to create a volunteer opportunity for others. Please provide details like title, description, date, location, and required volunteers.
+            Create a volunteer opportunity by providing details below.
           </Typography>
         </Box>
       </Fade>
@@ -118,19 +161,54 @@ const CreateOpportunity = () => {
             margin="normal"
             multiline
             rows={4}
+            error={Boolean(descriptionError)}
+            helperText={descriptionError || 'Maximum 500 words'}
           />
+
+          <Grid container spacing={2}>
+            <Grid item xs={6}>
+              <TextField
+                label="Registration Start Date"
+                name="registrationStartDate"
+                type="datetime-local"
+                fullWidth
+                value={formData.registrationStartDate}
+                onChange={handleChange}
+                required
+                margin="normal"
+                InputLabelProps={{ shrink: true }}
+                inputProps={{ min: new Date().toISOString().slice(0, 16) }}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <TextField
+                label="Registration End Date"
+                name="registrationEndDate"
+                type="datetime-local"
+                fullWidth
+                value={formData.registrationEndDate}
+                onChange={handleChange}
+                required
+                margin="normal"
+                InputLabelProps={{ shrink: true }}
+                inputProps={{ min: formData.registrationStartDate || new Date().toISOString().slice(0, 16) }}
+              />
+            </Grid>
+          </Grid>
+
           <TextField
-            label="Date"
-            name="date"
-            type="date"
+            label="Volunteer Date and Time"
+            name="volunteerDatetime"
+            type="datetime-local"
             fullWidth
-            value={formData.date}
+            value={formData.volunteerDatetime}
             onChange={handleChange}
             required
             margin="normal"
             InputLabelProps={{ shrink: true }}
-            inputProps={{ min: today }}
+            inputProps={{ min: formData.registrationEndDate || new Date().toISOString().slice(0, 16) }}
           />
+
           <TextField
             label="Location"
             name="location"
@@ -186,7 +264,7 @@ const CreateOpportunity = () => {
               type="submit"
               variant="contained"
               color="primary"
-              disabled={isSubmitting}
+              disabled={isSubmitting || Boolean(descriptionError)}
             >
               {isSubmitting ? 'Submitting...' : 'Create Opportunity'}
             </Button>
@@ -208,11 +286,13 @@ const CreateOpportunity = () => {
           <Button onClick={handleCancel} color="secondary">
             Cancel
           </Button>
-          <Button onClick={handleConfirm} color="primary" disabled={isSubmitting}>
-            {isSubmitting ? 'Submitting...' : 'Confirm'}
+          <Button onClick={handleConfirm} color="primary">
+            Confirm
           </Button>
         </DialogActions>
       </Dialog>
+
+      {errorMessage && <Typography color="error" variant="body2">{errorMessage}</Typography>}
     </Container>
   );
 };

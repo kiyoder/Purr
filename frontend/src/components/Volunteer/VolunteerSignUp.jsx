@@ -1,133 +1,173 @@
+import React, { useState, useEffect } from 'react';
+import { Button, TextField, Box, Typography, Grid, Container, Snackbar, Dialog, DialogTitle, DialogActions, DialogContent, IconButton, InputAdornment } from '@mui/material';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
-import React, { useState } from 'react';
-import { Typography, TextField, Button, Snackbar, Stack, Paper, Box, InputAdornment, IconButton } from '@mui/material';
-import { Visibility, VisibilityOff } from '@mui/icons-material'; // Import icons for show/hide functionality
 
-const VolunteerSignUp = ({ opportunityID, hoursWorked, onClose }) => {
-    const [formData, setFormData] = useState({
-        firstName: '',
-        lastName: '',
-        email: '',
-        password: '',
-        address: '',
-        phoneNumber: ''
-    });
+const VolunteerSignUp = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
 
-    const [successMessage, setSuccessMessage] = useState('');
-    const [snackbarOpen, setSnackbarOpen] = useState(false);
-    const [showPassword, setShowPassword] = useState(false); // State for password visibility
+  const [opportunity, setOpportunity] = useState(null);
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+    address: '',
+    phoneNumber: '',
+  });
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [openDialog, setOpenDialog] = useState(false);
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
-    };
+  const fetchOpportunityDetail = async () => {
+    try {
+      const response = await axios.get(`http://localhost:8080/api/volunteer/opportunity/${id}`);
+      setOpportunity(response.data);
+    } catch (error) {
+      console.error('Error fetching opportunity details:', error);
+    }
+  };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        
-        const dataToSubmit = {
-            ...formData,
-            opportunityId: opportunityID,
-            hoursWorked: hoursWorked
-        };
+  useEffect(() => {
+    fetchOpportunityDetail();
+  }, [id]);
 
-        try {
-            const response = await axios.post(`http://localhost:8080/api/volunteer/signup/${opportunityID}`, dataToSubmit);
-            console.log(response.data);
-            setSuccessMessage('Successfully signed up for the opportunity!');
-            setSnackbarOpen(true);
-            onClose();
-        } catch (error) {
-            console.error('Error registering for the event', error);
-        }
-    };
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
 
-    const handleSnackbarClose = () => {
-        setSnackbarOpen(false);
-    };
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setOpenDialog(true);
+  };
 
-    const handleClickShowPassword = () => {
-        setShowPassword(!showPassword); // Toggle password visibility
-    };
+  const handleConfirmSubmit = async () => {
+    try {
+      const dataToSubmit = { ...formData, opportunityId: id };
+      await axios.post(`http://localhost:8080/api/volunteer/signup/${id}`, dataToSubmit);
+      setSuccessMessage('Successfully signed up for the opportunity!');
+      setSnackbarOpen(true);
+      setTimeout(() => navigate('/volunteer'), 2000);
+    } catch (error) {
+      console.error('Error signing up for the opportunity:', error);
+    } finally {
+      setOpenDialog(false);
+    }
+  };
 
-    return (
-        <Paper elevation={3} sx={{ padding: 3 }}>
-            <form onSubmit={handleSubmit}>
-                <Stack spacing={2}>
-                    <TextField
-                        name="firstName"
-                        onChange={handleChange}
-                        placeholder="First Name"
-                        required
-                        fullWidth
-                    />
-                    <TextField
-                        name="lastName"
-                        onChange={handleChange}
-                        placeholder="Last Name"
-                        required
-                        fullWidth
-                    />
-                    <TextField
-                        name="email"
-                        type="email"
-                        onChange={handleChange}
-                        placeholder="Email"
-                        required
-                        fullWidth
-                    />
-                    <TextField
-                        name="password"
-                        type={showPassword ? 'text' : 'password'} // Show password when showPassword is true
-                        onChange={handleChange}
-                        placeholder="Password"
-                        required
-                        fullWidth
-                        InputProps={{
-                            endAdornment: (
-                                <InputAdornment position="end">
-                                    <IconButton
-                                        aria-label="toggle password visibility"
-                                        onClick={handleClickShowPassword}
-                                        edge="end"
-                                    >
-                                        {showPassword ? <Visibility /> : <VisibilityOff />} {/* Corrected icons */}
-                                    </IconButton>
-                                </InputAdornment>
-                            )
-                        }}
-                    />
-                    <TextField
-                        name="address"
-                        onChange={handleChange}
-                        placeholder="Address"
-                        required
-                        fullWidth
-                    />
-                    <TextField
-                        name="phoneNumber"
-                        onChange={handleChange}
-                        placeholder="Phone Number"
-                        required
-                        fullWidth
-                    />
-                    <Box display="flex" justifyContent="space-between">
-                        <Button type="submit" variant="contained" color="primary" sx={{ width: '100%' }}>
-                            Sign Up
-                        </Button>
-                    </Box>
-                </Stack>
-            </form>
+  const handleCancelSubmit = () => setOpenDialog(false);
 
-            {/* Snackbar for success message */}
-            <Snackbar
-                open={snackbarOpen}
-                autoHideDuration={6000}
-                onClose={handleSnackbarClose}
-                message={successMessage}
-            />
-        </Paper>
-    );
+  const handleSnackbarClose = () => setSnackbarOpen(false);
+
+  const handleClickShowPassword = () => setShowPassword(!showPassword);
+
+  return (
+    <Container maxWidth="sm">
+      <Typography variant="h4" gutterBottom align="center">
+        Sign Up for {opportunity?.title || 'the Opportunity'}
+      </Typography>
+
+      <form onSubmit={handleSubmit}>
+        <TextField
+          label="First Name"
+          name="firstName"
+          value={formData.firstName}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+          required
+        />
+        <TextField
+          label="Last Name"
+          name="lastName"
+          value={formData.lastName}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+          required
+        />
+        <TextField
+          label="Email"
+          name="email"
+          type="email"
+          value={formData.email}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+          required
+        />
+        <TextField
+          label="Password"
+          name="password"
+          type={showPassword ? 'text' : 'password'}
+          value={formData.password}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+          required
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton onClick={handleClickShowPassword} edge="end">
+                  {showPassword ? <Visibility /> : <VisibilityOff />}
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
+        />
+        <TextField
+          label="Address"
+          name="address"
+          value={formData.address}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+          required
+        />
+        <TextField
+          label="Phone Number"
+          name="phoneNumber"
+          value={formData.phoneNumber}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+          required
+        />
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            sx={{ paddingX: 4, paddingY: 1.5 }}
+          >
+            Sign Up
+          </Button>
+        </Box>
+      </form>
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={handleSnackbarClose}
+        message={successMessage}
+      />
+
+      <Dialog open={openDialog} onClose={handleCancelSubmit}>
+        <DialogTitle>Confirm Sign-Up</DialogTitle>
+        <DialogContent>
+          <Typography>Are you sure you want to sign up for this opportunity?</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancelSubmit} color="secondary">Cancel</Button>
+          <Button onClick={handleConfirmSubmit} color="primary">Yes</Button>
+        </DialogActions>
+      </Dialog>
+    </Container>
+  );
 };
 
 export default VolunteerSignUp;

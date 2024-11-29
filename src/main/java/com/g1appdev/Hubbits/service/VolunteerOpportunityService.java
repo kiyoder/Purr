@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -46,7 +47,7 @@ public class VolunteerOpportunityService {
     }
 
     // Create or save a new volunteer opportunity
-    public VolunteerOpportunity createOpportunity(VolunteerOpportunity opportunity, MultipartFile volunteerImage) {
+    public VolunteerOpportunity createOpportunity(VolunteerOpportunity opportunity, MultipartFile volunteerImage, int creatorId) {
         if (volunteerImage != null && !volunteerImage.isEmpty()) {
             try {
                 // Upload the image and retrieve the URL
@@ -56,6 +57,23 @@ public class VolunteerOpportunityService {
                 throw new RuntimeException("Error processing volunteer image", e);
             }
         }
+
+        // Set registration period default dates if not provided
+        if (opportunity.getRegistrationStartDate() == null) {
+            opportunity.setRegistrationStartDate(LocalDateTime.now());  // Set current datetime as default registration start date
+        }
+        if (opportunity.getRegistrationEndDate() == null) {
+            opportunity.setRegistrationEndDate(opportunity.getRegistrationStartDate().plusDays(5));  // Default 5 days for registration
+        }
+
+        // Set the volunteer event date if not provided
+        if (opportunity.getVolunteerDatetime() == null) {
+            throw new IllegalArgumentException("Volunteer event date (volunteerDatetime) is required.");
+        }
+
+        // Set the creator ID before saving the opportunity
+        opportunity.setCreatorId(creatorId);
+
         return opportunityRepository.save(opportunity);
     }
 
@@ -71,7 +89,7 @@ public class VolunteerOpportunityService {
 
     // Update an existing volunteer opportunity, including the volunteer image URL
     @Transactional
-    public VolunteerOpportunity updateOpportunity(int id, VolunteerOpportunity updatedOpportunity, MultipartFile volunteerImage) {
+    public VolunteerOpportunity updateOpportunity(int id, VolunteerOpportunity updatedOpportunity, MultipartFile volunteerImage, int creatorId) {
         return opportunityRepository.findById(id)
                 .map(existingOpportunity -> {
                     // Update existing fields only if they're not null or empty
@@ -81,8 +99,14 @@ public class VolunteerOpportunityService {
                     if (updatedOpportunity.getDescription() != null) {
                         existingOpportunity.setDescription(updatedOpportunity.getDescription());
                     }
-                    if (updatedOpportunity.getDate() != null) {
-                        existingOpportunity.setDate(updatedOpportunity.getDate());
+                    if (updatedOpportunity.getRegistrationStartDate() != null) {
+                        existingOpportunity.setRegistrationStartDate(updatedOpportunity.getRegistrationStartDate());
+                    }
+                    if (updatedOpportunity.getRegistrationEndDate() != null) {
+                        existingOpportunity.setRegistrationEndDate(updatedOpportunity.getRegistrationEndDate());
+                    }
+                    if (updatedOpportunity.getVolunteerDatetime() != null) {
+                        existingOpportunity.setVolunteerDatetime(updatedOpportunity.getVolunteerDatetime());
                     }
                     if (updatedOpportunity.getLocation() != null) {
                         existingOpportunity.setLocation(updatedOpportunity.getLocation());
@@ -93,6 +117,7 @@ public class VolunteerOpportunityService {
                     if (updatedOpportunity.getVolunteersNeeded() > 0) {
                         existingOpportunity.setVolunteersNeeded(updatedOpportunity.getVolunteersNeeded());
                     }
+
                     // Update the volunteer image URL if a new image is provided
                     if (volunteerImage != null && !volunteerImage.isEmpty()) {
                         try {
@@ -103,6 +128,10 @@ public class VolunteerOpportunityService {
                             throw new RuntimeException("Error processing volunteer image", e);
                         }
                     }
+
+                    // Update creator ID if necessary (if the ID can be modified, otherwise leave as is)
+                    existingOpportunity.setCreatorId(creatorId);
+
                     return opportunityRepository.save(existingOpportunity);
                 })
                 .orElseThrow(() -> new IllegalArgumentException("Opportunity with ID " + id + " not found"));
@@ -123,5 +152,12 @@ public class VolunteerOpportunityService {
         VolunteerOpportunity opportunity = opportunityRepository.findById(opportunityId)
                 .orElseThrow(() -> new IllegalArgumentException("Opportunity with ID " + opportunityId + " not found"));
         return opportunity.getVolunteerSignUps();
+    }
+
+    // Get the number of sign-ups for a specific opportunity
+    public int getNumberOfSignUps(int opportunityId) {
+        VolunteerOpportunity opportunity = opportunityRepository.findById(opportunityId)
+                .orElseThrow(() -> new IllegalArgumentException("Opportunity with ID " + opportunityId + " not found"));
+        return opportunity.getNumberOfSignUps();  // This uses the getter from VolunteerOpportunity to count sign-ups
     }
 }
