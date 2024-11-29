@@ -21,8 +21,20 @@ public class NewsFeedEntity {
     
     private String author;  // author of the article
 
+    @Lob
+    @Column(name = "image")
+    private byte[] image;
+
     // Default constructor
     public NewsFeedEntity() {
+    }
+
+    // Constructor for easier entity creation
+    public NewsFeedEntity(String title, String content, String author, byte[] image) {
+        this.title = title;
+        this.content = content;
+        this.author = author;
+        this.image = image;
     }
 
     // Getter and Setter methods
@@ -64,6 +76,14 @@ public class NewsFeedEntity {
 
     public void setAuthor(String author) {
         this.author = author;
+    }
+
+    public byte[] getImage() {
+        return image;
+    }
+
+    public void setImage(byte[] image) {
+        this.image = image;
     }
 
     // Automatically set the current date and time when an article is created

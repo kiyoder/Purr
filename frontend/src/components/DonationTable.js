@@ -101,6 +101,7 @@ const DonationTable = () => {
               value={donationToEdit.amount}
               onChange={handleEditChange}
               fullWidth
+              margin='normal'
             />
             <TextField
               label="Donation Date"
@@ -108,6 +109,7 @@ const DonationTable = () => {
               value={donationToEdit.donationDate}
               onChange={handleEditChange}
               fullWidth
+              margin='normal'
             />
             <TextField
               label="First Name"
@@ -115,6 +117,7 @@ const DonationTable = () => {
               value={donationToEdit.firstName}
               onChange={handleEditChange}
               fullWidth
+              margin='normal'
             />
             <TextField
               label="Last Name"
@@ -122,6 +125,7 @@ const DonationTable = () => {
               value={donationToEdit.lastName}
               onChange={handleEditChange}
               fullWidth
+              margin='normal'
             />
             <TextField
               label="Special Message"
@@ -129,6 +133,7 @@ const DonationTable = () => {
               value={donationToEdit.specialMessage}
               onChange={handleEditChange}
               fullWidth
+              margin='normal'
               multiline
             />
           </DialogContent>
