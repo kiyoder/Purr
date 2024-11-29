@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.Base64;
+import jakarta.validation.constraints.Size;
+
 
 @Entity
 //@AllArgsConstructor
@@ -17,10 +19,16 @@ public class UserEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
 
+    @Column(unique = true, nullable = false)
     private String username;
+
     private String firstName;
     private String lastName;
+
+    @Column(unique = true, nullable = false)
     private String email;
+
+    @Size(min = 8, message = "Password must be at least 8 characters long.")
     private String password;
     private String address;
     private String phoneNumber;
@@ -117,13 +125,19 @@ public class UserEntity {
         this.createdAt = createdAt;
     }
 
-//    public byte[] getProfilePicture() {
-//        return profilePicture;
-//    }
+    public byte[] getProfilePicture() {
+        return profilePicture;
+    }
+
+
 
     public String getProfilePictureBase64() {
-        return profilePicture != null ? Base64.getEncoder().encodeToString(profilePicture) : null;
+        if (profilePicture != null && profilePicture.length > 0) {
+            return "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(profilePicture);
+        }
+        return null;
     }
+
 
     public void setProfilePicture(byte[] profilePicture) {
         this.profilePicture = profilePicture;

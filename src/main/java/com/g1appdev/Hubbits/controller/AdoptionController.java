@@ -30,7 +30,6 @@ public class AdoptionController {
     }
 
     // Create new adoption
-    // New adoption fields: name, address, contactNumber, petType, submissionDate
     @PostMapping
     public AdoptionEntity createAdoption(@RequestBody AdoptionEntity adoption) {
         return adoptionService.createAdoption(adoption);

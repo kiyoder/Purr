@@ -5,6 +5,7 @@ import {
     Card,
     CardContent,
     Typography,
+    IconButton,
     Button,
     Snackbar,
     Dialog,
@@ -14,9 +15,16 @@ import {
     Select,
     MenuItem,
 } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import { useNavigate } from 'react-router-dom';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+
 
 const AdoptionList = () => {
     const [adoptions, setAdoptions] = useState([]);
+    const [rehomes, setRehomes] = useState([]); // State to store rehome records
+    const [editRehome, setEditRehome] = useState(null);
     const [editAdoption, setEditAdoption] = useState(null);
     const [successMessage, setSuccessMessage] = useState('');
     const [error, setError] = useState('');
@@ -24,19 +32,27 @@ const AdoptionList = () => {
     const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [deleteId, setDeleteId] = useState(null);
+    const navigate = useNavigate();
 
+    // Fetch adoption and rehome records
     useEffect(() => {
-        const fetchAdoptions = async () => {
+        const fetchRecords = async () => {
             try {
-                const response = await axios.get('http://localhost:8080/api/adoptions');
-                setAdoptions(response.data);
+                const adoptionResponse = await axios.get('http://localhost:8080/api/adoptions');
+                const rehomeResponse = await axios.get('http://localhost:8080/api/pet/getAllPets'); 
+                setAdoptions(adoptionResponse.data);
+                setRehomes(rehomeResponse.data); // Store rehome data
             } catch (error) {
-                setError("Failed to load adoptions.");
+                setError("Failed to load records.");
             }
         };
 
-        fetchAdoptions();
+        fetchRecords();
     }, []);
+
+    const handleBack = () => {
+        navigate('/adopt'); 
+    };
 
     const handleDeleteClick = (id) => {
         setDeleteId(id);
@@ -61,6 +77,28 @@ const AdoptionList = () => {
         setConfirmDialogOpen(true);
     };
 
+    const handleEditRehome = async () => {
+        setEditDialogOpen(false);
+    
+        if (!editRehome) return;
+    
+        try {
+            const response = await axios.put(`http://localhost:8080/api/pet/updateRehomeStatus/${editRehome.pid}`, editRehome);
+
+            setRehomes((prevRehomes) =>
+                prevRehomes.map((rehome) =>
+                    rehome.pid === response.data.pid ? response.data : rehome
+                )
+            );
+    
+            setEditRehome(null); // Clear the selected record
+            setSuccessMessage("Rehome status updated successfully!");
+        } catch (error) {
+            setError("Failed to update rehome status.");
+        }
+    };
+    
+    
     const handleConfirmUpdate = async () => {
         setConfirmDialogOpen(false);
         if (!editAdoption) return;
@@ -80,88 +118,94 @@ const AdoptionList = () => {
         setEditAdoption(adoption);
         setEditDialogOpen(true);
     };
+    
+    const handleEditRehomeClick = (rehome) => {
+        setEditRehome(rehome);
+        setEditDialogOpen(true);
+    };
+    
 
-    const pendingAdoptions = adoptions.filter(adoption => adoption.status === 'PENDING');
-    const approvedAdoptions = adoptions.filter(adoption => adoption.status === 'APPROVED');
-    const rejectedAdoptions = adoptions.filter(adoption => adoption.status === 'REJECTED');
+    const renderAdoptionCards = (adoptionList) => (
+        adoptionList.map((adoption) => (
+            <Grid item xs={12} sm={6} md={5} key={adoption.adoptionID}>
+                <Card style={styles.card}>
+                    <CardContent>
+                        <Typography variant="h6">ID: {adoption.adoptionID}</Typography>
+                        <Typography variant="body1">Name: {adoption.name}</Typography>
+                        <Typography variant="body1">Address: {adoption.address}</Typography>
+                        <Typography variant="body1">Contact Number: {adoption.contactNumber}</Typography>
+                        <Typography variant="body1">Pet Type: {adoption.petType}</Typography>
+                        <Typography variant="body1">Breed: {adoption.breed}</Typography>
+                        <Typography variant="body1">Description: {adoption.petDescription}</Typography>
+                        <Typography variant="body1">Submission Date: {adoption.submissionDate}</Typography>
+                        <Typography variant="body1">Status: {adoption.status}</Typography>
+                        <div style={styles.buttonContainer}>
+                            <IconButton color="primary" onClick={() => handleEditClick(adoption)}>
+                                <EditIcon />
+                            </IconButton>
+                            <IconButton color="primary" onClick={() => handleDeleteClick(adoption.adoptionID)}>
+                                <DeleteIcon />
+                            </IconButton>
+                        </div>
+                    </CardContent>
+                </Card>
+            </Grid>
+        ))
+    );
+
+    const renderRehomeCards = (rehomeList) => (
+        rehomeList.map((rehome) => (
+            <Grid item xs={12} sm={6} md={5} key={rehome.pid}>
+                <Card style={styles.card}>
+                    <CardContent>
+                        <Typography variant="h6">ID: {rehome.pid}</Typography>
+                        <Typography variant="body1">Name: {rehome.name}</Typography>
+                        <Typography variant="body1">Type: {rehome.type}</Typography>
+                        <Typography variant="body1">Breed: {rehome.breed}</Typography>
+                        <Typography variant="body1">Age: {rehome.age}</Typography>
+                        <Typography variant="body1">Status: {rehome.status}</Typography>
+                        <div style={styles.buttonContainer}>
+                        <IconButton color="primary" onClick={() => handleEditRehomeClick(rehome)}>
+                            <EditIcon /> 
+                        </IconButton>
+                            <IconButton color="primary">
+                                <DeleteIcon />
+                            </IconButton>
+                        </div>
+                    </CardContent>
+                </Card>
+            </Grid>
+        ))
+    );
 
     return (
         <div style={styles.container}>
-            <h2>Adoption List</h2>
-            {error && <p style={{ color: 'red' }}>{error}</p>}
+            <IconButton onClick={handleBack} style={styles.backButton}>
+                <ArrowBackIcon />
+            </IconButton>
+            <Typography variant="h4" sx={{ fontFamily: "'Caramel', sans-serif", fontWeight: "bold", color: '#5A20A8' }}>
+                Adoption and Rehome List
+            </Typography>
+            {error && <Typography variant="body1" sx={{ color: 'red' }}>{error}</Typography>}
 
-            <h3>Pending Adoptions</h3>
-            <Grid container spacing={2}>
-                {pendingAdoptions.map((adoption) => (
-                    <Grid item xs={12} sm={6} md={4} key={adoption.adoptionID}>
-                        <Card style={styles.card}>
-                            <CardContent>
-                                <Typography variant="h6">ID: {adoption.adoptionID}</Typography>
-                                <Typography variant="body1">Name: {adoption.name}</Typography>
-                                <Typography variant="body1">Address: {adoption.address}</Typography>
-                                <Typography variant="body1">Contact: {adoption.contactNumber}</Typography>
-                                <Typography variant="body1">Pet Type: {adoption.petType}</Typography>
-                                <Typography variant="body1">Submission Date: {adoption.submissionDate}</Typography>
-                                <Typography variant="body1">Status: {adoption.status}</Typography>
-                                <div style={styles.buttonContainer}>
-                                    <Button onClick={() => handleEditClick(adoption)} variant="contained" color="success" sx={{ marginRight: 1 }}>Edit</Button>
-                                    <Button onClick={() => handleDeleteClick(adoption.adoptionID)} variant="contained" color="error">Delete</Button>
-                                </div>
-                            </CardContent>
-                        </Card>
+            <Grid container spacing={4}>
+                {/* Left Column for Adoptions */}
+                <Grid item xs={12} md={6}>
+                    <Typography variant="h6" sx={styles.centeredLeftHeading}>Pending Adoptions</Typography>
+                    <Grid container spacing={2}>
+                        {renderAdoptionCards(adoptions.filter(adoption => adoption.status === 'PENDING'))}
                     </Grid>
-                ))}
-            </Grid>
 
-            <h3>Approved Adoptions</h3>
-            <Grid container spacing={2}>
-                {approvedAdoptions.map((adoption) => (
-                    <Grid item xs={12} sm={6} md={4} key={adoption.adoptionID}>
-                        <Card style={styles.card}>
-                            <CardContent>
-                                <Typography variant="h6">ID: {adoption.adoptionID}</Typography>
-                                <Typography variant="body1">Name: {adoption.name}</Typography>
-                                <Typography variant="body1">Address: {adoption.address}</Typography>
-                                <Typography variant="body1">Contact: {adoption.contactNumber}</Typography>
-                                <Typography variant="body1">Pet Type: {adoption.petType}</Typography>
-                                <Typography variant="body1">Submission Date: {adoption.submissionDate}</Typography>
-                                <Typography variant="body1">Status: {adoption.status}</Typography>
-                                <div style={styles.buttonContainer}>
-                                    <Button onClick={() => handleEditClick(adoption)} variant="contained" color="success" sx={{ marginRight: 1 }}>Edit</Button>
-                                    <Button onClick={() => handleDeleteClick(adoption.adoptionID)} variant="contained" color="error">Delete</Button>
-                                </div>
-                            </CardContent>
-                        </Card>
+                    <Typography variant="h6" sx={styles.centeredLeftHeading}>Approved Adoptions</Typography>
+                    <Grid container spacing={2}>
+                        {renderAdoptionCards(adoptions.filter(adoption => adoption.status === 'APPROVED'))}
                     </Grid>
-                ))}
-            </Grid>
 
-            <h3>Rejected Adoptions</h3>
-            <Grid container spacing={2}>
-                {rejectedAdoptions.map((adoption) => (
-                    <Grid item xs={12} sm={6} md={4} key={adoption.adoptionID}>
-                        <Card style={styles.card}>
-                            <CardContent>
-                                <Typography variant="h6">ID: {adoption.adoptionID}</Typography>
-                                <Typography variant="body1">Name: {adoption.name}</Typography>
-                                <Typography variant="body1">Address: {adoption.address}</Typography>
-                                <Typography variant="body1">Contact: {adoption.contactNumber}</Typography>
-                                <Typography variant="body1">Pet Type: {adoption.petType}</Typography>
-                                <Typography variant="body1">Submission Date: {adoption.submissionDate}</Typography>
-                                <Typography variant="body1">Status: {adoption.status}</Typography>
-                                <div style={styles.buttonContainer}>
-                                    <Button onClick={() => handleEditClick(adoption)} variant="contained" color="success" sx={{ marginRight: 1 }}>Edit</Button>
-                                    <Button onClick={() => handleDeleteClick(adoption.adoptionID)} variant="contained" color="error">Delete</Button>
-                                </div>
-                            </CardContent>
-                        </Card>
+                    <Typography variant="h6" sx={styles.centeredLeftHeading}>Rejected Adoptions</Typography>
+                    <Grid container spacing={2}>
+                        {renderAdoptionCards(adoptions.filter(adoption => adoption.status === 'REJECTED'))}
                     </Grid>
-                ))}
-            </Grid>
-
-            <Snackbar open={!!successMessage} autoHideDuration={6000} onClose={() => setSuccessMessage('')} message={successMessage} />
-            
-            <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)}>
+                    <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)}>
                 <DialogTitle>Edit Adoption Status</DialogTitle>
                 <DialogContent>
                     {editAdoption && (
@@ -184,7 +228,6 @@ const AdoptionList = () => {
                 </DialogActions>
             </Dialog>
 
-            {/* Update Confirmation Dialog */}
             <Dialog open={confirmDialogOpen} onClose={() => setConfirmDialogOpen(false)}>
                 <DialogTitle>Confirm Update</DialogTitle>
                 <DialogContent>
@@ -196,7 +239,6 @@ const AdoptionList = () => {
                 </DialogActions>
             </Dialog>
 
-            {/* Delete Confirmation Dialog */}
             <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
                 <DialogTitle>Confirm Delete</DialogTitle>
                 <DialogContent>
@@ -204,9 +246,61 @@ const AdoptionList = () => {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
-                    <Button onClick={handleDelete} variant="contained" color="error">Delete</Button>
+                    <Button onClick={handleDelete} variant="contained" color="primary">Delete</Button>
                 </DialogActions>
             </Dialog>
+                </Grid>
+
+                {/* Right Column for Rehome */}
+                <Grid item xs={12} md={6}>
+                    <Typography variant="h6" sx={styles.centeredRightHeading}>Pending Rehome</Typography>
+                    <Grid container spacing={2}>
+                        {renderRehomeCards(rehomes.filter(rehome => rehome.status === 'PENDING_REHOME'))}
+                    </Grid>
+
+                    <Typography variant="h6" sx={styles.centeredRightHeading}>Accepted Rehome</Typography>
+                    <Grid container spacing={2}>
+                        {renderRehomeCards(rehomes.filter(rehome => rehome.status === 'ACCEPTED_REHOME'))}
+                    </Grid>
+                    <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)}>
+                <DialogTitle>Edit Rehome Status</DialogTitle>
+                <DialogContent>
+                    {editRehome && (
+                        <Select
+                            label="Status"
+                            value={editRehome.status}
+                            onChange={(e) => setEditRehome({ ...editRehome, status: e.target.value })}
+                            variant="outlined"
+                            fullWidth
+                            sx={{ marginBottom: 2 }}
+                        >
+                            <MenuItem value="ACCEPTED_REHOME">Accepted</MenuItem>
+                            <MenuItem value="REJECTED_REHOME">Rejected</MenuItem>
+                        </Select>
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setEditDialogOpen(false)}>Cancel</Button>
+                    <Button onClick={handleEditRehome} variant="contained">Save</Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Delete Confirmation Dialog */}
+            <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
+                <DialogTitle>Confirm Delete</DialogTitle>
+                    <DialogContent>
+                        <Typography>Are you sure you want to delete this record?</Typography>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+                        <Button onClick={handleDelete} variant="contained" color="primary">Delete</Button>
+                    </DialogActions>
+            </Dialog>
+                </Grid>
+            </Grid>
+
+            <Snackbar open={!!successMessage} autoHideDuration={6000} onClose={() => setSuccessMessage('')} message={successMessage} />
+
         </div>
     );
 };
@@ -218,15 +312,36 @@ const styles = {
         alignItems: 'center',
         padding: '20px',
     },
+    backButton: {
+        alignSelf: 'flex-start', 
+    },
     card: {
         width: '300px',
         minHeight: '250px',
         margin: 'auto',
+        marginBottom: '20px',
+        padding: '10px',
     },
     buttonContainer: {
         marginTop: '10px',
         display: 'flex',
-        justifyContent: 'space-between',
+        justifyContent: 'flex-end',
+    },
+    centeredLeftHeading: {
+        textAlign: 'left',
+        paddingLeft: '30%',
+        fontFamily: "'Arial', sans-serif",
+        fontWeight: 'bold',
+        color: '#5A20A8',
+        marginBottom: '10px',
+    },
+    centeredRightHeading: {
+        textAlign: 'right',
+        paddingRight: '40%',
+        fontFamily: "'Arial', sans-serif",
+        fontWeight: 'bold',
+        color: '#5A20A8',
+        marginBottom: '10px',
     },
 };
 

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, TextField, Typography, Container, Box } from '@mui/material';
-import Navbar from './Navbar'; // Import the Navbar
 
 const UserDashboard = () => {
     const [users, setUsers] = useState([]);
@@ -129,11 +128,8 @@ const UserDashboard = () => {
 
     return (
         <>
-            <Navbar /> {/* Add Navbar here */}
             <Container>
-                <Box sx={{ mt: 5 }}>
-                    <Typography variant="h4" align="center">User Dashboard</Typography>
-                </Box>
+
                 <TableContainer component={Paper}>
                     <Table>
                         <TableHead>

@@ -1,6 +1,7 @@
 package com.g1appdev.Hubbits.controller;
 
 import com.g1appdev.Hubbits.entity.UserEntity;
+import com.g1appdev.Hubbits.repository.UserRepository;
 import com.g1appdev.Hubbits.service.UserService;
 import com.g1appdev.Hubbits.security.JwtUtil;
 
@@ -38,6 +39,8 @@ public class AuthController {
     private PasswordEncoder passwordEncoder;
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+    @Autowired
+    private UserRepository userRepository;
 
     @PostMapping("/signup")
     public ResponseEntity<String> signupUser(@RequestBody UserEntity newUser) {
@@ -47,18 +50,22 @@ public class AuthController {
                 newUser.getAddress(), newUser.getPhoneNumber());
 
         try {
-            // Set a default role for new users
+
             newUser.setRole("ROLE_USER");
 
-            // Attempt to save the user via service
+
             userService.createUser(newUser);
 
-            // Log success and return response
+
             logger.info("User successfully saved: Username={}", newUser.getUsername());
             return ResponseEntity.ok("User saved successfully");
 
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+
         } catch (Exception e) {
-            // Log the exception if something goes wrong
+
             logger.error("Error during signup", e);
             return ResponseEntity.status(500).body("Error during user registration: " + e.getMessage());
         }
@@ -68,14 +75,14 @@ public class AuthController {
     public ResponseEntity<?> authenticateUser(@RequestBody UserEntity loginRequest) {
         logger.info("Login attempt with username: {}", loginRequest.getUsername());
 
-        // Load the user entity to retrieve full details, including role
+
         Optional<UserEntity> userEntity = userService.findByUsername(loginRequest.getUsername());
 
-        // Log passwords
+
         logger.info("Incoming password: {}", loginRequest.getPassword());
         logger.info("Stored password (hashed): {}", userEntity.get().getPassword());
 
-        // Compare passwords
+
         if (!passwordEncoder.matches(loginRequest.getPassword(), userEntity.get().getPassword())) {
             logger.error("Passwords do NOT match!");
             return ResponseEntity.status(401).body("Invalid credentials");
@@ -83,7 +90,7 @@ public class AuthController {
 
         logger.info("Passwords match!");
 
-        // Authenticate the user
+
         try {
             Authentication auth = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())
@@ -95,13 +102,11 @@ public class AuthController {
             return ResponseEntity.status(401).body("Invalid credentials");
         }
 
-        // Get the role directly from UserEntity
+
         List<String> roles = List.of(userEntity.get().getRole().startsWith("ROLE_") ? userEntity.get().getRole() : "ROLE_" + userEntity.get().getRole());
 
-        // Log roles to verify they are set correctly
         logger.info("Roles for token generation: {}", roles);
 
-        // Generate token with username and roles
         String token = jwtTokenUtil.generateToken(loginRequest.getUsername(), roles);
         return ResponseEntity.ok(token);
     }
@@ -109,16 +114,29 @@ public class AuthController {
 
     @GetMapping("/login")
     public String loginPage() {
-        return "login";  // Serve login.html from src/main/resources/templates
+        return "login";
     }
 
     @GetMapping("/signup")
     public String signupPage() {
-        return "signup";  // Serve login.html from src/main/resources/templates
+        return "signup";
     }
 
     @GetMapping("/test")
     public String testPage() {
-        return "test";  // This will resolve to test.html
+        return "test";
     }
+
+    @GetMapping("/check-username")
+    public ResponseEntity<Boolean> checkUsername(@RequestParam String username) {
+        boolean exists = userService.existsByUsername(username);
+        return ResponseEntity.ok(exists);
+    }
+
+    @GetMapping("/check-email")
+    public ResponseEntity<Boolean> checkEmail(@RequestParam String email) {
+        boolean exists = userService.existsByEmail(email); // Check if email exists
+        return ResponseEntity.ok(exists); // Return true if exists, false otherwise
+    }
+
 }

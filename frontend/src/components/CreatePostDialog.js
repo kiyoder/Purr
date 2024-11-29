@@ -85,7 +85,7 @@ const CreatePostDialog = ({
     dataToSubmit.append("description", formData.description);
 
     if (formData.imageData) {
-        dataToSubmit.append("imageFile", formData.imageData);
+      dataToSubmit.append("imageFile", formData.imageData);
     }
 
     try {
@@ -123,13 +123,36 @@ const CreatePostDialog = ({
           (error.response?.data?.message || error.message)
       );
     }
-};
-
+  };
 
   return (
-    <Dialog open={open} onClose={() => setOpen(false)} maxWidth="sm" fullWidth>
+    <Dialog
+      open={open}
+      onClose={() => setOpen(false)}
+      maxWidth="sm"
+      fullWidth
+      sx={{
+        "& .MuiPaper-root": {
+          backgroundColor: "white",
+          border: "2px solid",
+          borderColor: "primary.main",
+          borderRadius: "16px",
+          boxShadow: "none",
+        },
+        "& .MuiDialog-container": {
+          backdropFilter: "blur(3px)",
+          backgroundColor: "rgba(0, 0, 0, 0.3)",
+        },
+      }}
+    >
       <DialogTitle>
-        <Typography variant="h6" align="center" fontWeight="bold">
+        <Typography
+          variant="h4"
+          component="div"
+          color="primary"
+          align="center"
+          sx={{ fontWeight: "bold", fontFamily: "'Caramel', sans-serif" }}
+        >
           {isEditing ? "Edit Post" : "Create Post"}
         </Typography>
         <CloseIcon
@@ -142,7 +165,15 @@ const CreatePostDialog = ({
           }}
         />
       </DialogTitle>
-      <DialogContent>
+      <DialogContent
+        sx={{
+          backgroundColor: "white",
+          borderTop: "1px solid",
+          borderColor: "primary.main",
+          borderRadius: "0 0 16px 16px",
+          padding: "24px",
+        }}
+      >
         <Box display="flex" flexDirection="column" alignItems="center">
           <ToggleButtonGroup
             value={formData.reportType}
@@ -153,27 +184,61 @@ const CreatePostDialog = ({
               display: "flex",
               justifyContent: "center",
               mb: 2,
+              mt: 2,
             }}
           >
             <ToggleButton
               value="lost"
               aria-label="Lost"
               sx={{
+                border: "2px solid",
+                borderRadius: "8px",
+                padding: "12px 36px",
+                borderColor:
+                  formData.reportType === "lost" ? "primary.main" : "grey.500",
+                color: formData.reportType === "lost" ? "#fff" : "grey.500",
+                backgroundColor:
+                  formData.reportType === "lost"
+                    ? "primary.main"
+                    : "transparent",
                 "&.Mui-selected": {
-                  backgroundColor: "#1976d2",
+                  backgroundColor: "primary.main",
                   color: "#fff",
+                },
+                "&:hover": {
+                  backgroundColor:
+                    formData.reportType === "lost"
+                      ? "primary.dark"
+                      : "rgba(0, 0, 0, 0.04)",
                 },
               }}
             >
               Lost
             </ToggleButton>
+
             <ToggleButton
               value="found"
               aria-label="Found"
               sx={{
+                border: "2px solid",
+                borderRadius: "8px",
+                padding: "12px 36px",
+                borderColor:
+                  formData.reportType === "found" ? "primary.main" : "grey.500",
+                color: formData.reportType === "found" ? "#fff" : "grey.500",
+                backgroundColor:
+                  formData.reportType === "found"
+                    ? "primary.main"
+                    : "transparent",
                 "&.Mui-selected": {
-                  backgroundColor: "#1976d2",
+                  backgroundColor: "primary.main",
                   color: "#fff",
+                },
+                "&:hover": {
+                  backgroundColor:
+                    formData.reportType === "found"
+                      ? "primary.dark"
+                      : "rgba(0, 0, 0, 0.04)",
                 },
               }}
             >
@@ -214,6 +279,9 @@ const CreatePostDialog = ({
                 fullWidth
                 value={formData.lastSeen}
                 onChange={handleInputChange}
+                InputLabelProps={{
+                  shrink: true,
+                }}
               />
             </Grid>
             <Grid item xs={12}>
@@ -225,6 +293,9 @@ const CreatePostDialog = ({
                 fullWidth
                 value={formData.description}
                 onChange={handleInputChange}
+                InputLabelProps={{
+                  shrink: true,
+                }}
               />
             </Grid>
             <Grid item xs={12}>
@@ -240,19 +311,23 @@ const CreatePostDialog = ({
             <Grid item xs={12}>
               <Grid item xs={12}>
                 <Box display="flex" justifyContent="center">
-                  <Button
-                    variant="contained"
-                    onClick={handleSubmit}
+                  <ToggleButton
+                    onclick={handleSubmit}
                     sx={{
-                      backgroundColor: "#1976d2",
+                      border: "2px solid",
+                      borderRadius: "8px",
+                      padding: "12px 36px",
+                      borderColor: "primary.main",
+                      backgroundColor: "primary.main",
                       color: "#fff",
                       "&:hover": {
-                        backgroundColor: "#115293",
+                        backgroundColor: "white",
+                        color: "primary.main",
                       },
                     }}
                   >
-                    {isEditing ? "Update Post" : "Create Post"}
-                  </Button>
+                    Submit
+                  </ToggleButton>
                 </Box>
               </Grid>
             </Grid>

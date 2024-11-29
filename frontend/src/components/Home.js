@@ -147,9 +147,9 @@ const Home = () => {
             Pet adoption and rehoming are both vital aspects of animal welfare, offering hope and a fresh start to pets in need.
             Open your heart and your home to a shelter pet.
           </Typography>
-          <Box sx={{ display: 'flex', gap: 2 }}> {/* Reduced gap */}
-            <ToggleButton
-              onClick={handleAdoptNowClick}
+          <Box sx={{ display: 'flex', gap: 4 }}>
+            <ToggleButton value="adopt"
+              onClick={handleAdoptNowClick} // Add the handleAdoptNowClick function here
               sx={{
                 border: '2px solid',
                 borderRadius: '8px',
@@ -166,7 +166,7 @@ const Home = () => {
               Adopt Now
             </ToggleButton>
 
-            <ToggleButton
+            <ToggleButton value="adopt"
               onClick={handleSubmit}
               sx={{
                 border: '2px solid',
