@@ -28,6 +28,9 @@ const AuthModal = ({ open, handleClose }) => {
 
     const [emailExists, setEmailExists] = useState(false);
 
+
+
+
     const toggleShowPassword = () => setShowPassword(!showPassword);
 
     // Login state and handlers

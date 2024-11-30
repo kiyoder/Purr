@@ -53,7 +53,9 @@ function App() {
           <Route path="/lost-and-found" element={<LostAndFound />} />
           <Route path="/sponsor" element={<Sponsor />} />
           <Route path="/adopt" element={<PetList />} />
-          
+
+          <Route path="*" element={<NoMatch />} />
+
           <Route path="/adopt_dash" element={<AdoptionList />} />
           <Route path="/donate" element={<DonationForm />} />
           <Route path="/donation_dash" element={<DonationTable />} />

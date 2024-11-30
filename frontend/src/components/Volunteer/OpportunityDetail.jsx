@@ -20,7 +20,9 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import GroupIcon from '@mui/icons-material/Group';
 import { motion } from 'framer-motion';
 import AuthModal from '../AuthModal';
-import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive'; // Import reminder-related icon
+import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+
 
 const OpportunityDetail = () => {
     const { id } = useParams();
@@ -155,19 +157,30 @@ const OpportunityDetail = () => {
     const handleSnackbarClose = () => setSnackbarOpen(false);
 
     const handleRegisterButtonClick = () => {
-        if (userDetails && opportunity.creatorId === userDetails.userId) {
-            setSuccessMessage('You cannot register your own opportunity.');
-            setSnackbarOpen(true); // Display message in Snackbar
-        } else {
+        // Check if the user is logged in and has a userId
+        const user = JSON.parse(localStorage.getItem('user'));
+
+        if (user && user.userId) {
+            const userId = user.userId;
+
+            // Compare the logged-in userId with the opportunity creatorId
+            if (opportunity.creatorId === userId) {
+                setSuccessMessage('You cannot register your own opportunity.');
+                setSnackbarOpen(true); // Display message in Snackbar
+                return; // Prevent the registration process if the user is the creator
+            }
+
+            // Proceed with the registration process if the user is not the creator
             const token = localStorage.getItem("token");
             if (!token) {
-                setAuthModalOpen(true); // Open auth modal if user is not logged in
+                setAuthModalOpen(true); // Open the auth modal if the user is not logged in
             } else {
                 setOpenDialog(true); // Proceed with the registration dialog if logged in
             }
+        } else {
+            setAuthModalOpen(true);
         }
     };
-
     if (loading) return <Typography>Loading...</Typography>;
     if (error) return <Typography>{error}</Typography>;
     if (!opportunity) return <Typography>No opportunity found.</Typography>;
@@ -190,7 +203,6 @@ const OpportunityDetail = () => {
                 <Grid item xs={12}>
                     <Button
                         onClick={() => navigate(-1)}
-                        variant="outlined"
                         color="secondary"
                         sx={{ marginBottom: 1 }}
                     >
@@ -201,7 +213,12 @@ const OpportunityDetail = () => {
                 <Grid container spacing={3} sx={{ paddingTop: 5, paddingX: 5 }}>
                     <Grid item xs={12} md={7}>
                         <Paper elevation={0} sx={{ padding: 3, borderRadius: 2, marginBottom: 0.5 }}>
-                            <Typography variant="h4" sx={{ marginBottom: 0.5 }} color="purple">
+                            <Typography variant="h4" sx={{
+                                marginBottom: 0.5, fontFamily: "'Montserrat', sans-serif",
+                                fontWeight: "bold",
+                                color: "#675bc8",
+                                marginBottom: 0.5
+                            }} color="#675bc8">
                                 {opportunity.title}
                             </Typography>
                             <Typography variant="body1" sx={{ marginBottom: 0 }}>
@@ -219,63 +236,78 @@ const OpportunityDetail = () => {
                                     style={{ width: '100%', height: '550px', objectFit: 'cover', borderRadius: 8 }}
                                 />
                             </Box>
+
                             <Box sx={{ padding: 3, borderRadius: 2, border: '1px solid lightgray' }}>
+                                {/* Location */}
                                 <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: 2 }}>
-                                    <LocationOnIcon sx={{ marginRight: 1, color: '#9B4D96' }} />
-                                    <Typography variant="body2" sx={{ color: '#9B4D96' }}>
+                                    <LocationOnIcon sx={{ marginRight: 1, color: '#4c3dcb' }} />
+                                    <Typography variant="body2" sx={{ color: '#675bc8' }}>
                                         <strong>Location:</strong> {opportunity.location}
                                     </Typography>
                                 </Box>
+
+                                {/* Event Date */}
                                 <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: 2 }}>
-                                    <EventIcon sx={{ marginRight: 1, color: '#9B4D96' }} />
-                                    <Typography variant="body2" sx={{ color: '#9B4D96' }}>
+                                    <EventIcon sx={{ marginRight: 1, color: '#4c3dcb' }} />
+                                    <Typography variant="body2" sx={{ color: '#675bc8' }}>
                                         <strong>Event Date:</strong> {new Date(opportunity.volunteerDatetime).toLocaleString()}
                                     </Typography>
                                 </Box>
+
+                                {/* Hours */}
                                 <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: 2 }}>
-                                    <AccessTimeIcon sx={{ marginRight: 1, color: '#9B4D96' }} />
-                                    <Typography variant="body2" sx={{ color: '#9B4D96' }}>
+                                    <AccessTimeIcon sx={{ marginRight: 1, color: '#4c3dcb' }} />
+                                    <Typography variant="body2" sx={{ color: '#675bc8' }}>
                                         <strong>Hours:</strong> {opportunity.hoursWorked}
                                     </Typography>
                                 </Box>
+
+                                {/* Volunteers Needed */}
                                 <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: 2 }}>
-                                    <GroupIcon sx={{ marginRight: 1, color: '#9B4D96' }} />
-                                    <Typography variant="body2" sx={{ color: '#9B4D96' }}>
+                                    <GroupIcon sx={{ marginRight: 1, color: '#4c3dcb' }} />
+                                    <Typography variant="body2" sx={{ color: '#675bc8' }}>
                                         <strong>Volunteers Needed:</strong> {opportunity.volunteersNeeded}
                                     </Typography>
                                 </Box>
 
-                                <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: 2 }}>
-                                    <GroupIcon sx={{ marginRight: 1, color: '#9B4D96' }} />
-                                    <Typography variant="body2" sx={{ color: '#9B4D96' }}>
+                                {/* Sign-Ups */}
+                                <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: 1 }}>
+                                    <GroupIcon sx={{ marginRight: 1, color: '#4c3dcb' }} />
+                                    <Typography variant="body2" sx={{ color: '#675bc8' }}>
                                         <strong>Sign-Ups:</strong> {signUpCount}
                                     </Typography>
                                 </Box>
 
+                                {/* Registration Period with Register Button inline */}
+                                <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: 1 }}>
+                                    <CalendarTodayIcon sx={{ marginRight: 1, color: '#4c3dcb' }} />
+                                    <Typography variant="body2" sx={{ color: '#675bc8' }}>
+                                        <strong>Registration Period:</strong> {new Date(opportunity.registrationStartDate).toLocaleString()} - {new Date(opportunity.registrationEndDate).toLocaleString()}
+                                    </Typography>
 
-                                <Typography variant="body2" sx={{ marginBottom: 2 }}>
-                                    <strong>Registration Period:</strong> {new Date(opportunity.registrationStartDate).toLocaleString()} - {new Date(opportunity.registrationEndDate).toLocaleString()}
-                                </Typography>
-                                <Button
-                                    variant="contained"
-                                    color="primary"
-                                    onClick={handleRegisterButtonClick}
-                                    disabled={!isRegistrationOpen || signUpCount >= opportunity.volunteersNeeded}
-                                    sx={{ marginLeft: 'auto', marginBottom: 2 }}
-                                >
-                                    {signUpCount >= opportunity.volunteersNeeded ? 'Registration Closed' : (isRegistrationOpen ? 'Register' : 'Registration Closed')}
-                                </Button>
+                                    {/* Register Button */}
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
+                                        onClick={handleRegisterButtonClick}
+                                        disabled={!isRegistrationOpen || signUpCount >= opportunity.volunteersNeeded}
+                                        sx={{ marginLeft: 'auto', marginBottom: 1 }}
+                                    >
+                                        {signUpCount >= opportunity.volunteersNeeded ? 'Closed' : (isRegistrationOpen ? 'Register' : 'Closed')}
+                                    </Button>
+                                </Box>
 
                                 <AuthModal
                                     open={authModalOpen}
                                     handleClose={() => setAuthModalOpen(false)} // Close the auth modal when the user cancels
                                 />
-
                             </Box>
+
                         </Paper>
                     </Grid>
+
                     {/* Right Section: Reminders */}
-                    <Grid item xs={12} md={5} sx={{ display: 'flex', flexDirection: 'column', height: '860px', marginTop: 3 }}>
+                    <Grid item xs={12} md={5} sx={{ display: 'flex', flexDirection: 'column', height: '800px', marginTop: 3 }}>
                         <Paper
                             elevation={0}
                             sx={{
@@ -370,11 +402,13 @@ const OpportunityDetail = () => {
                     message={successMessage}
                 />
 
-                <Dialog open={openDialog} onClose={handleDialogClose}>
-                    <DialogTitle>Register for Opportunity</DialogTitle>
-                    <DialogContent>
+
+                <Dialog open={openDialog} onClose={handleDialogClose} maxWidth="xs" fullWidth>
+                    <DialogTitle sx={{ textAlign: 'center', fontWeight: 'bold', marginTop: 3 }}>Register for Opportunity</DialogTitle>
+                    <DialogContent sx={{ padding: '20px 30px' }}>
                         {['firstName', 'lastName', 'email', 'address', 'phoneNumber'].map((field) => (
                             <TextField
+                                key={field}
                                 label={field.replace(/([A-Z])/g, ' $1')}
                                 variant="outlined"
                                 fullWidth
@@ -383,20 +417,79 @@ const OpportunityDetail = () => {
                                 value={formData[field]}
                                 onChange={handleInputChange}
                                 error={formData[field] === ''} // Set error if field is empty
-                                helperText={formData[field] === '' ? 'This field is required' : ''} // Display message if empty
+                                helperText={formData[field] === '' ? 'This field is required' : ''}
+                                sx={{
+                                    '& .MuiInputBase-root': {
+                                        borderRadius: '8px', // Rounded corners for inputs
+                                        backgroundColor: '#f9f9f9', // Subtle background color for the input fields
+                                    },
+                                    '& .MuiFormLabel-root': {
+                                        fontWeight: '500', // Lighter font weight for labels
+                                    },
+                                    '& .MuiOutlinedInput-root': {
+                                        '& fieldset': {
+                                            borderRadius: '8px', // Ensure the border is also rounded
+                                        },
+                                        '&:hover fieldset': {
+                                            borderColor: 'primary.main', // Change border color on hover
+                                        },
+                                    },
+                                }}
                             />
                         ))}
                     </DialogContent>
-                    <DialogActions>
-                        <Button onClick={handleDialogClose} color="secondary">
+
+                    <DialogActions sx={{ justifyContent: 'space-between', padding: '15px 30px 40px ' }}>
+                        <Button
+                            onClick={handleDialogClose}
+                            color="secondary"
+                            variant="outlined" // Set the outlined variant
+                            sx={{
+                                borderRadius: '8px',
+                                borderColor: '#f44336', // Red border for the cancel button
+                                color: '#f44336', // Red text for cancel
+                                padding: '10px 20px',
+                                fontWeight: '500',
+                                width: '40%',
+                                '&:hover': {
+                                    borderColor: '#d32f2f', // Darker red border on hover
+                                    backgroundColor: '#f8d7da', // Light red background on hover
+                                },
+                            }}
+                        >
                             Cancel
                         </Button>
-                        <Button onClick={handleSubmit} color="primary" disabled={!Object.values(formData).every(value => value.trim() !== '')}>
+
+                        <Button
+                            onClick={handleSubmit}
+                            color="primary"
+                            variant="outlined" // Set the outlined variant
+                            disabled={!Object.values(formData).every(value => value.trim() !== '')}
+                            sx={{
+                                borderRadius: '8px',
+                                borderColor: '#3f51b5', // Blue border for the submit button
+                                color: '#3f51b5', // Blue text for submit
+                                padding: '10px 20px',
+                                fontWeight: '500',
+                                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', // Subtle shadow for the button
+                                width: '40%',
+                                '&:hover': {
+                                    borderColor: '#303f9f', // Darker blue border on hover
+                                    backgroundColor: '#e8eaf6', // Light blue background on hover
+                                    color: '#303f9f', // Darker text color on hover
+                                },
+                                '&.Mui-disabled': {
+                                    borderColor: '#c5cae9', // Lighter border color when disabled
+                                    color: '#c5cae9', // Lighter text color when disabled
+                                },
+                            }}
+                        >
                             Submit
                         </Button>
-
                     </DialogActions>
+
                 </Dialog>
+
 
                 <Dialog
                     open={confirmDialogOpen}

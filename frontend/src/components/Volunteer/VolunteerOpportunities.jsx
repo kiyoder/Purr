@@ -6,7 +6,18 @@ import axios from 'axios';
 const VolunteerOpportunities = () => {
     const [volunteerOpportunities, setVolunteerOpportunities] = useState([]);
     const [open, setOpen] = useState(false);
-    const [selectedOpportunity, setSelectedOpportunity] = useState({ title: '', description: '', date: '', location: '', hoursWorked: 0, volunteersNeeded: 0, id: null });
+    const [selectedOpportunity, setSelectedOpportunity] = useState({
+        title: '',
+        description: '',
+        registrationStartDate: '',
+        registrationEndDate: '',
+        volunteerDatetime: '',
+        location: '',
+        hoursWorked: 0,
+        volunteersNeeded: 0,
+        opportunityID: null,
+        creatorId: null,
+    });
 
     useEffect(() => {
         fetchVolunteerOpportunities();
@@ -21,14 +32,18 @@ const VolunteerOpportunities = () => {
         }
     };
 
-    const handleOpen = (opportunity = { title: '', description: '', date: '', location: '', hoursWorked: 0, volunteersNeeded: 0, id: null }) => {
+    const handleOpen = (opportunity = {
+        title: '', description: '', registrationStartDate: '', registrationEndDate: '', volunteerDatetime: '', location: '', hoursWorked: 0, volunteersNeeded: 0, opportunityID: null, creatorId: 0
+    }) => {
         setSelectedOpportunity(opportunity);
         setOpen(true);
     };
 
     const handleClose = () => {
         setOpen(false);
-        setSelectedOpportunity({ title: '', description: '', date: '', location: '', hoursWorked: 0, volunteersNeeded: 0, id: null });
+        setSelectedOpportunity({
+            title: '', description: '', registrationStartDate: '', registrationEndDate: '', volunteerDatetime: '', location: '', hoursWorked: 0, volunteersNeeded: 0, opportunityID: null, creatorId: 0
+        });
     };
 
     const handleChange = (e) => {
@@ -37,26 +52,55 @@ const VolunteerOpportunities = () => {
     };
 
     const handleSave = async () => {
-        const confirmationMessage = selectedOpportunity.id 
-            ? "Are you sure you want to update this opportunity?" 
+        const confirmationMessage = selectedOpportunity.opportunityID
+            ? "Are you sure you want to update this opportunity?"
             : "Are you sure you want to add this opportunity?";
-
+    
         const confirmSave = window.confirm(confirmationMessage);
-
+    
         if (confirmSave) {
+            if (!selectedOpportunity.title || !selectedOpportunity.description || !selectedOpportunity.volunteerDatetime || !selectedOpportunity.location) {
+                alert("Please fill in all required fields.");
+                return;
+            }
+    
             try {
-                if (selectedOpportunity.id) {
-                    await axios.put(`http://localhost:8080/api/volunteer/opportunity/${selectedOpportunity.id}`, selectedOpportunity);
-                } else {
-                    await axios.post('http://localhost:8080/api/volunteer/opportunity', selectedOpportunity);
+                const formData = new FormData();
+                formData.append("title", selectedOpportunity.title);
+                formData.append("description", selectedOpportunity.description);
+                formData.append("registrationStartDate", selectedOpportunity.registrationStartDate);
+                formData.append("registrationEndDate", selectedOpportunity.registrationEndDate);
+                formData.append("volunteerDatetime", selectedOpportunity.volunteerDatetime);
+                formData.append("location", selectedOpportunity.location);
+                formData.append("hoursWorked", selectedOpportunity.hoursWorked);
+                formData.append("volunteersNeeded", selectedOpportunity.volunteersNeeded);
+                formData.append("creatorId", selectedOpportunity.creatorId);
+    
+                if (selectedOpportunity.volunteerImage) {
+                    formData.append("volunteerImage", selectedOpportunity.volunteerImage);
                 }
+    
+                console.log("Form data being sent:", formData);
+    
+                const headers = {
+                    'Content-Type': 'multipart/form-data',
+                };
+    
+                if (selectedOpportunity.opportunityID) {
+                    await axios.put(`http://localhost:8080/api/volunteer/opportunity/${selectedOpportunity.opportunityID}`, formData, { headers });
+                } else {
+                    await axios.post('http://localhost:8080/api/volunteer/opportunity', formData, { headers });
+                }
+    
                 fetchVolunteerOpportunities();
                 handleClose();
             } catch (error) {
                 console.error("Error saving opportunity:", error);
+                alert("Error occurred while saving the opportunity. Please check the form data and try again.");
             }
         }
     };
+    
 
     const handleDelete = async (id) => {
         const confirmDelete = window.confirm("Are you sure you want to delete this opportunity?");
@@ -91,7 +135,7 @@ const VolunteerOpportunities = () => {
                                 <Typography variant="body2">Opportunity ID: {opportunity.opportunityID}</Typography>
                                 <Typography variant="body2">{opportunity.description}</Typography>
                                 <Typography variant="body2">
-                                    {opportunity.date ? new Date(opportunity.date).toLocaleDateString() : "No date provided"}
+                                    {opportunity.volunteerDatetime ? new Date(opportunity.volunteerDatetime).toLocaleDateString() : "No date provided"}
                                 </Typography>
                                 <Typography variant="body2">{opportunity.location}</Typography>
                                 <Typography variant="body2">
@@ -115,7 +159,7 @@ const VolunteerOpportunities = () => {
             </Grid>
 
             <Dialog open={open} onClose={handleClose}>
-                <DialogTitle>{selectedOpportunity.id ? 'Edit Volunteer Opportunity' : 'Add Volunteer Opportunity'}</DialogTitle>
+                <DialogTitle>{selectedOpportunity.opportunityID ? 'Edit Volunteer Opportunity' : 'Add Volunteer Opportunity'}</DialogTitle>
                 <DialogContent>
                     <TextField
                         autoFocus
@@ -138,17 +182,33 @@ const VolunteerOpportunities = () => {
                     />
                     <TextField
                         margin="dense"
-                        label="Date"
-                        name="date"
-                        type="date"
+                        label="Registration Start Date"
+                        name="registrationStartDate"
+                        type="datetime-local"
                         fullWidth
                         variant="outlined"
-                        InputLabelProps={{
-                            shrink: true,
-                        }}
-                        value={selectedOpportunity.date ? selectedOpportunity.date.split('T')[0] : ''}
+                        value={selectedOpportunity.registrationStartDate}
                         onChange={handleChange}
-                        inputProps={{ min: today }} // Disable past dates
+                    />
+                    <TextField
+                        margin="dense"
+                        label="Registration End Date"
+                        name="registrationEndDate"
+                        type="datetime-local"
+                        fullWidth
+                        variant="outlined"
+                        value={selectedOpportunity.registrationEndDate}
+                        onChange={handleChange}
+                    />
+                    <TextField
+                        margin="dense"
+                        label="Volunteer Date"
+                        name="volunteerDatetime"
+                        type="datetime-local"
+                        fullWidth
+                        variant="outlined"
+                        value={selectedOpportunity.volunteerDatetime}
+                        onChange={handleChange}
                     />
                     <TextField
                         margin="dense"
@@ -168,8 +228,8 @@ const VolunteerOpportunities = () => {
                         variant="outlined"
                         value={selectedOpportunity.hoursWorked}
                         onChange={handleChange}
-                        inputProps={{ min: 1 }} // Set minimum value to 1
-                        onWheel={(e) => e.target.blur()} // Prevent scrolling to change value
+                        inputProps={{ min: 1 }}
+                        onWheel={(e) => e.target.blur()}
                     />
                     <Typography variant="body2">Selected Hours Worked: {selectedOpportunity.hoursWorked}</Typography>
 
@@ -182,14 +242,15 @@ const VolunteerOpportunities = () => {
                         variant="outlined"
                         value={selectedOpportunity.volunteersNeeded}
                         onChange={handleChange}
-                        inputProps={{ min: 1 }} // Set minimum value to 1
-                        onWheel={(e) => e.target.blur()} // Prevent scrolling to change value
+                        inputProps={{ min: 1 }}
+                        onWheel={(e) => e.target.blur()}
                     />
-                    <Typography variant="body2">Selected Volunteers Needed: {selectedOpportunity.volunteersNeeded}</Typography>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleClose} color="primary">Cancel</Button>
-                    <Button onClick={handleSave} sx={{ backgroundColor: '#4CAF50', color: 'white' }}>Save</Button>
+                    <Button onClick={handleClose}>Cancel</Button>
+                    <Button onClick={handleSave} variant="contained" sx={{ backgroundColor: '#4CAF50', color: 'white' }}>
+                        Save
+                    </Button>
                 </DialogActions>
             </Dialog>
         </Container>

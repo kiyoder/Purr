@@ -45,13 +45,16 @@ const Volunteer = () => {
   const handleCloseFormDialog = () => {
     setIsBlurred(false); // Remove blur effect when dialog is closed
     setOpenFormDialog(false);
+
+    // Fetch the userID from localStorage
+    const userId = JSON.parse(localStorage.getItem('user'));
+    console.log('User ID:', userId);
   };
 
   // Function to handle form submission success
   const handleFormSubmitSuccess = () => {
     setOpenFormDialog(false); // Close the dialog
     navigate('/volunteer', { replace: true }); // Navigate to the volunteer page
-    window.location.reload(); // Force a page refresh
   };
 
   // FAQ data
@@ -89,7 +92,7 @@ const Volunteer = () => {
         console.error('Error fetching volunteer opportunities:', error);
         setVolunteerOpportunities([]); // Optionally handle fallback state
         alert('Failed to load volunteer opportunities. Please try again later.'); // Add user-friendly feedback
-      }      
+      }
     };
     fetchVolunteerOpportunities();
   }, []);
@@ -115,7 +118,7 @@ const Volunteer = () => {
       handleOpenFormDialog();
     }
   };
-  
+
 
   return (
     <motion.div
@@ -148,9 +151,21 @@ const Volunteer = () => {
               justifyContent: 'flex-start',
             }}
           >
-            <Typography variant="h4" gutterBottom>
+            <Typography
+              variant="h4"
+              gutterBottom
+              sx={{
+                fontFamily: '"Roboto", "Arial", sans-serif', // Change font family to something modern
+                fontWeight: 700, // Make the text bold
+                fontSize: '2.5rem', // Increase the font size
+                textAlign: 'left', // Center align the text
+                letterSpacing: '0.5px', // Add some spacing between letters for a clean look
+                color: 'primary.main', // Change text color to the primary theme color
+              }}
+            >
               Volunteer and Make a Difference for Pets
             </Typography>
+
             <Typography variant="body1" paragraph>
               Volunteering with pets is a rewarding way to give back and improve the lives of animals in need. From walking dogs at shelters to fostering pets, every moment you spend with them helps build a stronger bond between humans and animals. Whether you're offering companionship, care, or helping them find their forever home, your involvement makes a real difference. Join us in supporting pets who need love, care, and a second chance at life.
             </Typography>
@@ -164,8 +179,9 @@ const Volunteer = () => {
                 borderRadius: '18px',
                 boxShadow: 'none',
                 '&:hover': {
-                  backgroundColor: '#e1bee7',
-                  borderColor: '#9575cd',
+                  color: 'white',
+                  backgroundColor: '#675bc8',
+                  borderColor: '#675bc8',
                 },
                 width: 'fit-content',
                 display: 'inline-flex',
@@ -177,18 +193,30 @@ const Volunteer = () => {
               Book
             </Button>
             {/* Auth Modal */}
-      <AuthModal
-        open={authModalOpen}
-        handleClose={() => setAuthModalOpen(false)} // Close the modal when needed
-      />
+            <AuthModal
+              open={authModalOpen}
+              handleClose={() => setAuthModalOpen(false)} // Close the modal when needed
+            />
           </Grid>
         </Grid>
       </Container>
 
       {/* FAQ Section */}
       <Container maxWidth="md" sx={{ padding: '2rem 0', filter: isBlurred ? 'blur(5px)' : 'none' }}>
-        <Typography variant="h4" gutterBottom align="center" sx={{ fontWeight: 'bold', marginBottom: '2rem' }}>
-          Volunteer Orientation FAQ
+        <Typography
+          variant="h4"
+          gutterBottom
+          sx={{
+            fontFamily: '"Roboto", "Arial", sans-serif', // Change font family to something modern
+            fontWeight: 700, // Make the text bold
+            fontSize: '2.2rem', // Increase the font size
+            textAlign: 'center', // Center align the text
+            letterSpacing: '0.4px', // Add some spacing between letters for a clean look
+            color: 'primary.main', // Change text color to the primary theme color
+            marginBottom: 4,
+          }}
+        >
+          FAQ's for Volunteering
         </Typography>
 
         {faqData.map((item, index) => (
@@ -219,7 +247,7 @@ const Volunteer = () => {
                 <Typography
                   variant="h6"
                   sx={{
-                    fontWeight: 500,
+                    fontWeight: 550,
                     fontSize: '1rem', // Fix the font size so it doesn't change when expanded
                     transition: 'font-size 0.3s', // Smooth transition for font size
                   }}
@@ -229,7 +257,7 @@ const Volunteer = () => {
               </AccordionSummary>
 
               <AccordionDetails sx={{ padding: '12px 20px', backgroundColor: '#fafafa' }}>
-                <Typography variant="body2" sx={{ color: 'purple' }}>
+                <Typography variant="body1" sx={{ color: 'primary.main' }}>
                   {item.answer}
                 </Typography>
               </AccordionDetails>
@@ -238,9 +266,21 @@ const Volunteer = () => {
         ))}
       </Container>
 
-      {/* Volunteer Opportunities Section */}      
+      {/* Volunteer Opportunities Section */}
       <Container maxWidth="lg" sx={{ padding: '1rem 0', filter: isBlurred ? 'blur(5px)' : 'none' }}>
-        <Typography variant="h4" gutterBottom className="my-5" align="center" sx={{ fontWeight: 'bold', marginBottom: '2rem' }}>
+        <Typography
+          variant="h4"
+          gutterBottom
+          sx={{
+            fontFamily: '"Roboto", "Arial", sans-serif', // Change font family to something modern
+            fontWeight: 700, // Make the text bold
+            fontSize: '2.2rem', // Increase the font size
+            textAlign: 'center', // Center align the text
+            letterSpacing: '0.4px', // Add some spacing between letters for a clean look
+            color: 'primary.main', // Change text color to the primary theme color
+            marginBottom: 6,
+          }}
+        >
           Volunteer Opportunities
         </Typography>
         <Grid container spacing={4}>
@@ -265,7 +305,9 @@ const Volunteer = () => {
                   image={
                     opportunity.volunteerImageUrl
                       ? `http://localhost:8080${opportunity.volunteerImageUrl}`  // Use the volunteerImageUrl if available
-                      : "http://localhost:8080/images/default.png"  // Fallback to default image
+                      : 'http://localhost:3000/images/default.png'
+
+                      // Fallback to default image
                   }
                   title={opportunity.title}
                 />
@@ -275,10 +317,10 @@ const Volunteer = () => {
                     {opportunity.title}
                   </Typography>
                   <Typography variant="body2" color="text.secondary" paragraph>
-                    {opportunity.description.slice(0, 80)}...
+                    {opportunity.description.slice(0, 60)}...
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Date: {new Date(opportunity.date).toLocaleDateString()}
+                    Date: {new Date(opportunity.volunteerDatetime).toLocaleDateString()}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
                     Location: {opportunity.location}
@@ -294,7 +336,7 @@ const Volunteer = () => {
                       padding: '6px 16px', // Add padding to the button (vertical, horizontal)
                       marginBottom: '4px', // Reduce bottom margin
                       '&:hover': {
-                        color: '#9b59b6',
+                        color: '#675bc8',
                         borderRadius: '8px',
                       },
                     }}
@@ -309,8 +351,8 @@ const Volunteer = () => {
             </Grid>
           ))}
         </Grid>
-{/* Show More / Show Less Button */}
-{volunteerOpportunities.length > 4 && (
+        {/* Show More / Show Less Button */}
+        {volunteerOpportunities.length > 4 && (
           <Button
             variant="outlined"
             onClick={handleShowMoreLess}
