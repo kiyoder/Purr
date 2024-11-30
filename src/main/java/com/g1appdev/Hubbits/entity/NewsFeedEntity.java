@@ -9,21 +9,33 @@ public class NewsFeedEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long articleID;  // articleID as the primary key
-    
-    private String title;  // title of the news article
-    
+    private Long articleID;
+
+    private String title;
+
     @Column(columnDefinition = "TEXT")
-    private String content;  // content of the article (using TEXT for larger text data)
-    
-    @Temporal(TemporalType.TIMESTAMP)  // Ensures both date and time are saved
-    private Date publishedDate;  // date the article was published
-    
-    private String author;  // author of the article
+    private String content;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date publishedDate;
+
+    private String author;
+
+    @Column(name = "imageUrl", length = 255)
+    private String imageUrl;
+
+    // Getters and Setters...
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
 
     // Default constructor
-    public NewsFeedEntity() {
-    }
+    public NewsFeedEntity() {}
 
     // Getter and Setter methods
     public Long getArticleID() {
@@ -65,6 +77,8 @@ public class NewsFeedEntity {
     public void setAuthor(String author) {
         this.author = author;
     }
+
+    
 
     // Automatically set the current date and time when an article is created
     @PrePersist
