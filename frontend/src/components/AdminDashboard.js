@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Box, CssBaseline, Typography } from '@mui/material';
-import UserDashboard from './UserDashboard';
-import AdminNavbar from './AdminNavbar';
+import UserDashboard from './Dashboards/UserDashboard';
+import LostAndFoundDashboard from './Dashboards/LostAndFoundDashboard';
+import AdminNavbar from './Dashboards/AdminNavbar';
 
 const AdminDashboard = () => {
     const [selectedTab, setSelectedTab] = useState('Users');
@@ -10,7 +11,8 @@ const AdminDashboard = () => {
         switch (selectedTab) {
             case 'Users':
                 return <UserDashboard />;
-            // Add more cases here for other sections like Adoptions, Sponsorships, etc.
+            case 'Lost and Found':
+                return <LostAndFoundDashboard />;
             default:
                 return <UserDashboard />;
         }
