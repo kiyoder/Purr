@@ -56,16 +56,22 @@ const PostCard = ({ item, fetchLostItems, onEdit }) => {
   }, []);
 
   const handleDelete = async () => {
+    console.log("Attempting to delete report ID:", item.reportid);
     try {
-      await axios.delete(`http://localhost:8080/api/lostandfound/${item.reportid}`);
+      await axios.delete(`http://localhost:8080/api/lostandfound/${item.reportid}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`, // Ensure token is sent
+        },
+      });
       alert("Item deleted successfully");
       fetchLostItems();
-      setOpenDialog(false); // Close the confirmation dialog after deletion
+      setOpenDialog(false); // Close the confirmation dialog
     } catch (error) {
-      console.error("Error deleting item:", error);
-      setOpenDialog(false); // Close dialog even if there's an error
+      console.error("Error deleting item:", error.response?.data || error.message);
+      alert(`Failed to delete item: ${error.response?.data?.message || error.message}`);
     }
   };
+
 
   const handleOpenDialog = () => {
     setOpenDialog(true); // Open the dialog when the delete button is clicked

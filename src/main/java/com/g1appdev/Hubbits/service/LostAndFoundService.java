@@ -127,14 +127,22 @@ public class LostAndFoundService {
         UserEntity user = currentUser.get();
         boolean isAdmin = user.getRole().equalsIgnoreCase("ROLE_ADMIN");
 
+        System.out.println("Authenticated user: " + username + ", Role: " + user.getRole());
+        System.out.println("Attempting to delete report with ID: " + id);
+
+        // Retrieve the report
         LostAndFoundEntity report = repository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Report with ID " + id + " not found."));
 
+        System.out.println("Report found: Creator ID = " + report.getCreatorid());
+
+        // Allow deletion if the user is the creator or an admin
         if (!isAdmin && report.getCreatorid() != Math.toIntExact(user.getUserId())) {
             throw new IllegalArgumentException("You are not authorized to delete this report.");
         }
 
         repository.delete(report);
+        System.out.println("Report with ID " + id + " deleted successfully.");
     }
 
     private String getAuthenticatedUsername() {
