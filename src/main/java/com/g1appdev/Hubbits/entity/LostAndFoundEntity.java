@@ -1,6 +1,5 @@
 package com.g1appdev.Hubbits.entity;
 
-import java.util.Base64;
 import java.util.Date;
 import jakarta.persistence.*;
 

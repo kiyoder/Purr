@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import {
   Box,
@@ -22,10 +21,12 @@ import axios from "axios";
 const PostCard = ({ item, fetchLostItems, onEdit }) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [userId, setUserId] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false); // Admin role check
   const [creatorUsername, setCreatorUsername] = useState("Unknown");
-  const [openDialog, setOpenDialog] = useState(false); 
+  const [openDialog, setOpenDialog] = useState(false);
 
   useEffect(() => {
+    // Fetch the creator's username
     const fetchCreatorUsername = async () => {
       try {
         const response = await axios.get(`http://localhost:8080/api/users/${item.creatorid}`);
@@ -44,49 +45,39 @@ const PostCard = ({ item, fetchLostItems, onEdit }) => {
   }, [item.creatorid]);
 
   useEffect(() => {
-    // Retrieve user ID from local storage
+    // Retrieve user details from local storage
     const storedUser = JSON.parse(localStorage.getItem("user"));
-    if (storedUser && storedUser.userId) {
+    if (storedUser) {
       setUserId(storedUser.userId);
+      setIsAdmin(storedUser.role === "ROLE_ADMIN"); // Check if user is an admin
     } else {
-      console.error("User ID not found in local storage.");
+      console.error("User details not found in local storage.");
     }
   }, []);
 
   const handleDelete = async () => {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("You are not authenticated. Please log in first.");
-        return;
-      }
+    try {
+      await axios.delete(`http://localhost:8080/api/lostandfound/${item.reportid}`);
+      alert("Item deleted successfully");
+      fetchLostItems();
+      setOpenDialog(false); // Close the confirmation dialog after deletion
+    } catch (error) {
+      console.error("Error deleting item:", error);
+      setOpenDialog(false); // Close dialog even if there's an error
+    }
+  };
 
-      try {
-        await axios.delete(`http://localhost:8080/api/lostandfound/${item.reportid}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+  const handleOpenDialog = () => {
+    setOpenDialog(true); // Open the dialog when the delete button is clicked
+  };
 
-        alert("Item deleted successfully");
-        fetchLostItems();
-        setOpenDialog(false); // Close the confirmation dialog after deletion
-      } catch (error) {
-        console.error("You are not authorized to delete this item");
-        setOpenDialog(false); // Close dialog even if there's an error
-      }
-    };
+  const handleCloseDialog = () => {
+    setOpenDialog(false); // Close the dialog without deleting
+  };
 
-    const handleOpenDialog = () => {
-      setOpenDialog(true); // Open the dialog when the delete button is clicked
-    };
-
-    const handleCloseDialog = () => {
-      setOpenDialog(false); // Close the dialog without deleting
-    };
-
-    const handleEdit = () => {
-      onEdit(item);
-    };
+  const handleEdit = () => {
+    onEdit(item);
+  };
 
   return (
     <Card sx={{ height: 520, display: "flex", flexDirection: "column" }}>
@@ -101,7 +92,6 @@ const PostCard = ({ item, fetchLostItems, onEdit }) => {
         }
         title={item.description}
       />
-
 
       <CardContent sx={{ flexGrow: 1, overflow: "hidden" }}>
         <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
@@ -158,10 +148,10 @@ const PostCard = ({ item, fetchLostItems, onEdit }) => {
             {creatorUsername}
           </Typography>
         </Stack>
-
       </CardContent>
 
-      {parseInt(userId) === item.creatorid && (
+      {/* Show edit and delete buttons for the creator or admin */}
+      {(parseInt(userId) === item.creatorid || isAdmin) && (
         <div style={{ display: "flex", justifyContent: "flex-end", padding: "8px" }}>
           <IconButton color="primary" onClick={handleEdit}>
             <EditIcon />
@@ -176,7 +166,6 @@ const PostCard = ({ item, fetchLostItems, onEdit }) => {
         </div>
       )}
 
-      {/* Confirmation Dialog */}
       {/* Delete Confirmation Dialog */}
       <Dialog
         open={openDialog}
@@ -203,7 +192,6 @@ const PostCard = ({ item, fetchLostItems, onEdit }) => {
             component="div"
             color="error"
             align="center"
-            
             sx={{ fontWeight: "bold", fontFamily: "'Caramel', sans-serif" }}
           >
             Delete Post
@@ -215,15 +203,14 @@ const PostCard = ({ item, fetchLostItems, onEdit }) => {
             borderTop: "1px solid",
             borderColor: "primary.main",
             borderRadius: "0 0 16px 16px",
-            display: "flex", // Added
-            flexDirection: "column", // Added
-            alignItems: "center", // Added
-            justifyContent: "center", // Added
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
             padding: "24px",
-            textAlign: "center", // Added to center the text inside
+            textAlign: "center",
           }}
         >
-          <br></br>
           <Typography color="error" fontSize="18px" fontWeight="bold" sx={{ whiteSpace: "nowrap" }}>
             Are you sure you want to delete this post?
           </Typography>

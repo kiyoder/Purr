@@ -46,13 +46,7 @@ public class LostAndFoundService {
 
     // Create a new report
     public LostAndFoundEntity createReport(LostAndFoundEntity report, MultipartFile imageFile) {
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !(authentication.getPrincipal() instanceof UserDetails)) {
-            throw new IllegalArgumentException("User is not authenticated.");
-        }
-
-        String username = ((UserDetails) authentication.getPrincipal()).getUsername();
+        String username = getAuthenticatedUsername();
         Optional<UserEntity> currentUser = userService.findByUsername(username);
 
         if (currentUser.isEmpty()) {
@@ -86,22 +80,18 @@ public class LostAndFoundService {
     // Update an existing report
     @Transactional
     public LostAndFoundEntity updateReport(int id, LostAndFoundEntity updatedReport, MultipartFile imageFile) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !(authentication.getPrincipal() instanceof UserDetails)) {
-            throw new IllegalArgumentException("User is not authenticated.");
-        }
-
-        String username = ((UserDetails) authentication.getPrincipal()).getUsername();
+        String username = getAuthenticatedUsername();
         Optional<UserEntity> currentUser = userService.findByUsername(username);
 
         if (currentUser.isEmpty()) {
             throw new IllegalArgumentException("User not found.");
         }
 
-        int currentUserId = Math.toIntExact(currentUser.get().getUserId());
+        UserEntity user = currentUser.get();
+        boolean isAdmin = user.getRole().equalsIgnoreCase("ROLE_ADMIN");
 
         return repository.findById(id).map(existingReport -> {
-            if (existingReport.getCreatorid() != currentUserId) {
+            if (!isAdmin && existingReport.getCreatorid() != Math.toIntExact(user.getUserId())) {
                 throw new IllegalArgumentException("You are not authorized to update this report.");
             }
 
@@ -127,33 +117,31 @@ public class LostAndFoundService {
 
     @Transactional
     public void deleteReport(int id) {
-        // Authenticate the user
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !(authentication.getPrincipal() instanceof UserDetails)) {
-            throw new IllegalArgumentException("User is not authenticated.");
-        }
-
-        // Get the username from the SecurityContext
-        String username = ((UserDetails) authentication.getPrincipal()).getUsername();
+        String username = getAuthenticatedUsername();
         Optional<UserEntity> currentUser = userService.findByUsername(username);
 
         if (currentUser.isEmpty()) {
             throw new IllegalArgumentException("User not found.");
         }
 
-        int currentUserId = Math.toIntExact(currentUser.get().getUserId());
+        UserEntity user = currentUser.get();
+        boolean isAdmin = user.getRole().equalsIgnoreCase("ROLE_ADMIN");
 
-        // Retrieve the report
         LostAndFoundEntity report = repository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Report with ID " + id + " not found."));
 
-        // Check authorization
-        if (report.getCreatorid() != currentUserId) {
+        if (!isAdmin && report.getCreatorid() != Math.toIntExact(user.getUserId())) {
             throw new IllegalArgumentException("You are not authorized to delete this report.");
         }
 
-        // Perform deletion
         repository.delete(report);
-        System.out.println("Report with ID " + id + " deleted successfully by user with ID " + currentUserId);
+    }
+
+    private String getAuthenticatedUsername() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !(authentication.getPrincipal() instanceof UserDetails)) {
+            throw new IllegalArgumentException("User is not authenticated.");
+        }
+        return ((UserDetails) authentication.getPrincipal()).getUsername();
     }
 }
