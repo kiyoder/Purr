@@ -107,7 +107,6 @@ const Home = () => {
   const handleDeleteClick = (articleID) => {
     setDeleteId(articleID);  // Set the deleteId to the article's ID
     setDeleteDialogOpen(true); // Open the confirmation dialog
-    confirmDelete();
   };
 
   const confirmDelete = async () => {
@@ -317,6 +316,29 @@ const Home = () => {
           </Grid>
         ))}
       </Grid>
+
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)} // Close dialog if the user clicks outside
+      >
+        <DialogTitle>Confirm Deletion</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete this article?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDialogOpen(false)} color="primary">
+            Cancel
+          </Button>
+          <Button
+            onClick={confirmDelete} // Call the confirmDelete function when Confirm is clicked
+            color="secondary"
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
 
     </Box>
   );
