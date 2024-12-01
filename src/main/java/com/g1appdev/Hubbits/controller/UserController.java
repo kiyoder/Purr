@@ -112,26 +112,6 @@ public class UserController {
     }
 
 
-    // Get the currently authenticated user
-//    @GetMapping("/me")
-//    public ResponseEntity<UserEntity> getCurrentUser() {
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        String currentUsername = authentication != null ? authentication.getName() : null;
-//
-//        if (currentUsername == null) {
-//            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-//        }
-//
-//        Optional<UserEntity> user = userService.findByUsername(currentUsername);
-//        if (user.isPresent()) {
-//            System.out.println("User found: " + user.get().getUsername());  // Log username to verify
-//            return new ResponseEntity<>(user.get(), HttpStatus.OK);
-//        } else {
-//            System.out.println("User not found for username: " + currentUsername);  // Log missing user
-//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//        }
-//    }
-
     @GetMapping("/me")
     public ResponseEntity<Map<String, Object>> getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Box, CssBaseline, Typography } from '@mui/material';
-import UserDashboard from './Dashboards/UserDashboard';
-import LostAndFoundDashboard from './Dashboards/LostAndFoundDashboard';
-import AdminNavbar from './Dashboards/AdminNavbar';
+import UserDashboard from './UserDashboard';
+import LostAndFoundDashboard from './LostAndFoundDashboard';
+import AdminNavbar from './AdminNavbar';
 
 const AdminDashboard = () => {
     const [selectedTab, setSelectedTab] = useState('Users');

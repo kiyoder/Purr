@@ -20,8 +20,10 @@ import NoMatch from "./components/NoMatch";
 import Profile from "./components/Profile";
 import Navbar from "./components/Navbar";
 import PetList from "./components/PetList";
-import AdminDashboard from "./components/AdminDashboard";
+import AdminDashboard from "./components/Dashboards/AdminDashboard";
 import { UserProvider } from "./components/UserContext";
+import User from "./components/User";
+
 
 const theme = createTheme({
   palette: {
@@ -57,6 +59,7 @@ function App() {
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />
             <Route path="/users" element={<UserDashboard />} />
+
             <Route path="/profile" element={<Profile />} />
             <Route path="/" element={<Home />} /> {/* Default to login */}
             <Route path="/home" element={<Home />} />
@@ -78,6 +81,7 @@ function App() {
             <Route path="/opportunity/:id" element={<OpportunityDetail />} />
             <Route path="/book" element={<CreateOpportunity />} />
             <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/user/:id" element={<User />} />
           </Routes>
         </Router>
       </ThemeProvider>

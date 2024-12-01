@@ -17,6 +17,7 @@ import {
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import axios from "axios";
+import { Link } from "react-router-dom";
 
 const PostCard = ({ item, fetchLostItems, onEdit }) => {
   const [isDeleting, setIsDeleting] = useState(false);
@@ -150,7 +151,20 @@ const PostCard = ({ item, fetchLostItems, onEdit }) => {
           <Typography color="primary" fontSize="14px">
             Posted by
           </Typography>
-          <Typography color="secondary" fontWeight="bold" sx={{ whiteSpace: "nowrap" }}>
+          <Typography
+            component={Link}
+            to={`/user/${item.creatorid}`} // Link to User.js
+            color="secondary"
+            fontWeight="bold"
+            sx={{
+            whiteSpace: "nowrap",
+            textDecoration: "none",
+            "&:hover": {
+              textDecoration: "underline",
+              color: "primary.main",
+            },
+          }}
+            >
             {creatorUsername}
           </Typography>
         </Stack>
