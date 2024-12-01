@@ -7,6 +7,10 @@ import {
     Container,
     CircularProgress,
     Button,
+    Grid,
+    Card,
+    CardContent,
+    CardMedia,
 } from "@mui/material";
 import axios from "axios";
 
@@ -14,15 +18,21 @@ const User = () => {
     const { id } = useParams(); // Get userId from the URL
     const navigate = useNavigate();
     const [user, setUser] = useState(null);
+    const [userPosts, setUserPosts] = useState([]); // State for user's lost and found entries
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchUserDetails = async () => {
             try {
-                const response = await axios.get(`http://localhost:8080/api/users/${id}`);
-                setUser(response.data);
+                const userResponse = await axios.get(`http://localhost:8080/api/users/${id}`);
+                setUser(userResponse.data);
+
+                const postsResponse = await axios.get(
+                    `http://localhost:8080/api/lostandfound?creatorid=${id}`
+                ); // Assuming API supports filtering by `creatorid`
+                setUserPosts(postsResponse.data);
             } catch (error) {
-                console.error("Error fetching user details:", error);
+                console.error("Error fetching user details or posts:", error);
             } finally {
                 setLoading(false);
             }
@@ -51,6 +61,7 @@ const User = () => {
 
     return (
         <Container sx={{ mt: 5 }}>
+            {/* User Profile */}
             <Box
                 sx={{
                     display: "flex",
@@ -60,6 +71,7 @@ const User = () => {
                     borderRadius: 2,
                     boxShadow: 3,
                     bgcolor: "background.paper",
+                    mb: 4,
                 }}
             >
                 <Avatar
@@ -92,6 +104,49 @@ const User = () => {
                     </Button>
                 )}
             </Box>
+
+            {/* User's Lost and Found Entries */}
+            <Typography variant="h5" sx={{ mb: 3 }}>
+                {user.firstName}'s Lost and Found Entries
+            </Typography>
+            <Grid container spacing={2}>
+                {userPosts.map((post) => (
+                    <Grid item xs={12} sm={6} md={4} key={post.reportid}>
+                        <Card sx={{ height: "100%" }}>
+                            <CardMedia
+                                component="img"
+                                alt={post.description}
+                                height="140"
+                                image={
+                                    post.imageurl
+                                        ? `http://localhost:8080${post.imageurl}`
+                                        : "http://localhost:8080/images/default_image.jpg"
+                                }
+                                title={post.description}
+                            />
+                            <CardContent>
+                                <Typography
+                                    variant="subtitle1"
+                                    fontWeight="bold"
+                                    color="primary"
+                                >
+                                    {post.reporttype === "lost" ? "Lost" : "Found"} -{" "}
+                                    {post.petcategory}
+                                </Typography>
+                                <Typography variant="body2" color="textSecondary">
+                                    {post.description}
+                                </Typography>
+                                <Typography variant="body2" color="textSecondary">
+                                    Last Seen: {post.lastseen}
+                                </Typography>
+                                <Typography variant="body2" color="textSecondary">
+                                    Date Reported: {post.datereported}
+                                </Typography>
+                            </CardContent>
+                        </Card>
+                    </Grid>
+                ))}
+            </Grid>
         </Container>
     );
 };

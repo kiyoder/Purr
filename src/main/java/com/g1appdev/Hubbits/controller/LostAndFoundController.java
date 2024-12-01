@@ -15,6 +15,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.http.HttpStatus;
+
 @RestController
 @RequestMapping("/api/lostandfound")
 @CrossOrigin
@@ -48,23 +50,19 @@ public class LostAndFoundController {
         report.setDescription(description);
         report.setCreatorid(creatorid);
 
-        System.out.println("Report Type: " + reporttype);
-        System.out.println("Pet Category: " + petcategory);
-        System.out.println("Date Reported: " + datereported);
-        System.out.println("Last Seen: " + lastseen);
-        System.out.println("Description: " + description);
-        System.out.println("Creator ID: " + creatorid);
-        if (imageFile != null) {
-            System.out.println("Image File Name: " + imageFile.getOriginalFilename());
-        }
-
         service.createReport(report, imageFile);
         return ResponseEntity.ok("Report created successfully.");
     }
 
     @GetMapping
-    public ResponseEntity<List<LostAndFoundEntity>> getAllReports() {
-        List<LostAndFoundEntity> reports = service.getAllReports();
+    public ResponseEntity<List<LostAndFoundEntity>> getReports(
+            @RequestParam(value = "creatorid", required = false) Integer creatorId) {
+        List<LostAndFoundEntity> reports;
+        if (creatorId != null) {
+            reports = service.getReportsByCreatorId(creatorId);
+        } else {
+            reports = service.getAllReports();
+        }
         return ResponseEntity.ok(reports);
     }
 
@@ -109,5 +107,4 @@ public class LostAndFoundController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
 }

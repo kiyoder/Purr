@@ -152,4 +152,8 @@ public class LostAndFoundService {
         }
         return ((UserDetails) authentication.getPrincipal()).getUsername();
     }
+
+    public List<LostAndFoundEntity> getReportsByCreatorId(int creatorId) {
+        return repository.findByCreatorid(creatorId);
+    }
 }
