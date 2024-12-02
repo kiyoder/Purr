@@ -47,7 +47,7 @@ const CreatePostDialog = ({
   useEffect(() => {
   if (isEditing && postToEdit) {
     setFormData({
-      reporttype: postToEdit.reporttype || "lost", // Fallback to "lost"
+      reporttype: postToEdit.reporttype || "lost",
       petcategory: postToEdit.petcategory || "",
       datereported: postToEdit.datereported || "",
       lastseen: postToEdit.lastseen || "",
@@ -98,13 +98,11 @@ const CreatePostDialog = ({
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Check if user is logged in
     if (!userId) {
       alert("You must be logged in to create or edit a post.");
       return;
     }
 
-    // Retrieve the token from localStorage
     const token = localStorage.getItem("token"); // Ensure token exists
     if (!token) {
       console.error("JWT token not found");
@@ -112,14 +110,13 @@ const CreatePostDialog = ({
       return;
     }
 
-    // Prepare form data
     const dataToSubmit = new FormData();
     dataToSubmit.append("reporttype", formData.reporttype || "lost");
     dataToSubmit.append("petcategory", formData.petcategory);
     dataToSubmit.append("datereported", formData.datereported);
     dataToSubmit.append("lastseen", formData.lastseen);
     dataToSubmit.append("description", formData.description);
-    dataToSubmit.append("creatorid", userId); // Append the user ID
+    dataToSubmit.append("creatorid", userId);
 
     if (formData.imagedata) {
       dataToSubmit.append("imagefile", formData.imagedata);
@@ -131,31 +128,23 @@ const CreatePostDialog = ({
         : `http://localhost:8080/api/lostandfound`;
 
       const method = isEditing ? "put" : "post";
-
-      // Make the API request with the token in the Authorization header
       const response = await axios[method](url, dataToSubmit, {
         headers: {
-          Authorization: `Bearer ${token}`, // Include the token
+          Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
         },
       });
 
       console.log(isEditing ? "Report updated" : "Report created", response.data);
-
-      // Refresh the page after submission
-      window.location.reload();
-
       setOpen(false);
+      window.location.reload();
     } catch (error) {
-      // Extract and display detailed error information
       console.error("Submission error:", error.response?.data || error.message);
 
-      // Display error details in a readable format
       const errorDetails = error.response?.data
         ? JSON.stringify(error.response.data, null, 2)
         : error.message;
 
-      // Show the error to the user
       alert(`Failed to submit the post. Server response:\n${errorDetails}`);
     }
   };
