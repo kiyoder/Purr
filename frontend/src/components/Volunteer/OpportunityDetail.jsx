@@ -22,7 +22,7 @@ import { motion } from 'framer-motion';
 import AuthModal from '../AuthModal';
 import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-
+import UpdateOpportunityModal from "./UpdateOpportunity";
 
 const OpportunityDetail = () => {
     const { id } = useParams();
@@ -48,6 +48,18 @@ const OpportunityDetail = () => {
     const [filter, setFilter] = useState('All'); // Default filter is 'All'
     const [signUpCount, setSignUpCount] = useState(0); // New state for the number of sign-ups
 
+
+    const { opportunityId } = useParams();
+
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const handleEditButtonClick = () => {
+        setIsModalOpen(true);
+    };
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+    };
 
     const fetchSignUpCount = async () => {
         try {
@@ -101,7 +113,6 @@ const OpportunityDetail = () => {
         fetchOpportunityDetail();
         fetchUserDetails(); // Fetch user details when the component mounts
     }, [id]);
-
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -201,15 +212,45 @@ const OpportunityDetail = () => {
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1 }}>
             <Grid container spacing={3} sx={{ paddingTop: 5, paddingX: 10 }}>
                 <Grid item xs={12}>
-                    <Button
-                        onClick={() => navigate(-1)}
-                        color="secondary"
-                        sx={{ marginBottom: 1 }}
-                    >
-                        Back
-                    </Button>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Button
+                            onClick={() => navigate(-1)}
+                            color="secondary"
+                            sx={{ marginBottom: 1 }}
+                        >
+                            Back
+                        </Button>
+
+                        {/* Conditional Edit Button */}
+            
+                        {userDetails && opportunity.creatorId === userDetails.userId && (
+                            <Button
+                                onClick={handleEditButtonClick} // Open modal
+                                color="primary"
+                                sx={{
+                                    marginLeft: 2,
+                                    marginBottom: 1,
+                                    backgroundColor: '#4caf50',
+                                    '&:hover': {
+                                        backgroundColor: '#388e3c',
+                                    },
+                                }}
+                            >
+                                Edit
+                            </Button>
+                        )}
+
+                        {/* Modal for editing opportunity */}
+                        <UpdateOpportunityModal
+                            open={isModalOpen}
+                            onClose={handleCloseModal} // Close modal
+                            opportunity={opportunity}
+                        />
+
+                    </Box>
                 </Grid>
 
+                {/* Opportunity Details Section */}
                 <Grid container spacing={3} sx={{ paddingTop: 5, paddingX: 5 }}>
                     <Grid item xs={12} md={7}>
                         <Paper elevation={0} sx={{ padding: 3, borderRadius: 2, marginBottom: 0.5 }}>

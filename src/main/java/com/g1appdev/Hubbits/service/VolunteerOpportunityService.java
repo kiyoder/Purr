@@ -87,9 +87,8 @@ public class VolunteerOpportunityService {
         return opportunityRepository.findById(id);
     }
 
-    // Update an existing volunteer opportunity, including the volunteer image URL
     @Transactional
-    public VolunteerOpportunity updateOpportunity(int id, VolunteerOpportunity updatedOpportunity, MultipartFile volunteerImage, int creatorId) {
+    public VolunteerOpportunity updateOpportunity(int id, VolunteerOpportunity updatedOpportunity, MultipartFile volunteerImage) {
         return opportunityRepository.findById(id)
                 .map(existingOpportunity -> {
                     // Update existing fields only if they're not null or empty
@@ -117,7 +116,7 @@ public class VolunteerOpportunityService {
                     if (updatedOpportunity.getVolunteersNeeded() > 0) {
                         existingOpportunity.setVolunteersNeeded(updatedOpportunity.getVolunteersNeeded());
                     }
-
+    
                     // Update the volunteer image URL if a new image is provided
                     if (volunteerImage != null && !volunteerImage.isEmpty()) {
                         try {
@@ -128,14 +127,16 @@ public class VolunteerOpportunityService {
                             throw new RuntimeException("Error processing volunteer image", e);
                         }
                     }
-
-                    // Update creator ID if necessary (if the ID can be modified, otherwise leave as is)
-                    existingOpportunity.setCreatorId(creatorId);
-
+    
+                    // The creator_id remains unchanged, so we don't need to modify it.
+                    // The creator_id will automatically remain the same as in the database.
+                    // You don't need to set it again unless it should be updated (which doesn't seem to be the case here).
+    
                     return opportunityRepository.save(existingOpportunity);
                 })
                 .orElseThrow(() -> new IllegalArgumentException("Opportunity with ID " + id + " not found"));
     }
+    
 
     // Delete a volunteer opportunity by its ID
     public String deleteOpportunity(int id) {

@@ -17,7 +17,7 @@ import CreateOpportunity from "./components/Volunteer/CreateOpportunity";
 import Volunteer from "./components/Volunteer/Volunteer";
 import VolunteerOpportunities from "./components/Volunteer/VolunteerOpportunities";
 import OpportunityDetail from "./components/Volunteer/OpportunityDetail";
-
+import UpdateOpportunity from "./components/Volunteer/UpdateOpportunity"
 
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import NoMatch from "./components/NoMatch";
@@ -69,6 +69,8 @@ function App() {
             element={<VolunteerSignUp />}
           />
           <Route path="/opportunity/:id" element={<OpportunityDetail />} />
+          <Route path="/update-opportunity/:id" element={<UpdateOpportunity />} />
+          <Route path="/book" element={<CreateOpportunity />} />
           <Route path="/book" element={<CreateOpportunity />} />
           <Route path="/admin" element={<AdminDashboard/>} />
           

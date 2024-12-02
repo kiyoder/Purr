@@ -32,8 +32,8 @@ public class VolunteerOpportunityController {
     public ResponseEntity<VolunteerOpportunity> getOpportunityWithSignUps(@PathVariable int id) {
         Optional<VolunteerOpportunity> opportunity = service.getOpportunityById(id);
         return opportunity
-                .map(ResponseEntity::ok)  // If the opportunity exists, return it with OK status
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());  // If not found, return NOT_FOUND
+                .map(ResponseEntity::ok) 
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(null)); // Return null body with status
     }
 
     // Get the number of sign-ups for a specific opportunity
@@ -43,7 +43,7 @@ public class VolunteerOpportunityController {
             int signUpCount = service.getNumberOfSignUps(id);
             return ResponseEntity.ok(signUpCount);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // Return null body with status
         }
     }
 
@@ -58,15 +58,15 @@ public class VolunteerOpportunityController {
             @RequestParam("location") String location,
             @RequestParam("hoursWorked") int hoursWorked,
             @RequestParam("volunteersNeeded") int volunteersNeeded,
-            @RequestParam("creatorId") int creatorId, // Added creatorId
+            @RequestParam("creatorId") int creatorId, 
             @RequestParam(value = "volunteerImage", required = false) MultipartFile volunteerImage) {
 
-        // Parse the date strings into LocalDateTime
+        // Validate dates and other required fields here
+
         LocalDateTime regStart = LocalDateTime.parse(registrationStartDate);
         LocalDateTime regEnd = LocalDateTime.parse(registrationEndDate);
         LocalDateTime volunteerDate = LocalDateTime.parse(volunteerDatetime);
 
-        // Create the opportunity object
         VolunteerOpportunity opportunity = new VolunteerOpportunity();
         opportunity.setTitle(title);
         opportunity.setDescription(description);
@@ -80,15 +80,14 @@ public class VolunteerOpportunityController {
         // Handle image upload
         if (volunteerImage != null && !volunteerImage.isEmpty()) {
             try {
-                // Upload image and set the URL (file path)
                 String imageUrl = service.uploadImage(volunteerImage);
                 opportunity.setVolunteerImageUrl(imageUrl);
             } catch (IOException e) {
                 e.printStackTrace();
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             }
         }
 
-        // Save the opportunity and return it with the creatorId
         VolunteerOpportunity createdOpportunity = service.createOpportunity(opportunity, volunteerImage, creatorId);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdOpportunity);
     }
@@ -98,23 +97,17 @@ public class VolunteerOpportunityController {
     public ResponseEntity<VolunteerOpportunity> updateOpportunity(
             @PathVariable int id,
             @RequestPart("opportunity") VolunteerOpportunity opportunity,
-            @RequestParam("creatorId") int creatorId, // Added creatorId
-            @RequestParam(value = "volunteerImage", required = false) MultipartFile volunteerImage) throws IOException {
-
-        // Check and set image URL if a new image is provided
-        String volunteerImageUrl = null;
-        if (volunteerImage != null && !volunteerImage.isEmpty()) {
-            volunteerImageUrl = service.uploadImage(volunteerImage);
-        }
-        opportunity.setVolunteerImageUrl(volunteerImageUrl);
-
+            @RequestParam(value = "volunteerImage", required = false) MultipartFile volunteerImage) {
+    
         try {
-            // Handle updating the opportunity, including setting the creatorId
-            VolunteerOpportunity updatedOpportunity = service.updateOpportunity(id, opportunity, volunteerImage, creatorId);
+            // Update the opportunity in the service
+            VolunteerOpportunity updatedOpportunity = service.updateOpportunity(id, opportunity, volunteerImage);
             return ResponseEntity.ok(updatedOpportunity);
         } catch (IllegalArgumentException e) {
+            // Opportunity with the provided ID not found
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         } catch (Exception e) {
+            // Handle unexpected errors
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
