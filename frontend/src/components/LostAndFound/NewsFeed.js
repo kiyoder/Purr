@@ -149,7 +149,7 @@ const NewsFeed = () => {
             placeholder="Have you found someone's pet? Or did you lose a pet?"
             onClick={handleTextFieldClick}
             sx={{
-              maxWidth: 600,
+              maxWidth: 980,
               backgroundColor: "transparent !important",
               borderRadius: "8px",
               "& .MuiOutlinedInput-root": {
