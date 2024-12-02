@@ -47,7 +47,7 @@ const NewsFeed = () => {
   };
 
   const handleSearchChange = (event) => {
-    setSearchQuery(event.target.value); // Update the search query state
+    setSearchQuery(event.target.value);
   };
 
   const filteredItems = lostItems.filter(
@@ -112,12 +112,18 @@ const NewsFeed = () => {
       </Box>
 
       {/* Main Content */}
-      <Container sx={{ mt: 5 }}>
+      <Container 
+        sx={{ 
+          mt: 5, 
+          maxWidth: '90% !important', // Span the full width of the viewport
+          padding: '0 100px' // Optional padding for spacing 
+        }}
+      >
         <Grid
           container
           justifyContent="space-between"
           alignItems="center"
-          maxWidth={"lg"}
+          maxWidth="lg"
           sx={{ mb: 2 }}
         >
           <Typography
@@ -177,18 +183,24 @@ const NewsFeed = () => {
           setPostToEdit={setPostToEdit}
         />
 
-        <Grid container spacing={2} justifyContent="center" sx={{ mt: 2 }}>
-          {filteredItems.map((item) => (
-            <Grid
-              item
-              key={item.reportid}
-              xs={12}
-              sm={4}
-              md={4}
-              lg={4}
+      <Grid container spacing={2} justifyContent="center" sx={{ mt: 2 }}>
+        {filteredItems.map((item) => (
+          <Grid
+            item
+            key={item.reportid}
+            xs={12}
+            sm={6}
+            md={6}
+            lg={6}
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
+            <Box
               sx={{
-                width: "100%",
-                maxWidth: 500,
+                maxWidth: 720, // Adjust based on desired card size
+                width: "100%", // Ensures responsiveness
               }}
             >
               <PostCard
@@ -196,9 +208,11 @@ const NewsFeed = () => {
                 fetchLostItems={fetchLostItems}
                 onEdit={handleEditPost}
               />
-            </Grid>
-          ))}
-        </Grid>
+            </Box>
+          </Grid>
+        ))}
+      </Grid>
+
       </Container>
     </>
   );

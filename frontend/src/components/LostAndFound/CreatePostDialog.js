@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import {
   Dialog,
+  DialogActions,
   DialogContent,
   DialogTitle,
   Grid,
@@ -11,9 +12,6 @@ import {
   Box,
   Typography,
 } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
-import InputAdornment from "@mui/material/InputAdornment";
-
 import axios from "axios";
 
 const CreatePostDialog = ({
@@ -32,7 +30,7 @@ const CreatePostDialog = ({
   });
 
   const [previewImage, setPreviewImage] = useState(null); // Move this inside the component
-  const [userId, setUserId] = useState(null); // Store the authenticated user's ID
+  const [userId, setUserId] = useState(null);
 
   useEffect(() => {
     // Retrieve user ID from local storage
@@ -45,49 +43,47 @@ const CreatePostDialog = ({
   }, []);
 
   useEffect(() => {
-  if (isEditing && postToEdit) {
-    setFormData({
-      reporttype: postToEdit.reporttype || "lost",
-      petcategory: postToEdit.petcategory || "",
-      datereported: postToEdit.datereported || "",
-      lastseen: postToEdit.lastseen || "",
-      description: postToEdit.description || "",
-      imagedata: postToEdit.imagefile || null,
-    });
+    if (isEditing && postToEdit) {
+      setFormData({
+        reporttype: postToEdit.reporttype || "lost",
+        petcategory: postToEdit.petcategory || "",
+        datereported: postToEdit.datereported || "",
+        lastseen: postToEdit.lastseen || "",
+        description: postToEdit.description || "",
+        imagedata: null,
+      });
 
-    if (postToEdit.imagefile) {
-      const previewUrl = URL.createObjectURL(postToEdit.imagefile);
-      setPreviewImage(previewUrl);
+      if (postToEdit.imageurl) {
+        setPreviewImage(postToEdit.imageurl);
+      }
+    } else {
+      setFormData({
+        reporttype: "lost",
+        petcategory: "",
+        datereported: "",
+        lastseen: "",
+        description: "",
+        imagedata: null,
+      });
+      setPreviewImage(null);
     }
-  } else {
-    setFormData({
-      reporttype: "lost",
-      petcategory: "",
-      datereported: "",
-      lastseen: "",
-      description: "",
-      imagedata: null,
-    });
-    setPreviewImage(null);
-  }
-}, [isEditing, postToEdit, open]);
-
+  }, [isEditing, postToEdit, open]);
+  
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
   const handleImageUpload = (e) => {
-  const file = e.target.files[0];
-  if (file && file.type.startsWith("image/")) {
-    setFormData({ ...formData, imagedata: file });
-    const previewUrl = URL.createObjectURL(file);
-    setPreviewImage(previewUrl);
-  } else {
-    alert("Please upload a valid image file.");
-  }
-};
-
+    const file = e.target.files[0];
+    if (file && file.type.startsWith("image/")) {
+      setFormData({ ...formData, imagedata: file });
+      const previewUrl = URL.createObjectURL(file);
+      setPreviewImage(previewUrl);
+    } else {
+      alert("Please upload a valid image file.");
+    }
+  };
 
   const handleReportTypeChange = (event, newReportType) => {
     if (newReportType) {
@@ -149,13 +145,11 @@ const CreatePostDialog = ({
     }
   };
 
-
-
   return (
     <Dialog
       open={open}
       onClose={() => setOpen(false)}
-      maxWidth="sm"
+      maxWidth="md" // Make dialog width larger
       fullWidth
       sx={{
         "& .MuiPaper-root": {
@@ -164,6 +158,7 @@ const CreatePostDialog = ({
           borderColor: "primary.main",
           borderRadius: "16px",
           boxShadow: "none",
+          padding: "30px", // Increased padding for the dialog
         },
         "& .MuiDialog-container": {
           backdropFilter: "blur(3px)",
@@ -173,24 +168,15 @@ const CreatePostDialog = ({
     >
       <DialogTitle>
         <Typography
-          variant="h4"
-          component="div"
-          color="primary"
+          variant="h3" // Larger font size for title
           align="center"
+          color="primary"
           sx={{ fontWeight: "bold", fontFamily: "'Caramel', sans-serif" }}
         >
           {isEditing ? "Edit Post" : "Create Post"}
         </Typography>
-        <CloseIcon
-          onClick={() => setOpen(false)}
-          style={{
-            cursor: "pointer",
-            position: "absolute",
-            right: 16,
-            top: 16,
-          }}
-        />
       </DialogTitle>
+
       <DialogContent
         sx={{
           backgroundColor: "white",
@@ -200,188 +186,269 @@ const CreatePostDialog = ({
           padding: "24px",
         }}
       >
-        <Box display="flex" flexDirection="column" alignItems="center">
-          <ToggleButtonGroup
-            value={formData.reporttype || "lost"}
-            exclusive
-            onChange={handleReportTypeChange}
-            aria-label="Report Type"
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              mb: 2,
-              mt: 2,
-            }}
-          >
-            <ToggleButton
-              value="lost"
-              aria-label="Lost"
+
+        {/* Main Container */}
+        <Grid container spacing={3}
+           sx = {{
+            mt: 2
+          }}
+        >
+          {/* Left Side (Lost and Found toggle & image upload) */}
+          <Grid item xs={12} sm={6} md={6}> {/* Increased width */}
+            <Box 
               sx={{
-                border: "2px solid",
-                borderRadius: "8px",
-                padding: "12px 36px",
-                borderColor:
-                  formData.reporttype === "lost" ? "primary.main" : "grey.500",
-                color: formData.reporttype === "lost" ? "#fff" : "grey.500",
-                backgroundColor:
-                  formData.reportType === "lost"
-                    ? "primary.main"
-                    : "transparent",
-                "&.Mui-selected": {
-                  backgroundColor: "primary.main",
-                  color: "#fff",
-                },
-                "&:hover": {
-                  backgroundColor:
-                    formData.reporttype === "lost"
-                      ? "primary.dark"
-                      : "rgba(0, 0, 0, 0.04)",
-                },
-              }}
-            >
-              Lost
-            </ToggleButton>
-            <ToggleButton
-              value="found"
-              aria-label="Found"
-              sx={{
-                border: "2px solid",
-                borderRadius: "8px",
-                padding: "12px 36px",
-                borderColor:
-                  formData.reporttype === "found" ? "primary.main" : "grey.500",
-                color: formData.reporttype === "found" ? "#fff" : "grey.500",
-                backgroundColor:
-                  formData.reporttype === "found"
-                    ? "primary.main"
-                    : "transparent",
-                "&.Mui-selected": {
-                  backgroundColor: "primary.main",
-                  color: "#fff",
-                },
-                "&:hover": {
-                  backgroundColor:
-                    formData.reporttype === "found"
-                      ? "primary.dark"
-                      : "rgba(0, 0, 0, 0.04)",
-                },
-              }}
-            >
-              Found
-            </ToggleButton>
-          </ToggleButtonGroup>
-          {/* Form Fields */}
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <TextField
-                name="petcategory"
-                label="Pet Type"
-                fullWidth
-                value={formData.petcategory}
-                onChange={handleInputChange}
-                InputLabelProps={{
-                  shrink: true,
+                display: "flex",         // Set display to flex
+                flexDirection: "column", // Align items vertically in a column
+                justifyContent: "center", // Center items horizontally
+                alignItems: "center",    // Center items vertically
+                height: "100%",
                 }}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                name="datereported"
-                label="Date Reported"
-                type="date"
-                fullWidth
-                value={formData.datereported}
-                onChange={handleInputChange}
-                InputLabelProps={{
-                  shrink: true,
+            > 
+              <ToggleButtonGroup
+                value={formData.reporttype || "lost"}
+                exclusive
+                onChange={handleReportTypeChange}
+                aria-label="Report Type"
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  mb: 2,
+                  mt: 2,
+                  fontSize: "1.2rem", // Larger font size for the toggle buttons
                 }}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end" style={{ color: "#675BC8" }}>
-                      {/* Calendar icon styling */}
-                    </InputAdornment>
-                  ),
+              >
+                <ToggleButton
+                  value="lost"
+                  aria-label="Lost"
+                  sx={{
+                    border: "2px solid",
+                    borderRadius: "8px",
+                    padding: "16px 40px", // Increased padding
+                    borderColor:
+                      formData.reporttype === "lost" ? "primary.main" : "grey.500",
+                    color: formData.reporttype === "lost" ? "#fff" : "grey.500",
+                    backgroundColor:
+                      formData.reportType === "lost"
+                        ? "primary.main"
+                        : "transparent",
+                    "&.Mui-selected": {
+                      backgroundColor: "red",
+                      color: "#fff",
+                    },
+                    "&:hover": {
+                      backgroundColor:
+                        formData.reporttype === "lost"
+                          ? "primary.dark"
+                          : "rgba(0, 0, 0, 0.04)",
+                    },
+                  }}
+                >
+                  <Typography
+                    variant="h5"
+                    align="center"
+                    sx={{ fontWeight: "regular", fontFamily: "'Caramel', sans-serif" }}
+                  >
+                    Lost
+                  </Typography>
+                </ToggleButton>
+                <ToggleButton
+                  value="found"
+                  aria-label="Found"
+                  sx={{
+                    border: "2px solid",
+                    borderRadius: "8px",
+                    padding: "16px 40px", // Increased padding
+                    borderColor:
+                      formData.reporttype === "found" ? "primary.main" : "grey.500",
+                    color: formData.reporttype === "found" ? "#fff" : "grey.500",
+                    backgroundColor:
+                      formData.reporttype === "found"
+                        ? "primary.main"
+                        : "transparent",
+                    "&.Mui-selected": {
+                      backgroundColor: "green",
+                      color: "#fff",
+                    },
+                    "&:hover": {
+                      backgroundColor:
+                        formData.reporttype === "found"
+                          ? "primary.dark"
+                          : "rgba(0, 0, 0, 0.04)",
+                    },
+                  }}
+                >
+                  <Typography
+                    variant="h5"
+                    align="center"
+                    sx={{ fontWeight: "regular", fontFamily: "'Caramel', sans-serif" }}
+                  >
+                    Found
+                  </Typography>
+                </ToggleButton>
+              </ToggleButtonGroup>
+              
+              {/* Image Upload */}
+              <Box
+                sx={{
+                  width: "400px",
+                  height: "300px",
+                  border: isEditing ? "none" : "5px dotted #675BC8",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  borderRadius: "8px",
+                  overflow: "hidden",
+                  position: "relative",
                 }}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                name="lastseen"
-                label="Last Seen"
-                fullWidth
-                value={formData.lastseen}
-                onChange={handleInputChange}
-                InputLabelProps={{
-                  shrink: true,
-                }}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                name="description"
-                label="Description"
-                multiline
-                rows={4}
-                fullWidth
-                value={formData.description}
-                onChange={handleInputChange}
-                InputLabelProps={{
-                  shrink: true,
-                }}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <Typography>Upload Image:</Typography>
-              <input
-                type="file"
-                onChange={handleImageUpload}
-                accept="image/*"
-              />
-              {previewImage && (
-                <Box mt={2}>
+                onClick={
+                  isEditing
+                    ? undefined // Disable click action during editing
+                    : () => document.getElementById("image-upload").click()
+                }
+              >
+                {isEditing && postToEdit.imageurl ? (
+                  // Display the existing image if editing
+                  <img
+                    src={`http://localhost:8080${postToEdit.imageurl}`}
+                    alt="Existing Post"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      borderRadius: "8px",
+                    }}
+                  />
+                ) : previewImage ? (
+                  // Display the preview image if available
                   <img
                     src={previewImage}
                     alt="Preview"
                     style={{
-                      maxWidth: "100%",
-                      height: "auto",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
                       borderRadius: "8px",
-                      border: "1px solid #ccc",
                     }}
                   />
-                </Box>
-              )}
-            </Grid>
-            <Grid item xs={12}>
-              <Grid item xs={12}>
-                <Box display="flex" justifyContent="center">
-                  <ToggleButton
-                    onClick={handleSubmit}
-                    sx={{
-                      border: "2px solid",
-                      borderRadius: "8px",
-                      padding: "12px 36px",
-                      borderColor: "primary.main",
-                      backgroundColor: "primary.main",
-                      color: "#fff",
-                      "&:hover": {
-                        backgroundColor: "white",
-                        color: "primary.main",
-                      },
-                    }}
+                ) : (
+                  // Placeholder for new uploads
+                  <Typography
+                    variant="h4"
+                    color="textSecondary"
+                    sx={{ fontWeight: "bold", position: "absolute" }}
                   >
-                    Submit
-                  </ToggleButton>
-                </Box>
-              </Grid>
-            </Grid>
-            
+                    +
+                  </Typography>
+                )}
+                {!isEditing && (
+                  // File input only appears when not editing
+                  <input
+                    id="image-upload"
+                    type="file"
+                    accept="image/*"
+                    style={{ display: "none" }}
+                    onChange={handleImageUpload}
+                  />
+                )}
+              </Box>
+            </Box>
           </Grid>
-        </Box>
+
+          {/* Right Side (form fields) */}
+          <Grid item xs={12} sm={6} md={6}> {/* Increased width */}
+            <Box
+              sx={{
+                display: "flex",         // Set display to flex
+                flexDirection: "column", // Align items vertically in a column
+                justifyContent: "center", // Center items horizontally
+                alignItems: "center",    // Center items vertically
+                height: "100%",
+                }}
+            >
+            <TextField
+              label="Date Reported"
+              type="date"
+              name="datereported"
+              value={formData.datereported}
+              onChange={handleInputChange}
+              fullWidth
+              InputLabelProps={{
+                shrink: true,
+                style: {
+                  marginBottom: '8px', // Adjust the margin to move the label down
+                },
+              }}
+              margin="normal"
+              sx={{
+                fontSize: "1.2rem", // Larger font size for text field
+                padding: "10px", // Increased padding
+              }}
+            />
+            <TextField
+              label="Last Seen"
+              name="lastseen"
+              value={formData.lastseen}
+              onChange={handleInputChange}
+              fullWidth
+              margin="normal"
+              InputLabelProps={{
+                shrink: true,
+                style: {
+                  marginBottom: '8px', // Adjust the margin to move the label down
+                },
+              }}
+              sx={{
+                fontSize: "1.2rem", // Larger font size for text field
+                padding: "10px", // Increased padding
+              }}
+            />
+            <TextField
+              label="Description"
+              name="description"
+              value={formData.description}
+              onChange={handleInputChange}
+              fullWidth
+              multiline
+              rows={4}
+              margin="normal"
+              InputLabelProps={{
+                shrink: true,
+                style: {
+                  marginBottom: '8px', // Adjust the margin to move the label down
+                },
+              }}
+              sx={{
+                fontSize: "1.2rem", // Larger font size for text field
+                padding: "10px", // Increased padding
+              }}
+            />
+            </Box>
+          </Grid>
+        </Grid>
       </DialogContent>
+
+      <DialogActions>
+          <Button onClick={() => setOpen(false)} color="error">
+            <Typography
+              variant="h5"
+              align="center"
+              sx={{ fontWeight: "regular", fontFamily: "'Caramel', sans-serif" }}
+            >
+              Cancel
+            </Typography>
+          </Button>
+          <Button onClick={handleSubmit} color="primary">
+            <Typography
+              variant="h5"
+              align="center"
+              sx={{ fontWeight: "regular", fontFamily: "'Caramel', sans-serif" }}
+            >
+              CONFIRM
+            </Typography>
+          </Button>
+        </DialogActions>
     </Dialog>
   );
 };
 
 export default CreatePostDialog;
-
