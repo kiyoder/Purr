@@ -241,10 +241,22 @@ const PostCard = ({ item, fetchLostItems, onEdit }) => {
 
         <DialogActions>
           <Button onClick={() => setOpenDialog(false)} color="secondary">
-            Cancel
+            <Typography
+              variant="h5"
+              align="center"
+              sx={{ fontWeight: "regular", fontFamily: "'Caramel', sans-serif" }}
+            >
+              Cancel
+            </Typography>
           </Button>
           <Button onClick={handleDelete} color="error">
-            Delete
+            <Typography
+              variant="h5"
+              align="center"
+              sx={{ fontWeight: "regular", fontFamily: "'Caramel', sans-serif" }}
+            >
+              Delete
+            </Typography>
           </Button>
         </DialogActions>
       </Dialog>
