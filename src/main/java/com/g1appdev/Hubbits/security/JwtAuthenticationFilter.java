@@ -34,6 +34,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
         String authorizationHeader = request.getHeader("Authorization");
+        String refreshTokenHeader = request.getHeader("Refresh-Token");
         String username = null;
         String token = null;
 
@@ -58,6 +59,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authToken);
 
                 logger.info("Authentication set with roles: {}", authorities); // Debug roles
+            } else if (refreshTokenHeader != null) {
+                String refreshToken = refreshTokenHeader;
+                if (jwtUtil.validateRefreshToken(refreshToken)) {
+                    username = jwtUtil.extractUsername(refreshToken);
+                    String newAccessToken = jwtUtil.generateToken(username, null);
+                    response.setHeader("New-Access-Token", newAccessToken);
+                }
             } else {
                 logger.warn("Invalid token for user: {}", username);
             }

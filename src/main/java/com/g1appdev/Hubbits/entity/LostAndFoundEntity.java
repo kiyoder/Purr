@@ -1,6 +1,5 @@
 package com.g1appdev.Hubbits.entity;
 
-import java.util.Base64;
 import java.util.Date;
 import jakarta.persistence.*;
 
@@ -29,11 +28,10 @@ public class LostAndFoundEntity {
     @Column(name = "description")
     private String description;
 
-    @Lob
-    @Column(name = "imagedata", columnDefinition = "LONGBLOB")
-    private byte[] imagedata;
+    private String imageurl;
 
-    private String imageUrl;
+    @Column(nullable = false)
+    private int creatorid;
 
     // Default constructor
     public LostAndFoundEntity() {
@@ -41,13 +39,12 @@ public class LostAndFoundEntity {
 
     // Constructor with fields
     public LostAndFoundEntity(String reporttype, String petcategory, Date datereported, String lastseen,
-            String description, byte[] imagedata) {
+            String description) {
         this.reporttype = reporttype;
         this.petcategory = petcategory;
         this.datereported = datereported;
         this.lastseen = lastseen;
         this.description = description;
-        this.imagedata = imagedata;
     }
 
     // Getters and setters
@@ -99,11 +96,19 @@ public class LostAndFoundEntity {
         this.description = description;
     }
 
-    public String getImageUrl() {
-        return imageUrl;
+    public String getImageurl() {
+        return imageurl;
     }
 
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
+    public void setImageurl(String imageurl) {
+        this.imageurl = imageurl;
+    }
+
+    public int getCreatorid() {
+        return creatorid;
+    }
+
+    public void setCreatorid(int creatorid) {
+        this.creatorid = creatorid;
     }
 }

@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface LostAndFoundRepository extends JpaRepository<LostAndFoundEntity, Integer> {
     List<LostAndFoundEntity> findByLastseen(String lastseen);
+
+    List<LostAndFoundEntity> findByCreatorid(int creatorid);
 }

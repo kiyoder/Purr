@@ -10,22 +10,52 @@ import {
   CardMedia,
   Accordion,
   AccordionSummary,
-  AccordionDetails
+  AccordionDetails,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import CloseIcon from '@mui/icons-material/Close'; // Close Icon
 import { motion } from 'framer-motion'; // Importing motion
 import './Volunteer.css';
-import petImg from '../images/petimg.png';  // Adjust the path based on your folder structure
-import petImg2 from '../images/example.jpg'; 
+import CreateOpportunity from './CreateOpportunity';
+import AuthModal from '../AuthModal';
 
 const Volunteer = () => {
   const [volunteerOpportunities, setVolunteerOpportunities] = useState([]);
   const [visibleOpportunities, setVisibleOpportunities] = useState(4); // Default: Show 4 cards initially
   const [isExpanded, setIsExpanded] = useState(false); // Track Show More / Show Less state
-
+  const [openFormDialog, setOpenFormDialog] = useState(false);
+  const [isBlurred, setIsBlurred] = useState(false); // New state for blur effect
   const navigate = useNavigate();
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+
+  // Function to handle dialog open
+  const handleOpenFormDialog = () => {
+    setIsBlurred(true); // Set blur effect when dialog is opened
+    setOpenFormDialog(true);
+  };
+
+  // Function to handle dialog close
+  const handleCloseFormDialog = () => {
+    setIsBlurred(false); // Remove blur effect when dialog is closed
+    setOpenFormDialog(false);
+
+    // Fetch the userID from localStorage
+    const userId = JSON.parse(localStorage.getItem('user'));
+    console.log('User ID:', userId);
+  };
+
+  // Function to handle form submission success
+  const handleFormSubmitSuccess = () => {
+    setOpenFormDialog(false); // Close the dialog
+    navigate('/volunteer', { replace: true }); // Navigate to the volunteer page
+  };
 
   // FAQ data
   const faqData = [
@@ -56,9 +86,12 @@ const Volunteer = () => {
     const fetchVolunteerOpportunities = async () => {
       try {
         const response = await axios.get('http://localhost:8080/api/volunteer/opportunities');
+        console.log(response.data);  // Log the response to check the structure and values
         setVolunteerOpportunities(response.data);
       } catch (error) {
         console.error('Error fetching volunteer opportunities:', error);
+        setVolunteerOpportunities([]); // Optionally handle fallback state
+        alert('Failed to load volunteer opportunities. Please try again later.'); // Add user-friendly feedback
       }
     };
     fetchVolunteerOpportunities();
@@ -74,6 +107,19 @@ const Volunteer = () => {
     setIsExpanded((prev) => !prev); // Toggle the state of expanded
   };
 
+  // Handle "Book" button click
+  const handleBookButtonClick = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      // If no token found, open the AuthModal
+      setAuthModalOpen(true);
+    } else {
+      // Proceed to booking functionality or form dialog
+      handleOpenFormDialog();
+    }
+  };
+
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -82,20 +128,19 @@ const Volunteer = () => {
       transition={{ duration: 1 }}
     >
       {/* Header Section */}
-      <Container maxWidth="lg" sx={{ paddingTop: '4rem', paddingBottom: '1rem' }}>
+      <Container maxWidth="lg" sx={{ paddingTop: '4rem', paddingBottom: '1rem', filter: isBlurred ? 'blur(5px)' : 'none' }}>
         <Grid container spacing={4} alignItems="flex-start">
           <Grid item xs={12} md={6}>
             <motion.img
-              src={petImg}  // Use the imported image reference
+              src="petimg.png"
               alt="Volunteer"
               className="img-fluid rounded"
-              style={{ width: '100%', borderRadius: '20px' }}
+              style={{ width: '100%', borderRadius: '8px' }}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2, duration: 1 }}
             />
           </Grid>
-
           <Grid
             item
             xs={12}
@@ -106,9 +151,21 @@ const Volunteer = () => {
               justifyContent: 'flex-start',
             }}
           >
-            <Typography variant="h4" gutterBottom>
+            <Typography
+              variant="h4"
+              gutterBottom
+              sx={{
+                fontFamily: '"Roboto", "Arial", sans-serif', // Change font family to something modern
+                fontWeight: 700, // Make the text bold
+                fontSize: '2.5rem', // Increase the font size
+                textAlign: 'left', // Center align the text
+                letterSpacing: '0.5px', // Add some spacing between letters for a clean look
+                color: 'primary.main', // Change text color to the primary theme color
+              }}
+            >
               Volunteer and Make a Difference for Pets
             </Typography>
+
             <Typography variant="body1" paragraph>
               Volunteering with pets is a rewarding way to give back and improve the lives of animals in need. From walking dogs at shelters to fostering pets, every moment you spend with them helps build a stronger bond between humans and animals. Whether you're offering companionship, care, or helping them find their forever home, your involvement makes a real difference. Join us in supporting pets who need love, care, and a second chance at life.
             </Typography>
@@ -117,31 +174,49 @@ const Volunteer = () => {
               color="secondary"
               size="small"
               sx={{
-                padding: '6px 16px', // Adds padding around the text
-                fontSize: '0.875rem', // Smaller text size
-                borderRadius: '18px', // Rounded corners
-                boxShadow: 'none', // Removes shadow
+                padding: '6px 16px',
+                fontSize: '0.875rem',
+                borderRadius: '18px',
+                boxShadow: 'none',
                 '&:hover': {
-                  backgroundColor: '#e1bee7', // Light purple hover effect
-                  borderColor: '#9575cd', // Slightly darker border on hover
+                  color: 'white',
+                  backgroundColor: '#675bc8',
+                  borderColor: '#675bc8',
                 },
-                width: 'fit-content', // Ensures the button only takes as much space as the text + padding
-                display: 'inline-flex', // Makes sure the button size adjusts to content
-                alignItems: 'center', // Centers the text vertically
-                marginTop: '1rem', // Adds some space between the button and the text above
+                width: 'fit-content',
+                display: 'inline-flex',
+                alignItems: 'center',
+                marginTop: '1rem',
               }}
-              onClick={() => navigate('/book')} // This should work if routes are set correctly
+              onClick={handleBookButtonClick} // Call the updated function
             >
               Book
             </Button>
+            {/* Auth Modal */}
+            <AuthModal
+              open={authModalOpen}
+              handleClose={() => setAuthModalOpen(false)} // Close the modal when needed
+            />
           </Grid>
         </Grid>
       </Container>
 
       {/* FAQ Section */}
-      <Container maxWidth="md" sx={{ padding: '2rem 0' }}>
-        <Typography variant="h4" gutterBottom align="center" sx={{ fontWeight: 'bold', marginBottom: '2rem' }}>
-          Volunteer Orientation FAQ
+      <Container maxWidth="md" sx={{ padding: '2rem 0', filter: isBlurred ? 'blur(5px)' : 'none' }}>
+        <Typography
+          variant="h4"
+          gutterBottom
+          sx={{
+            fontFamily: '"Roboto", "Arial", sans-serif', // Change font family to something modern
+            fontWeight: 700, // Make the text bold
+            fontSize: '2.2rem', // Increase the font size
+            textAlign: 'center', // Center align the text
+            letterSpacing: '0.4px', // Add some spacing between letters for a clean look
+            color: 'primary.main', // Change text color to the primary theme color
+            marginBottom: 4,
+          }}
+        >
+          FAQ's for Volunteering
         </Typography>
 
         {faqData.map((item, index) => (
@@ -172,7 +247,7 @@ const Volunteer = () => {
                 <Typography
                   variant="h6"
                   sx={{
-                    fontWeight: 500,
+                    fontWeight: 550,
                     fontSize: '1rem', // Fix the font size so it doesn't change when expanded
                     transition: 'font-size 0.3s', // Smooth transition for font size
                   }}
@@ -182,7 +257,7 @@ const Volunteer = () => {
               </AccordionSummary>
 
               <AccordionDetails sx={{ padding: '12px 20px', backgroundColor: '#fafafa' }}>
-                <Typography variant="body2" sx={{ color: 'purple' }}> {/* Set color to purple */}
+                <Typography variant="body1" sx={{ color: 'primary.main' }}>
                   {item.answer}
                 </Typography>
               </AccordionDetails>
@@ -192,8 +267,20 @@ const Volunteer = () => {
       </Container>
 
       {/* Volunteer Opportunities Section */}
-      <Container maxWidth="lg" sx={{ padding: '1rem 0' }}>
-        <Typography variant="h4" gutterBottom className="my-5" align="center" sx={{ fontWeight: 'bold', marginBottom: '2rem' }}>
+      <Container maxWidth="lg" sx={{ padding: '1rem 0', filter: isBlurred ? 'blur(5px)' : 'none' }}>
+        <Typography
+          variant="h4"
+          gutterBottom
+          sx={{
+            fontFamily: '"Roboto", "Arial", sans-serif', // Change font family to something modern
+            fontWeight: 700, // Make the text bold
+            fontSize: '2.2rem', // Increase the font size
+            textAlign: 'center', // Center align the text
+            letterSpacing: '0.4px', // Add some spacing between letters for a clean look
+            color: 'primary.main', // Change text color to the primary theme color
+            marginBottom: 6,
+          }}
+        >
           Volunteer Opportunities
         </Typography>
         <Grid container spacing={4}>
@@ -214,9 +301,15 @@ const Volunteer = () => {
                 <CardMedia
                   component="img"
                   alt={opportunity.title}
-                  height="180"
-                  image={opportunity.imageUrl || petImg2}  // Use the imported image reference
-                  sx={{ objectFit: 'cover' }}  // Keeps the image in uniform size
+                  height="200"
+                  image={
+                    opportunity.volunteerImageUrl
+                      ? `http://localhost:8080${opportunity.volunteerImageUrl}`  // Use the volunteerImageUrl if available
+                      : 'http://localhost:3000/images/default.png'
+
+                      // Fallback to default image
+                  }
+                  title={opportunity.title}
                 />
 
                 <CardContent sx={{ flexGrow: 1 }}>
@@ -224,10 +317,10 @@ const Volunteer = () => {
                     {opportunity.title}
                   </Typography>
                   <Typography variant="body2" color="text.secondary" paragraph>
-                    {opportunity.description.slice(0, 80)}...
+                    {opportunity.description.slice(0, 60)}...
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Date: {new Date(opportunity.date).toLocaleDateString()}
+                    Date: {new Date(opportunity.volunteerDatetime).toLocaleDateString()}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
                     Location: {opportunity.location}
@@ -243,7 +336,7 @@ const Volunteer = () => {
                       padding: '6px 16px', // Add padding to the button (vertical, horizontal)
                       marginBottom: '4px', // Reduce bottom margin
                       '&:hover': {
-                        color: '#9b59b6',
+                        color: '#675bc8',
                         borderRadius: '8px',
                       },
                     }}
@@ -258,7 +351,6 @@ const Volunteer = () => {
             </Grid>
           ))}
         </Grid>
-
         {/* Show More / Show Less Button */}
         {volunteerOpportunities.length > 4 && (
           <Button
@@ -291,11 +383,37 @@ const Volunteer = () => {
           >
             {isExpanded ? 'Show Less' : 'Show More'}
           </Button>
-
-
         )}
       </Container>
-
+      {/* Dialog for the CreateOpportunity form */}
+      <Dialog
+        open={openFormDialog}
+        onClose={handleCloseFormDialog}
+        aria-labelledby="form-dialog-title"
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle id="form-dialog-title" sx={{ position: 'relative' }}>
+          Schedule Volunteer Work
+          <IconButton
+            onClick={handleCloseFormDialog}
+            sx={{
+              position: 'absolute',
+              right: 8,
+              top: 8,
+              color: 'gray',
+              '&:hover': {
+                backgroundColor: 'transparent',
+              }
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent>
+          <CreateOpportunity onSubmitSuccess={handleFormSubmitSuccess} />
+        </DialogContent>
+      </Dialog>
 
     </motion.div>
   );

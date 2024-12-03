@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { TextField, Button, Box, Typography, Snackbar, Grid, Card, CardContent, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, ToggleButton, IconButton } from '@mui/material';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import petPlaceholder from '../assets/petplaceholder.png';
+import petPlaceholder from '../../assets/petplaceholder.png';
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";

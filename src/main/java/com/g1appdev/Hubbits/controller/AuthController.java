@@ -39,8 +39,6 @@ public class AuthController {
     private PasswordEncoder passwordEncoder;
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
-    @Autowired
-    private UserRepository userRepository;
 
     @PostMapping("/signup")
     public ResponseEntity<String> signupUser(@RequestBody UserEntity newUser) {

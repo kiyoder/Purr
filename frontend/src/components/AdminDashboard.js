@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Box, CssBaseline, Typography } from '@mui/material';
 import UserDashboard from './UserDashboard';
-import AdoptionDashboard from './AdoptionDashboard';  // Import AdoptionDashboard
-import PetDashboard from './PetDashboard';
+import AdoptionDashboard from './Dashboards/AdoptionDashboard';  // Import AdoptionDashboard
+import PetDashboard from './Dashboards/PetDashboard';
 import AdminNavbar from './AdminNavbar';
-import DonationTable from './DonationTable';
-import ArticleDashboard from './ArticleDashboard';
+import DonationTable from './Dashboards/DonationTable';
+import ArticleDashboard from './Dashboards/ArticleDashboard';
 
 const AdminDashboard = () => {
     const [selectedTab, setSelectedTab] = useState('Users');

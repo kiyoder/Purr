@@ -1,9 +1,6 @@
 package com.g1appdev.Hubbits.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-
 import java.time.LocalDateTime;
 import java.util.Base64;
 import jakarta.validation.constraints.Size;

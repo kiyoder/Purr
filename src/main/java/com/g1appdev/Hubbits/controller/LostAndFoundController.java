@@ -8,12 +8,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
+
+import org.springframework.http.HttpStatus;
 
 @RestController
 @RequestMapping("/api/lostandfound")
@@ -30,6 +30,7 @@ public class LostAndFoundController {
             @RequestParam("datereported") String datereported,
             @RequestParam("lastseen") String lastseen,
             @RequestParam("description") String description,
+            @RequestParam("creatorid") int creatorid,
             @RequestParam(value = "imagefile", required = false) MultipartFile imageFile) {
 
         Date date;
@@ -45,14 +46,21 @@ public class LostAndFoundController {
         report.setDatereported(date);
         report.setLastseen(lastseen);
         report.setDescription(description);
+        report.setCreatorid(creatorid);
 
         service.createReport(report, imageFile);
         return ResponseEntity.ok("Report created successfully.");
     }
 
     @GetMapping
-    public ResponseEntity<List<LostAndFoundEntity>> getAllReports() {
-        List<LostAndFoundEntity> reports = service.getAllReports();
+    public ResponseEntity<List<LostAndFoundEntity>> getReports(
+            @RequestParam(value = "creatorid", required = false) Integer creatorId) {
+        List<LostAndFoundEntity> reports;
+        if (creatorId != null) {
+            reports = service.getReportsByCreatorId(creatorId);
+        } else {
+            reports = service.getAllReports();
+        }
         return ResponseEntity.ok(reports);
     }
 
