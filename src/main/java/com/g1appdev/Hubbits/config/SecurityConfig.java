@@ -62,6 +62,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.DELETE, "/api/users/**").hasAuthority("ROLE_ADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/users/**").permitAll()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/users/**").permitAll()
                 .requestMatchers("/api/users/**").authenticated()
                 .anyRequest().permitAll() // .authenticated() when applying admin
                 .and()
