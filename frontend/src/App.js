@@ -22,6 +22,7 @@ import Navbar from "./components/Navbar";
 import PetList from "./components/PetList";
 import AdminDashboard from "./components/AdminDashboard";
 import { UserProvider } from "./components/UserContext";
+import ArticleDashboard from "./components/ArticleDashboard";
 
 const theme = createTheme({
   palette: {
@@ -60,6 +61,7 @@ function App() {
             <Route path="/profile" element={<Profile />} />
             <Route path="/" element={<Home />} /> {/* Default to login */}
             <Route path="/home" element={<Home />} />
+            <Route path="/article_dash" element={<ArticleDashboard />} />
             <Route path="/lost-and-found" element={<LostAndFound />} />
             <Route path="/sponsor" element={<Sponsor />} />
             <Route path="/adopt" element={<PetList />} />

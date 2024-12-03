@@ -24,7 +24,18 @@ public class NewsFeedEntity {
     @Column(name = "imageUrl", length = 255)
     private String imageUrl;
 
+    @Column(name = "link", length = 255)
+    private String link;
+
     // Getters and Setters...
+
+    public String getLink() {
+        return link;
+    }
+
+    public void setLink(String link) {
+        this.link = link;
+    }
 
     public String getImageUrl() {
         return imageUrl;

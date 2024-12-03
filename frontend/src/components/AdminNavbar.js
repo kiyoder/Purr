@@ -1,14 +1,17 @@
 import React from 'react';
 import { Drawer, List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
-import { People, Favorite, Pets, Event, Settings, Logout } from '@mui/icons-material';
+import { People, Favorite, Pets, Event, Settings, Logout, AttachMoney, Article } from '@mui/icons-material';
 
 const sections = [
     { label: 'Users', icon: <People /> },
     { label: 'Adoptions', icon: <Favorite /> },
+    { label: 'Rehome', icon: <Favorite /> },
+    { label: 'Donation', icon: <AttachMoney /> },
     { label: 'Sponsorships', icon: <Pets /> },
     { label: 'Lost and Found', icon: <Event /> },
     { label: 'Volunteers', icon: <People /> },
     { label: 'Events', icon: <Event /> },
+    { label: 'Articles', icon: <Article /> },
     { label: 'Settings', icon: <Settings /> },
     { label: 'Logout', icon: <Logout /> },
 ];

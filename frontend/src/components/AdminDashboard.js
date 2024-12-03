@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
 import { Box, CssBaseline, Typography } from '@mui/material';
 import UserDashboard from './UserDashboard';
+import AdoptionDashboard from './AdoptionDashboard';  // Import AdoptionDashboard
+import PetDashboard from './PetDashboard';
 import AdminNavbar from './AdminNavbar';
+import DonationTable from './DonationTable';
+import ArticleDashboard from './ArticleDashboard';
 
 const AdminDashboard = () => {
     const [selectedTab, setSelectedTab] = useState('Users');
@@ -10,7 +14,14 @@ const AdminDashboard = () => {
         switch (selectedTab) {
             case 'Users':
                 return <UserDashboard />;
-            // Add more cases here for other sections like Adoptions, Sponsorships, etc.
+            case 'Adoptions':  // Add case for Adoptions
+                return <AdoptionDashboard />;  // Render AdoptionDashboard when "Adoptions" is selected
+            case 'Rehome':
+                return <PetDashboard />;
+            case 'Donation':
+                return <DonationTable />;
+            case 'Articles':
+                return <ArticleDashboard />;
             default:
                 return <UserDashboard />;
         }

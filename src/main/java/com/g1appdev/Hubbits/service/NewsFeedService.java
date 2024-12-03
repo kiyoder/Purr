@@ -63,7 +63,8 @@ public class NewsFeedService {
             existingArticle.setTitle(updatedArticle.getTitle());
             existingArticle.setContent(updatedArticle.getContent());
             existingArticle.setAuthor(updatedArticle.getAuthor());
-
+            existingArticle.setLink(updatedArticle.getLink());
+            
             // Preserve existing publishedDate
             if (updatedArticle.getPublishedDate() != null) {
                 existingArticle.setPublishedDate(updatedArticle.getPublishedDate());

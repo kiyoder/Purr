@@ -38,12 +38,14 @@ public class NewsFeedController {
             @RequestParam("title") String title,
             @RequestParam("content") String content,
             @RequestParam("author") String author,
+            @RequestParam(value = "link", required = false) String link,
             @RequestParam(value = "imagefile", required = false) MultipartFile imageFile) {
 
         NewsFeedEntity article = new NewsFeedEntity();
         article.setTitle(title);
         article.setContent(content);
         article.setAuthor(author);
+        article.setLink(link);
 
         try {
             newsFeedService.createArticle(article, imageFile);
@@ -59,12 +61,14 @@ public class NewsFeedController {
             @RequestParam("title") String title,
             @RequestParam("content") String content,
             @RequestParam("author") String author,
+            @RequestParam(value = "link", required = false) String link,
             @RequestParam(value = "imagefile", required = false) MultipartFile imageFile) {
 
         NewsFeedEntity updatedArticle = new NewsFeedEntity();
         updatedArticle.setTitle(title);
         updatedArticle.setContent(content);
         updatedArticle.setAuthor(author);
+        updatedArticle.setLink(link);
 
         try {
             newsFeedService.updateArticle(id, updatedArticle, imageFile);
