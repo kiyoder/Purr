@@ -87,29 +87,45 @@ const PostCard = ({ item, fetchLostItems, onEdit }) => {
   };
 
   return (
-    <Card sx={{ height: 520, display: "flex", flexDirection: "column" }}>
-      <CardMedia
-        component="img"
-        alt={item.description}
-        height="200"
-        image={
-          item.imageurl
-            ? `http://localhost:8080${item.imageurl}`
-            : "http://localhost:8080/images/default_image.jpg"
-        }
-        title={item.description}
+    <Card
+      sx={{
+        height: 520,
+        display: "flex",
+        flexDirection: "column",
+        boxShadow: 5,
+        backgroundImage: item.imageurl
+          ? `url(http://localhost:8080${item.imageurl})`
+          : `url(http://localhost:8080/images/default_image.jpg)`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        color: "white",
+        borderRadius: "8px",
+        position: "relative",
+      }}
+    >
+      <Box
+        sx={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: "linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 30%, rgba(0, 0, 0, 1) 100%)", // Gradient transition from image to black
+          borderRadius: "8px",
+          zIndex: 1, 
+        }}
       />
-
-      <CardContent sx={{ flexGrow: 1, overflow: "hidden" }}>
-        <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
+      <CardContent sx={{ flexGrow: 1, overflow: "hidden", position: "relative", zIndex: 10 }}>
+        <Stack direction="row" spacing={1} sx={{ mt: 32, mb: 2}}>
           <Chip
             label={item.reporttype === "lost" ? "Lost" : "Found"}
             variant="outlined"
-            color="primary"
+            color={item.reporttype === "lost" ? "error" : "success"}
             sx={{
               fontWeight: "bold",
-              borderWidth: 1.5,
-              borderColor: "primary.main",
+              fontSize: "16px",
+              borderWidth: 3,
+              borderColor: item.reporttype === "lost" ? "error.main" : "success.main",
             }}
           />
           <Chip
@@ -118,37 +134,36 @@ const PostCard = ({ item, fetchLostItems, onEdit }) => {
             color="primary"
             sx={{
               fontWeight: "bold",
-              borderWidth: 1.5,
+              borderWidth: 2,
               borderColor: "primary.main",
             }}
           />
         </Stack>
-        <Typography color="primary" fontSize="12px">
+        <Typography color="#7f71f5" fontSize="16px">
           Last Seen
         </Typography>
         <Typography color="secondary" fontWeight="bold" sx={{ ml: 2 }}>
           {item.lastseen}
         </Typography>
-        <Typography color="primary" fontSize="12px">
+        <Typography color="#7f71f5" fontSize="12px">
           Date Reported
         </Typography>
         <Typography color="secondary" fontWeight="bold" sx={{ ml: 2 }}>
           {item.datereported}
         </Typography>
-        <br />
         <Typography
-          color="primary"
+          color="#7f71f5"
           fontStyle="italic"
           sx={{
             whiteSpace: "normal",
             overflowWrap: "break-word",
+            mt: 1
           }}
         >
           {item.description}
         </Typography>
-        <br />
-        <Stack direction="row" spacing={1} alignItems="center">
-          <Typography color="primary" fontSize="14px">
+        <Stack direction="row" spacing={1} alignItems="center" sx={{mt: 3}}>
+          <Typography color="#7f71f5" fontSize="14px">
             Posted by
           </Typography>
           <Typography
@@ -172,8 +187,8 @@ const PostCard = ({ item, fetchLostItems, onEdit }) => {
 
       {/* Show edit and delete buttons for the creator or admin */}
       {(parseInt(userId) === item.creatorid || isAdmin) && (
-        <div style={{ display: "flex", justifyContent: "flex-end", padding: "8px" }}>
-          <IconButton color="primary" onClick={handleEdit}>
+        <div style={{ position: "fixed", top: 16, right: 16, zIndex: 10 }}>
+          <IconButton color="primary" onClick={handleEdit} sx={{ marginRight: 1 }}>
             <EditIcon />
           </IconButton>
           <IconButton
@@ -185,7 +200,6 @@ const PostCard = ({ item, fetchLostItems, onEdit }) => {
           </IconButton>
         </div>
       )}
-
       {/* Delete Confirmation Dialog */}
       <Dialog
         open={openDialog}
@@ -196,7 +210,7 @@ const PostCard = ({ item, fetchLostItems, onEdit }) => {
           "& .MuiPaper-root": {
             backgroundColor: "white",
             border: "2px solid",
-            borderColor: "primary.main",
+            borderColor: "red",
             borderRadius: "16px",
             boxShadow: "none",
           },
@@ -221,7 +235,7 @@ const PostCard = ({ item, fetchLostItems, onEdit }) => {
           sx={{
             backgroundColor: "white",
             borderTop: "1px solid",
-            borderColor: "primary.main",
+            borderColor: "error",
             borderRadius: "0 0 16px 16px",
             display: "flex",
             flexDirection: "column",
@@ -231,7 +245,7 @@ const PostCard = ({ item, fetchLostItems, onEdit }) => {
             textAlign: "center",
           }}
         >
-          <Typography color="error" fontSize="18px" fontWeight="bold" sx={{ whiteSpace: "nowrap" }}>
+          <Typography color="error" fontSize="18px" fontWeight="bold" sx={{ whiteSpace: "nowrap", mt: 5 }}>
             Are you sure you want to delete this post?
           </Typography>
           <Typography color="error" fontSize="18px">
@@ -241,10 +255,22 @@ const PostCard = ({ item, fetchLostItems, onEdit }) => {
 
         <DialogActions>
           <Button onClick={() => setOpenDialog(false)} color="secondary">
-            Cancel
+            <Typography
+              variant="h5"
+              align="center"
+              sx={{ fontWeight: "regular", fontFamily: "'Caramel', sans-serif" }}
+            >
+              Cancel
+            </Typography>
           </Button>
           <Button onClick={handleDelete} color="error">
-            Delete
+            <Typography
+              variant="h5"
+              align="center"
+              sx={{ fontWeight: "regular", fontFamily: "'Caramel', sans-serif" }}
+            >
+              Delete
+            </Typography>
           </Button>
         </DialogActions>
       </Dialog>
