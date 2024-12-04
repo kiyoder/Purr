@@ -69,22 +69,30 @@ public class UserController {
             @RequestParam("user") String userJson,
             @RequestParam(value = "profilePicture", required = false) MultipartFile profilePicture) {
 
-        if (!userService.isOwnerOrAdmin(id)) {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        }
         try {
+            System.out.println("Received userJson: " + userJson);
+            if (profilePicture != null) {
+                System.out.println("Received profilePicture: " + profilePicture.getOriginalFilename());
+            }
+
+            // Deserialize user JSON
             UserEntity updatedUser = new ObjectMapper().readValue(userJson, UserEntity.class);
+
+            // Perform update
             UserEntity user = userService.updateUser(id, updatedUser, profilePicture);
+
             if (user != null) {
                 Map<String, Object> response = Map.of(
                         "updatedUser", user,
-                        "newToken", userService.generateTokenForUser(user) // Generate a new token if the username is updated
+                        "newToken", userService.generateTokenForUser(user) // Generate token if needed
                 );
                 return new ResponseEntity<>(response, HttpStatus.OK);
             }
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+            return new ResponseEntity<>(Map.of("error", "User not found"), HttpStatus.NOT_FOUND);
         } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            e.printStackTrace();
+            return new ResponseEntity<>(Map.of("error", e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
 

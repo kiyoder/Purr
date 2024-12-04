@@ -72,7 +72,7 @@ const AuthModal = ({ open, handleClose }) => {
                 severity: "success",
             });
 
-            navigate("/profile");
+            navigate("/");
             handleClose();
             setLoginCredentials({ username: "", password: "" }); // Reset form data
         } catch (error) {

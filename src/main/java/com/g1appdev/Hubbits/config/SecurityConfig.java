@@ -63,7 +63,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.DELETE, "/api/users/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/users/**").permitAll()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/users/**").permitAll()
+                .requestMatchers(HttpMethod.PUT, "/api/users/**").permitAll()
+                .requestMatchers(HttpMethod.PUT, "/admin").permitAll()
                 .requestMatchers("/api/users/**").authenticated()
                 .anyRequest().permitAll() // .authenticated() when applying admin
                 .and()
