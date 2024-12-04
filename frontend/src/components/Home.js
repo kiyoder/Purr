@@ -6,6 +6,14 @@ import landingImage from '../assets/landing.png';
 import mockImage from '../assets/mock.png';
 import petPlaceholder from '../assets/petplaceholder.png';
 
+//ABOUT US IMAGES
+import AU_Lou from '../assets/AU_Lou.jpg';
+import AU_Jai from '../assets/AU_Jai.jpg';
+import AU_Stela from '../assets/AU_Stela.jpg';
+import AU_Nek from '../assets/AU_Nek.jpg';
+import AU_Kiyo from '../assets/AU_Kiyo.jpg';
+import AU_Selma from '../assets/AU_Selma.jpg';
+
 const Home = () => {
     const [formData, setFormData] = useState({
         title: '',
@@ -42,48 +50,51 @@ const Home = () => {
   };
 
   return (
-    <Box sx={{ padding: 3 }}>
+    <Box>
       {/* Top Page Layout */}
       <Grid container spacing={3} sx={{ padding: '50px' }}>
         <Grid item xs={5} container justifyContent="center" alignItems="center">
-          <Typography variant="h3">Give a New Life to PURR</Typography>
-          <Typography variant="h5">
-            Pet adoption and rehoming are vital aspects of animal welfare, offering hope and a fresh start to pets in need.
-            Open your heart and your home to a shelter pet.
-          </Typography>
-          <Box sx={{ display: 'flex', gap: 4 }}>
-            <ToggleButton
-              value="adopt"
-              onClick={() => navigate('/adopt')}
-              sx={{
-                border: '2px solid',
-                borderRadius: '8px',
-                padding: '12px 36px',
-                borderColor: 'primary.main',
-                backgroundColor: 'primary.main',
-                color: '#fff',
-                '&:hover': { backgroundColor: 'white', color: 'primary.main' },
-              }}
-            >
-              Adopt Now
-            </ToggleButton>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'center', textAlign: 'center' }}>
+            <Typography variant="h3" style={{ fontWeight: 'bold' }}>Give a New Life to PURR</Typography>
+            <Typography variant="h5">
+              Pet adoption and rehoming are vital aspects of animal welfare, offering hope and a fresh start to pets in need.
+              Open your heart and your home to a shelter pet.
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 4 }}>
+              <ToggleButton
+                value="adopt"
+                onClick={() => navigate('/adopt')}
+                sx={{
+                  border: '2px solid',
+                  borderRadius: '8px',
+                  padding: '12px 36px',
+                  borderColor: 'primary.main',
+                  backgroundColor: 'primary.main',
+                  color: '#fff',
+                  '&:hover': { backgroundColor: 'white', color: 'primary.main' },
+                }}
+              >
+                Adopt Now
+              </ToggleButton>
 
-            <ToggleButton
-              value="rehome"
-              onClick={() => navigate('/rehome')}
-              sx={{
-                border: '2px solid',
-                borderRadius: '8px',
-                padding: '12px 36px',
-                borderColor: 'secondary.main',
-                backgroundColor: 'secondary.main',
-                color: '#fff',
-                '&:hover': { backgroundColor: 'white', color: 'secondary.main' },
-              }}
-            >
-              Rehome Now
-            </ToggleButton>
+              <ToggleButton
+                value="rehome"
+                onClick={() => navigate('/adopt')}
+                sx={{
+                  border: '2px solid',
+                  borderRadius: '8px',
+                  padding: '12px 36px',
+                  borderColor: 'secondary.main',
+                  backgroundColor: 'secondary.main',
+                  color: '#fff',
+                  '&:hover': { backgroundColor: 'white', color: 'secondary.main' },
+                }}
+              >
+                Rehome Now
+              </ToggleButton>
+            </Box>
           </Box>
+
         </Grid>
 
         <Grid item xs={7} container justifyContent="center" alignItems="center">
@@ -95,10 +106,13 @@ const Home = () => {
 
 
       {/* News Feed Cards */}
-      <Typography variant="h4" sx={{ my: 3 }}>
-        Pet News
-      </Typography>
-      <Grid container spacing={3}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', paddingTop: '50px' }}>
+        <Typography variant="h4" sx={{ my: 3, fontWeight: 'bold' }}>
+          Pet News
+        </Typography>
+      </Box>
+
+      <Grid container spacing={3} sx={{ padding: 3 }}>
         {articles.map((article) => (
           <Grid item xs={12} sm={6} md={4} key={article.articleID}>
             <Card sx={{ display: 'flex', flexDirection: 'column', position: 'relative', padding: 2, height: '100%' }}>
@@ -146,6 +160,51 @@ const Home = () => {
           </Grid>
         ))}
       </Grid>
+
+      <Box sx={{ padding: 25 }}>
+        <Typography
+          variant="h4"
+          align="center"
+          sx={{ mb: 4, fontWeight: 'bold', textTransform: 'uppercase' }}
+        >
+          About Us
+        </Typography>
+        <Grid container spacing={3} justifyContent="center" sx={{ paddingTop: '50px' }}>
+          {[
+            { name: 'Louie James Carbungco', position: 'Founder', image: AU_Lou },
+            { name: 'Jierelle Jane Ravanes', position: 'Founder', image: AU_Jai },
+            { name: 'Stela Maris Asufra', position: 'Founder', image: AU_Stela },
+            { name: 'Nick Carter Lacanglacang', position: 'Founder', image: AU_Nek },
+            { name: 'Yoshinori Kyono Jr.', position: 'Founder', image: AU_Kiyo },
+            { name: 'John Edward Selma', position: 'Founder', image: AU_Selma },
+          ].map((person, index) => (
+            <Grid
+              item
+              xs={12}
+              sm={6}
+              md={4}
+              key={index}
+              sx={{ textAlign: 'center' }}
+            >
+              <Box
+                sx={{
+                  width: 200,
+                  height: 200,
+                  borderRadius: '50%',
+                  backgroundImage: `url(${person.image})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  margin: '0 auto',
+                }}
+              />
+              <Typography variant="h6" sx={{ mt: 2 }}>
+                {person.name}
+              </Typography>
+              <Typography variant="body2">{person.position}</Typography>
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
 
     </Box>
 
