@@ -59,7 +59,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/login", "/api/auth/signup", "/api/users", "/api/lostandfound",
                         "/api/users/me", "api/admin")
                 .permitAll()
-                .requestMatchers(HttpMethod.DELETE, "/api/users/**").hasAuthority("ROLE_ADMIN")
+//                .requestMatchers(HttpMethod.DELETE, "/api/users/**").hasAuthority("ROLE_ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/users/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/users/**").permitAll()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/users/**").permitAll()
