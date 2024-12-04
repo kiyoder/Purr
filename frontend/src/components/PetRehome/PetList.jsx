@@ -18,8 +18,10 @@ import CloseIcon from "@mui/icons-material/Close";
 import AdoptionForm from '../Adoption/AdoptionForm';
 import RehomeForm from '../PetRehome/RehomeForm';
 import axios from "axios";
+import { useUser } from '../UserContext';
 
 const PetList = ({ onPetAdded }) => {
+  const { user } = useUser();
   const [openAdoption, setOpenAdoption] = useState(false);
   const [openRehome, setOpenRehome] = useState(false);
   const [selectedPet, setSelectedPet] = useState(null);
@@ -65,8 +67,12 @@ const PetList = ({ onPetAdded }) => {
   };
 
   const handleCardClick = (pet) => {
-    setSelectedPet(pet);
-    setOpenAdoption(true);
+    if (user) {
+        setSelectedPet(pet);
+        setOpenAdoption(true);
+    } else {
+        alert("You must be logged in to adopt a pet.");
+    }
   };
 
   const handleAdoptionClose = () => {
@@ -263,22 +269,24 @@ const PetList = ({ onPetAdded }) => {
         <Typography variant="h7" fontWeight="bold" sx={{ mr: 2 }}>
           Do you want to rehome your pet?
         </Typography>
-        <ToggleButton
-          onClick={handleRehomeClick}
-          sx={{
-            border: "2px solid",
-            borderRadius: "25px",
-            padding: "12px 36px",
-            borderColor: "#6c5ce7",
-            backgroundColor: "#6c5ce7",
-            color: "#fff",
-            "&:hover": {
-              backgroundColor: "white",
-              color: "#6c5ce7",
-            },
-          }}>
-          Rehome
-        </ToggleButton>
+        {user && (
+          <ToggleButton
+            onClick={handleRehomeClick}
+            sx={{
+              border: "2px solid",
+              borderRadius: "25px",
+              padding: "12px 36px",
+              borderColor: "#6c5ce7",
+              backgroundColor: "#6c5ce7",
+              color: "#fff",
+              "&:hover": {
+                backgroundColor: "white",
+                color: "#6c5ce7",
+              },
+            }}>
+            Rehome
+          </ToggleButton>
+        )}
       </Box>
     </>
   );
