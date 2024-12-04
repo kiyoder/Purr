@@ -40,16 +40,6 @@ public class UserController {
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
-    // Get a user by ID
-//    @GetMapping("/{id}")
-//    public ResponseEntity<UserEntity> getUserById(@PathVariable Long id) {
-//        Optional<UserEntity> user = userService.findUserById(id);
-//        if (user.isPresent()) {
-//            return new ResponseEntity<>(user.get(), HttpStatus.OK);
-//        }
-//        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//    }
-
     @GetMapping("/{id}")
     public ResponseEntity<Map<String, Object>> getUserById(@PathVariable Long id) {
         Optional<UserEntity> user = userService.findUserById(id);
@@ -74,21 +64,23 @@ public class UserController {
     // Update a user by ID with profile picture support
     @PutMapping("/{id}")
 //    @PreAuthorize("hasRole('ADMIN')") or  @com.g1appdev.Hubbits.service.UserService.isOwner(#id)")
-    public ResponseEntity<UserEntity> updateUser(
+    public ResponseEntity<Map<String, Object>> updateUser(
             @PathVariable Long id,
             @RequestParam("user") String userJson,
             @RequestParam(value = "profilePicture", required = false) MultipartFile profilePicture) {
 
-        if (userService.isOwnerOrAdmin(id)) {
-            // Proceed with update logic
-        } else {
+        if (!userService.isOwnerOrAdmin(id)) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         try {
             UserEntity updatedUser = new ObjectMapper().readValue(userJson, UserEntity.class);
             UserEntity user = userService.updateUser(id, updatedUser, profilePicture);
             if (user != null) {
-                return new ResponseEntity<>(user, HttpStatus.OK);
+                Map<String, Object> response = Map.of(
+                        "updatedUser", user,
+                        "newToken", userService.generateTokenForUser(user) // Generate a new token if the username is updated
+                );
+                return new ResponseEntity<>(response, HttpStatus.OK);
             }
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (Exception e) {
@@ -171,10 +163,4 @@ public class UserController {
 
         return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
     }
-
-
-
-
-
-
 }

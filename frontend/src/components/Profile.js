@@ -76,11 +76,13 @@ const Profile = () => {
             console.error("Token is missing. Please log in again.");
             return;
         }
+
         const formData = new FormData();
         formData.append('user', JSON.stringify(editFormData));
         if (profilePicture) {
             formData.append('profilePicture', profilePicture);
         }
+
         try {
             const response = await axios.put(
                 `http://localhost:8080/api/users/${user.userId}`,
@@ -92,16 +94,19 @@ const Profile = () => {
                     },
                 }
             );
+
             if (response.status === 200) {
                 console.log("User updated successfully");
-                // Dynamically fetch the updated user data
-                const updatedResponse = await axios.get(`http://localhost:8080/api/users/me`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                if (updatedResponse.status === 200) {
-                    updateUser(updatedResponse.data); // Update context with the updated user data
-                    setProfilePicture(updatedResponse.data.profilePicture); // Set new profile picture
+
+                // Update localStorage and user context with the new token and user data
+                const { updatedUser, newToken } = response.data;
+                if (newToken) {
+                    localStorage.setItem('token', newToken);
+                    updateUser(updatedUser); // Update user context
+                    setProfilePicture(updatedUser.profilePicture); // Set new profile picture
                     setEditingUserId(null);
+                } else {
+                    console.error("Failed to retrieve new token");
                 }
             } else {
                 console.error("Failed to update user");
@@ -112,6 +117,7 @@ const Profile = () => {
 
         setIsSaving(false);
     };
+
 
 
 
