@@ -91,52 +91,136 @@ const DonationTable = () => {
 
       {/* Edit donation dialog */}
       {donationToEdit && (
-        <Dialog open={true} onClose={handleCancelEdit}>
-          <DialogTitle>Edit Donation</DialogTitle>
+        <Dialog
+          open={true}
+          onClose={handleCancelEdit}
+          PaperProps={{
+            sx: {
+              width: '800px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              textAlign: 'center',
+              padding: '20px',
+              margin: '0 auto',
+              gap: '16px',
+              backgroundColor: '#F9F9F9',
+              borderRadius: '8px',
+              boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
+            },
+          }}
+        >
+          <DialogTitle
+            sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '16px' }}
+          >
+            <Typography variant="h6">Edit Donation</Typography>
+          </DialogTitle>
           <DialogContent>
-            <DialogContentText>Edit the details of the donation</DialogContentText>
-            <TextField
-              label="Amount"
-              name="amount"
-              value={donationToEdit.amount}
-              onChange={handleEditChange}
-              fullWidth
-            />
-            <TextField
-              label="Donation Date"
-              name="donationDate"
-              value={donationToEdit.donationDate}
-              onChange={handleEditChange}
-              fullWidth
-            />
-            <TextField
-              label="First Name"
-              name="firstName"
-              value={donationToEdit.firstName}
-              onChange={handleEditChange}
-              fullWidth
-            />
-            <TextField
-              label="Last Name"
-              name="lastName"
-              value={donationToEdit.lastName}
-              onChange={handleEditChange}
-              fullWidth
-            />
-            <TextField
-              label="Special Message"
-              name="specialMessage"
-              value={donationToEdit.specialMessage}
-              onChange={handleEditChange}
-              fullWidth
-              multiline
-            />
+            <DialogContentText
+              sx={{ marginBottom: '16px', fontSize: '1rem', color: 'text.secondary', textAlign: 'center' }}
+            >
+              Edit the details of the donation
+            </DialogContentText>
+            <Box
+              sx={{
+                width: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '16px',
+              }}
+            >
+              <TextField
+                label="Amount"
+                name="amount"
+                value={donationToEdit.amount}
+                onChange={handleEditChange}
+                variant="outlined"
+                fullWidth
+              />
+              <TextField
+                label="Donation Date"
+                name="donationDate"
+                value={donationToEdit.donationDate}
+                onChange={handleEditChange}
+                variant="outlined"
+                fullWidth
+                type="date"
+                InputLabelProps={{ shrink: true }}
+              />
+              <TextField
+                label="First Name"
+                name="firstName"
+                value={donationToEdit.firstName}
+                onChange={handleEditChange}
+                variant="outlined"
+                fullWidth
+              />
+              <TextField
+                label="Last Name"
+                name="lastName"
+                value={donationToEdit.lastName}
+                onChange={handleEditChange}
+                variant="outlined"
+                fullWidth
+              />
+              <TextField
+                label="Special Message"
+                name="specialMessage"
+                value={donationToEdit.specialMessage}
+                onChange={handleEditChange}
+                variant="outlined"
+                fullWidth
+                multiline
+                rows={3}
+              />
+            </Box>
           </DialogContent>
-          <DialogActions>
-            <Button onClick={handleCancelEdit} color="primary">Cancel</Button>
-            <Button onClick={handleSaveEdit} color="primary">Save</Button>
+          <DialogActions
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              width: '100%',
+              paddingTop: '16px',
+            }}
+          >
+            <Button
+              onClick={handleCancelEdit}
+              sx={{
+                border: '2px solid',
+                borderRadius: '8px',
+                padding: '12px 36px',
+                borderColor: 'primary.main',
+                backgroundColor: 'primary.main',
+                color: '#fff',
+                '&:hover': {
+                  backgroundColor: 'white',
+                  color: 'primary.main',
+                },
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSaveEdit}
+              sx={{
+                border: '2px solid',
+                borderRadius: '8px',
+                padding: '12px 36px',
+                borderColor: 'primary.main',
+                backgroundColor: 'primary.main',
+                color: '#fff',
+                '&:hover': {
+                  backgroundColor: 'white',
+                  color: 'primary.main',
+                },
+              }}
+            >
+              Save
+            </Button>
           </DialogActions>
         </Dialog>
+      
       )}
 
       {/* Delete confirmation dialog */}

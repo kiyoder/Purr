@@ -7,7 +7,7 @@ import Home from "./components/Home";
 import LostAndFound from "./components/LostAndFound";
 import Sponsor from "./components/Sponsor";
 import DonationForm from "./components/DonationForm";
-import DonationTable from "./components/DonationTable";
+import DonationTable from "./components/Dashboards/DonationTable";
 
 
 import VolunteerSignUp from "./components/Volunteer/VolunteerSignUpList";
@@ -24,6 +24,7 @@ import Navbar from "./components/Navbar";
 import PetList from "./components/PetRehome/PetList";
 import AdminDashboard from "./components/Dashboards/AdminDashboard";
 import { UserProvider } from "./components/UserContext";
+import ArticleDashboard from "./components/Dashboards/ArticleDashboard";
 import User from "./components/User";
 
 
@@ -65,6 +66,7 @@ function App() {
             <Route path="/profile" element={<Profile />} />
             <Route path="/" element={<Home />} /> {/* Default to login */}
             <Route path="/home" element={<Home />} />
+            <Route path="/article_dash" element={<ArticleDashboard />} />
             <Route path="/lost-and-found" element={<LostAndFound />} />
             <Route path="/sponsor" element={<Sponsor />} />
             <Route path="/adopt" element={<PetList />} />

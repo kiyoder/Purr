@@ -6,7 +6,7 @@ const sections = [
     { label: 'Users', icon: <People /> },
     { label: 'Adoptions', icon: <Favorite /> },
     { label: 'Rehome', icon: <Favorite /> },
-    { label: 'Donations', icon: <AttachMoney /> },
+    { label: 'Donation', icon: <AttachMoney /> },
     { label: 'Sponsorships', icon: <Pets /> },
     { label: 'Lost and Found', icon: <Event /> },
     { label: 'Volunteers', icon: <People /> },
@@ -22,14 +22,11 @@ const AdminNavbar = ({ selectedTab, setSelectedTab }) => (
         sx={{
             width: 240,
             flexShrink: 0,
-            position: 'relative',
-            top: 64,
+            position: 'relative', // Ensure it is relative to the layout
             [`& .MuiDrawer-paper`]: {
-                paddingTop: 10,
                 width: 240,
                 boxSizing: 'border-box',
-                position: 'fixed',
-                top: 64,
+                position: 'relative', // Stops floating above content
             },
         }}
     >

@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { Box, CssBaseline, Typography } from '@mui/material';
 import UserDashboard from './UserDashboard';
-import AdoptionDashboard from './AdoptionDashboard';  // Import AdoptionDashboard
-import PetDashboard from './PetDashboard';
-import LostAndFoundDashboard from './LostAndFoundDashboard';
+import AdoptionDashboard from './Dashboards/AdoptionDashboard';  // Import AdoptionDashboard
+import PetDashboard from './Dashboards/PetDashboard';
 import AdminNavbar from './AdminNavbar';
-import DonationTable from './DonationTable';
-import ArticleDashboard from './ArticleDashboard';
+import DonationTable from './Dashboards/DonationTable';
+import ArticleDashboard from './Dashboards/ArticleDashboard';
 
 const AdminDashboard = () => {
     const [selectedTab, setSelectedTab] = useState('Users');
@@ -19,16 +18,10 @@ const AdminDashboard = () => {
                 return <AdoptionDashboard />;  // Render AdoptionDashboard when "Adoptions" is selected
             case 'Rehome':
                 return <PetDashboard />;
-            case 'Donations':
+            case 'Donation':
                 return <DonationTable />;
             case 'Articles':
                 return <ArticleDashboard />;
-            case 'Lost and Found':
-                return <LostAndFoundDashboard />;
-            case 'Adoptions':  
-                return <AdoptionDashboard />;  
-            case 'Rehome':
-                return <PetDashboard />;
             default:
                 return <UserDashboard />;
         }
