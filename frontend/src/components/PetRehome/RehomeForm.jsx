@@ -1,33 +1,67 @@
-import React, { useState } from "react";
+import React, { useState,useRef } from "react";
+import { TextField, Button, Typography, Snackbar, Box, Select, MenuItem, InputLabel, FormControl } from "@mui/material";
 import axios from "axios";
-import { TextField, Button, Typography, Snackbar } from "@mui/material";
 
 const RehomeForm = () => {
   const [formData, setFormData] = useState({
     petType: "",
     breed: "",
     description: "",
-    image: null,  // To handle image upload
+    image: null,  
     name: "",
     address: "",
     contactNumber: "",
     submissionDate: "",
     age: "",
-    gender: "",
+    gender: "",  
+    userName: "", 
   });
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [ageError, setAgeError] = useState(""); 
+  const [contactError, setContactError] = useState(""); 
 
-  // Handle form field changes
+  const fileInputRef = useRef(null); 
+
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    setFormData({
+        ...formData,
+        image: file,
+    });
+};
+
+  
   const handleChange = (e) => {
     const { name, value, files } = e.target;
+
+    
+    if (name === "contactNumber") {
+        if (!/^\d*$/.test(value)) {
+            setContactError("Contact number must be numeric");
+            return;
+        } else {
+            setContactError(""); // Clear error if valid
+        }
+    }
+
+    
+    if (name === "age") {
+        if (!/^\d*$/.test(value) && (value < 0)) { 
+            setAgeError("Age should be a non-negative number"); 
+            return;
+            setAgeError(""); // Clear error if valid
+        }
+    }
+
+    
     setFormData((prev) => ({
-      ...prev,
-      [name]: name === "image" ? files[0] : value,  // Handle file input separately
+        ...prev,
+        [name]: name === "image" ? files[0] : value,
     }));
   };
 
-  // Handle form submission
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -35,18 +69,20 @@ const RehomeForm = () => {
     form.append("name", formData.name);
     form.append("type", formData.petType);
     form.append("breed", formData.breed);
-    form.append("age", formData.age); // Add age
-    form.append("gender", formData.gender); // Add gender
+    form.append("age", formData.age); 
+    form.append("gender", formData.gender);
     form.append("description", formData.description);
-    form.append("photo", formData.image);  // Append image
+    form.append("photo", formData.image);  
+    form.append("userName", formData.userName); 
     form.append("address", formData.address);
     form.append("contactNumber", formData.contactNumber);
-    form.append("submissionDate", formData.submissionDate);
-    form.append("status", "PENDING_REHOME"); // Set status to pending rehome
+    form.append("submissionDate", new Date().toISOString().split('T')[0]); 
+    form.append("status", "PENDING_REHOME"); 
+
+    resetForm();
 
     try {
-      // Send the form data including the image to the backend
-      const response = await axios.post("http://localhost:8080/api/pet/postpetrecord", form, {
+        await axios.post("http://localhost:8080/api/pet/postpetrecord", form, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       setSuccessMessage("Pet successfully rehomed!");
@@ -57,36 +93,55 @@ const RehomeForm = () => {
     }
   };
 
+  const resetForm = () => {
+    setFormData({
+      name: '',
+      petType: '',
+      breed: '',
+      age: '',
+      gender: '', 
+      description: '',
+      image: null,
+      userName: '',
+      address: '',
+      contactNumber: '',
+      submissionDate: ''
+    });
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""; 
+    }
+  };
+  
+
   const styles = {
     container: {
-      padding: "8px", // Reduced padding to decrease overall form height
-      maxWidth: "1200px", // Limiting the width
-      margin: "0 auto", // Centering the form
+      padding: "8px", 
+      maxWidth: "1200px", 
+      margin: "0 auto", 
     },
     columns: {
       display: "flex",
       justifyContent: "space-between",
-      flexWrap: "wrap", // Ensure columns wrap on smaller screens
-      gap: "10px", // Reduced gap between columns
+      flexWrap: "wrap", 
+      gap: "10px",
     },
     leftColumn: {
       flex: 1,
-      border: "2px solid #5A20A8", // Border around left column
-      padding: "10px", // Reduced padding
+      border: "2px solid #5A20A8",
+      padding: "10px", 
       boxSizing: "border-box",
     },
     rightColumn: {
       flex: 1,
-      padding: "10px", // Reduced padding
+      padding: "10px", 
       boxSizing: "border-box",
     },
     buttonContainer: {
-      marginTop: "10px", // Reduced margin for button container
+      marginTop: "10px", 
       display: "flex",
       justifyContent: "center",
     },
   };
-  
 
   return (
     <div style={styles.container}>
@@ -130,17 +185,25 @@ const RehomeForm = () => {
             onChange={handleChange}
             required
             type="number"
+            error={!!ageError} // Show error state
+            helperText={ageError} // Display error message
             sx={{ marginBottom: 2 }}
           />
-          <TextField
-            label="Gender"
-            name="gender"
-            fullWidth
-            value={formData.gender}
-            onChange={handleChange}
-            required
-            sx={{ marginBottom: 2 }}
-          />
+
+          {/* Gender dropdown */}
+          <FormControl fullWidth sx={{ marginBottom: 2 }}>
+            <InputLabel>Gender</InputLabel>
+            <Select
+              name="gender"
+              value={formData.gender}
+              onChange={handleChange}
+              required
+            >
+              <MenuItem value="Male">Male</MenuItem>
+              <MenuItem value="Female">Female</MenuItem>
+            </Select>
+          </FormControl>
+
           <TextField
             label="Description"
             name="description"
@@ -159,16 +222,18 @@ const RehomeForm = () => {
             onChange={handleChange}
             accept="image/*"
             required
+            ref={fileInputRef}
             style={{ marginBottom: "16px", display: "block" }}
           />
         </div>
 
+        {/* Adopter's Info */}
         <div style={styles.rightColumn}>
           <TextField
-            label="Name of User"
-            name="name"
+            label="Your Name"
+            name="userName"
             fullWidth
-            value={formData.name}
+            value={formData.userName}
             onChange={handleChange}
             required
             sx={{ marginBottom: 2 }}
@@ -190,21 +255,25 @@ const RehomeForm = () => {
             onChange={handleChange}
             required
             type="tel"
+            error={!!contactError} // Show error state
+            helperText={contactError} // Display error message
             sx={{ marginBottom: 2 }}
           />
           <TextField
-                        label="Submission Date"
-                        type="date"
-                        name="submissionDate"
-                        value={formData.submissionDate}
-                        onChange={handleChange}
-                        InputLabelProps={{ shrink: true }}
-                        inputProps={{ min: new Date().toISOString().split('T')[0] }}
-                        variant="outlined"
-                        required
-                        fullWidth
-                        sx={{ marginBottom: 2 }}
-                    />
+  label="Submission Date"
+  type="date"
+  name="submissionDate"
+  value={formData.submissionDate || new Date().toISOString().split('T')[0]} 
+  inputProps={{
+    min: new Date().toISOString().split('T')[0], // today's date as the minimum
+    max: new Date().toISOString().split('T')[0]  // today's date as the maximum
+  }}
+  variant="outlined"
+  required
+  fullWidth
+  sx={{ marginBottom: 2 }}
+/>
+
         </div>
       </div>
       <div style={styles.buttonContainer}>
@@ -221,19 +290,33 @@ const RehomeForm = () => {
           Confirm Rehome
         </Button>
       </div>
+
+      {/* Success Snackbar */}
       <Snackbar
         open={!!successMessage}
         autoHideDuration={6000}
-        message={successMessage}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
         onClose={() => setSuccessMessage("")}
+        message={successMessage}
+        sx={{
+          '& .MuiSnackbarContent-root': {
+            backgroundColor: '#5A20A8',
+            color: 'white'
+          }
+        }}
       />
+
+      {/* Error Snackbar */}
       <Snackbar
         open={!!errorMessage}
-        autoHideDuration={6000}
-        message={errorMessage}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        autoHideDuration={4000}
         onClose={() => setErrorMessage("")}
+        message={errorMessage}
+        sx={{
+          '& .MuiSnackbarContent-root': {
+            backgroundColor: '#5A20A8',
+            color: 'white'
+          }
+        }}
       />
     </div>
   );

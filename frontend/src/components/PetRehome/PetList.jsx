@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Card,
   Box,
@@ -12,53 +12,57 @@ import {
   DialogTitle,
   DialogContent,
   IconButton,
-} from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import CloseIcon from '@mui/icons-material/Close';
-import AdoptionForm from './AdoptionForm'; 
-import RehomeForm from './RehomeForm';
-import goldenImage from '../assets/golden_retriever.jpg';
-import siameseImage from '../assets/siamese.jpg';
-import cockatielImage from '../assets/cockatiel.jpg';
+} from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import CloseIcon from "@mui/icons-material/Close";
+import AdoptionForm from '../Adoption/AdoptionForm';
+import RehomeForm from '../PetRehome/RehomeForm';
+import axios from "axios";
 
-const PetList = () => {
+const PetList = ({ onPetAdded }) => {
   const [openAdoption, setOpenAdoption] = useState(false);
-  const [openRehome, setOpenRehome] = useState(false); // Add this line
+  const [openRehome, setOpenRehome] = useState(false);
   const [selectedPet, setSelectedPet] = useState(null);
   const navigate = useNavigate();
+  const [pets, setPets] = useState([]);
+  const [adoptions, setAdoptions] = useState([]);
 
-  const pets = [
-    {
-      petId: 'P001', // Added Pet ID
-      image: goldenImage,
-      breed: 'Golden Retriever',
-      type: 'Dog',
-      name: 'Buddy',
-      age: 3,
-      gender: 'Male',
-      description: 'A friendly and intelligent breed.',
-    },
-    {
-      petId: 'P002', // Added Pet ID
-      image: siameseImage,
-      breed: 'Siamese',
-      type: 'Cat',
-      name: 'Luna',
-      age: 2,
-      gender: 'Female',
-      description: 'An affectionate and playful breed.',
-    },
-    {
-      petId: 'P003', // Added Pet ID
-      image: cockatielImage,
-      breed: 'Cockatiel',
-      type: 'Bird',
-      name: 'Sunny',
-      age: 1,
-      gender: 'Male',
-      description: 'A social and curious companion.',
-    },
-  ];
+  useEffect(() => {
+    fetchRecords();
+  }, []);
+
+  const fetchRecords = async () => {
+    try {
+      const petResponse = await axios.get(
+        "http://localhost:8080/api/pet/getAllPets"
+      );
+      const adoptionResponse = await axios.get(
+        "http://localhost:8080/api/adoptions"
+      );
+
+      const filteredPets = petResponse.data.filter((pet) => {
+        const isInAdoptionProcess = adoptionResponse.data.some((adoption) => {
+          console.log("Adoption Status:", adoption.status);
+          return (
+            (adoption.status === "PENDING" || adoption.status === "APPROVED") &&
+            adoption.breed === pet.breed &&
+            adoption.petType === pet.type &&
+            adoption.description === pet.description
+          );
+        });
+
+        return pet.status === "ACCEPTED_REHOME" && !isInAdoptionProcess;
+      });
+
+      setPets(filteredPets);
+    } catch (error) {
+      console.error("Failed to fetch updated PetList", error);
+    }
+  };
+
+  const handleNewPet = (newPet) => {
+    setPets((prevPets) => [...prevPets, newPet]);
+  };
 
   const handleCardClick = (pet) => {
     setSelectedPet(pet);
@@ -78,65 +82,62 @@ const PetList = () => {
     setOpenRehome(false);
   };
 
-  const handleListOpen = () => {
-    navigate('/admin/adoption-list');
-  };
-
   return (
     <>
       <div style={styles.pageContainer}>
-      <Typography variant="h6" component="h6" sx={{ color: '#5A20A8', fontWeight: 'bold', padding: '20px' }}>
-  List of Pets to Adopt
-</Typography>
+        <Typography
+          variant="h6"
+          component="h6"
+          sx={{ color: "#5A20A8", fontWeight: "bold", padding: "20px" }}>
+          List of Pets to Adopt
+        </Typography>
 
         <div style={styles.listContainer}>
           {pets.length > 0 ? (
-            pets.map((pet, index) => (
+            pets.map((pet) => (
               <Card
-                key={index}
+                key={pet.petId}
                 sx={{
                   width: 360,
-                  height: 590, // Increased height to accommodate all content
-                  display: 'flex',
-                  flexDirection: 'column',
-                  cursor: 'pointer',
+                  height: 590,
+                  display: "flex",
+                  flexDirection: "column",
+                  cursor: "pointer",
                 }}
-                onClick={() => handleCardClick(pet)}
-              >
-                {pet.image ? (
+                onClick={() => handleCardClick(pet)}>
+                {pet.photo ? (
                   <CardMedia
                     component="img"
                     height="140"
-                    image={pet.image}
+                    image={pet.photo}
                     alt={pet.breed}
-                    sx={{ objectFit: 'cover' }}
+                    sx={{ objectFit: "cover" }}
                   />
                 ) : (
                   <Box
                     sx={{
                       height: 140,
-                      backgroundColor: '#f0f0f0',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
+                      backgroundColor: "#f0f0f0",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}>
                     <Typography variant="body2" color="text.secondary">
                       No Image Available
                     </Typography>
                   </Box>
                 )}
 
-                <CardContent sx={{ flexGrow: 1, overflow: 'hidden' }}>
+                <CardContent sx={{ flexGrow: 1, overflow: "hidden" }}>
                   <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
                     <Chip
                       label={pet.type}
                       variant="outlined"
                       color="primary"
                       sx={{
-                        fontWeight: 'bold',
+                        fontWeight: "bold",
                         borderWidth: 1.5,
-                        borderColor: 'primary.main',
+                        borderColor: "primary.main",
                       }}
                     />
                     <Chip
@@ -144,23 +145,17 @@ const PetList = () => {
                       variant="outlined"
                       color="primary"
                       sx={{
-                        fontWeight: 'bold',
+                        fontWeight: "bold",
                         borderWidth: 1.5,
-                        borderColor: 'primary.main',
+                        borderColor: "primary.main",
                       }}
                     />
                   </Stack>
                   <Typography color="#5A20A8" fontSize="12px" fontWeight="bold">
-                    Pet ID
-                  </Typography>
-                  <Typography color="#5A20A8" fontWeight="bold" sx={{ ml: 2 }}>
-                    {pet.petId} {/* Display Pet ID */}
-                  </Typography>
-                  <Typography color="#5A20A8" fontSize="12px" fontWeight="bold">
                     Name
                   </Typography>
                   <Typography color="#5A20A8" fontWeight="bold" sx={{ ml: 2 }}>
-                    {pet.name} {/* Display pet name */}
+                    {pet.name}
                   </Typography>
                   <Typography color="#5A20A8" fontSize="12px" fontWeight="bold">
                     Pet Type
@@ -178,16 +173,20 @@ const PetList = () => {
                     Age
                   </Typography>
                   <Typography color="#5A20A8" fontWeight="bold" sx={{ ml: 2 }}>
-                    {pet.age} years {/* Display pet age */}
+                    {pet.age} years
                   </Typography>
                   <Typography color="#5A20A8" fontSize="12px" fontWeight="bold">
                     Gender
                   </Typography>
                   <Typography color="#5A20A8" fontWeight="bold" sx={{ ml: 2 }}>
-                    {pet.gender} {/* Display pet gender */}
+                    {pet.gender}
                   </Typography>
                   <br />
-                  <Typography color="#5A20A8" fontStyle="italic" fontWeight="bold" noWrap>
+                  <Typography
+                    color="#5A20A8"
+                    fontStyle="italic"
+                    fontWeight="bold"
+                    noWrap>
                     {pet.description}
                   </Typography>
                 </CardContent>
@@ -201,18 +200,21 @@ const PetList = () => {
         </div>
       </div>
 
-      <Dialog open={openAdoption} onClose={handleAdoptionClose} fullWidth maxWidth="md">
+      <Dialog
+        open={openAdoption}
+        onClose={handleAdoptionClose}
+        fullWidth
+        maxWidth="md">
         <DialogTitle>
           <IconButton
             aria-label="close"
             onClick={handleAdoptionClose}
             sx={{
-              position: 'absolute',
+              position: "absolute",
               right: 8,
               top: 8,
               color: (theme) => theme.palette.grey[500],
-            }}
-          >
+            }}>
             <CloseIcon />
           </IconButton>
         </DialogTitle>
@@ -221,18 +223,21 @@ const PetList = () => {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={openRehome} onClose={handleRehomeClose} fullWidth maxWidth="md">
+      <Dialog
+        open={openRehome}
+        onClose={handleRehomeClose}
+        fullWidth
+        maxWidth="md">
         <DialogTitle>
           <IconButton
             aria-label="close"
             onClick={handleRehomeClose}
             sx={{
-              position: 'absolute',
+              position: "absolute",
               right: 8,
               top: 8,
               color: (theme) => theme.palette.grey[500],
-            }}
-          >
+            }}>
             <CloseIcon />
           </IconButton>
         </DialogTitle>
@@ -243,55 +248,36 @@ const PetList = () => {
 
       <Box
         sx={{
-          width: '100vw',
-          backgroundColor: '#6c5ce7',
-          color: 'white',
-          textAlign: 'center',
-          padding: '8px 0',
-          position: 'fixed',
+          width: "100vw",
+          backgroundColor: "#6c5ce7",
+          color: "white",
+          textAlign: "center",
+          padding: "8px 0",
+          position: "fixed",
           bottom: 0,
           left: 0,
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-      >
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}>
         <Typography variant="h7" fontWeight="bold" sx={{ mr: 2 }}>
           Do you want to rehome your pet?
         </Typography>
         <ToggleButton
           onClick={handleRehomeClick}
           sx={{
-            border: '2px solid',
-            borderRadius: '25px',
-            padding: '12px 36px',
-            borderColor: '#6c5ce7',
-            backgroundColor: '#6c5ce7',
-            color: '#fff',
-            '&:hover': {
-              backgroundColor: 'white',
-              color: '#6c5ce7',
+            border: "2px solid",
+            borderRadius: "25px",
+            padding: "12px 36px",
+            borderColor: "#6c5ce7",
+            backgroundColor: "#6c5ce7",
+            color: "#fff",
+            "&:hover": {
+              backgroundColor: "white",
+              color: "#6c5ce7",
             },
-          }}
-        >
+          }}>
           Rehome
-        </ToggleButton>
-        <ToggleButton
-          onClick={handleListOpen}
-          sx={{
-            border: '2px solid',
-            borderRadius: '25px',
-            padding: '12px 36px',
-            borderColor: '#6c5ce7',
-            backgroundColor: '#6c5ce7',
-            color: '#fff',
-            '&:hover': {
-              backgroundColor: 'white',
-              color: '#6c5ce7',
-            },
-          }}
-        >
-          Admin
         </ToggleButton>
       </Box>
     </>
@@ -300,16 +286,16 @@ const PetList = () => {
 
 const styles = {
   pageContainer: {
-    flexDirection: 'column',
-    alignItems: 'flex-start',
-    minHeight: '100vh',
+    flexDirection: "column",
+    alignItems: "flex-start",
+    minHeight: "100vh",
   },
   listContainer: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: '20px',
-    justifyContent: 'flex-start',
-    padding: '10px',
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "20px",
+    justifyContent: "flex-start",
+    padding: "10px",
   },
 };
 

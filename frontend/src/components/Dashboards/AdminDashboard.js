@@ -3,6 +3,8 @@ import { Box, CssBaseline, Typography } from '@mui/material';
 import UserDashboard from './UserDashboard';
 import LostAndFoundDashboard from './LostAndFoundDashboard';
 import AdminNavbar from './AdminNavbar';
+import AdoptionDashboard from './AdoptionDashboard';
+import PetDashboard from './PetDashboard';
 
 const AdminDashboard = () => {
     const [selectedTab, setSelectedTab] = useState('Users');
@@ -13,6 +15,10 @@ const AdminDashboard = () => {
                 return <UserDashboard />;
             case 'Lost and Found':
                 return <LostAndFoundDashboard />;
+            case 'Adoptions':  
+                return <AdoptionDashboard />;  
+            case 'Rehome':
+                return <PetDashboard />;
             default:
                 return <UserDashboard />;
         }
