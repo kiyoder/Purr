@@ -23,6 +23,9 @@ import AuthModal from '../AuthModal';
 import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import UpdateOpportunityModal from "./UpdateOpportunity";
+import Swal from 'sweetalert2';
+import EditIcon from '@mui/icons-material/Edit';
+import UserProfile from './UserProfile';
 
 const OpportunityDetail = () => {
     const { id } = useParams();
@@ -134,14 +137,22 @@ const OpportunityDetail = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+
+        // Validate form inputs
         const isValid = Object.values(formData).every(value => value.trim() !== '');
+
         if (isValid) {
-            setConfirmDialogOpen(true); // Show confirmation dialog if valid
+            setConfirmDialogOpen(true); // Show confirmation dialog if form is valid
         } else {
-            setSnackbarOpen(true); // Show error if form is invalid
-            setSuccessMessage('Please fill all required fields.');
+            // Use SweetAlert2 for the error message
+            Swal.fire({
+                icon: 'error',
+                title: 'Incomplete Form',
+                text: 'Please fill all required fields.',
+                confirmButtonText: 'OK',
+            });
         }
-    };
+    };;
 
     const handleConfirmSubmit = async () => {
         try {
@@ -151,17 +162,46 @@ const OpportunityDetail = () => {
                 hoursWorked: opportunity.hoursWorked,
             };
 
+            // Make the API call
             await axios.post(`http://localhost:8080/api/volunteer/signup/${id}`, dataToSubmit);
-            setSuccessMessage('Successfully signed up for the opportunity!');
-            setSnackbarOpen(true);
+
+            // Success alert
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: 'You have successfully signed up for the opportunity!',
+                confirmButtonText: 'OK',
+                timer: 2000,
+                timerProgressBar: true,
+            });
+
+            // Redirect after the SweetAlert2 popup closes
             setTimeout(() => navigate('/volunteer'), 2000);
         } catch (error) {
+            if (error.response && error.response.status === 409) {
+                // Duplicate sign-up detected alert
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Duplicate Sign-Up',
+                    text: 'You are already registered for this opportunity.',
+                    confirmButtonText: 'OK',
+                });
+            } else {
+                // General error alert
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'An error occurred while registering for the event. Please try again later.',
+                    confirmButtonText: 'OK',
+                });
+            }
             console.error('Error registering for the event:', error);
         } finally {
             setConfirmDialogOpen(false); // Close the confirmation dialog
             setOpenDialog(false);
         }
     };
+
 
     const handleDialogClose = () => setOpenDialog(false);
     const handleConfirmDialogClose = () => setConfirmDialogOpen(false);
@@ -176,8 +216,12 @@ const OpportunityDetail = () => {
 
             // Compare the logged-in userId with the opportunity creatorId
             if (opportunity.creatorId === userId) {
-                setSuccessMessage('You cannot register your own opportunity.');
-                setSnackbarOpen(true); // Display message in Snackbar
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Registration Not Allowed',
+                    text: 'You cannot register your own opportunity.',
+                    confirmButtonText: 'OK',
+                });
                 return; // Prevent the registration process if the user is the creator
             }
 
@@ -189,9 +233,11 @@ const OpportunityDetail = () => {
                 setOpenDialog(true); // Proceed with the registration dialog if logged in
             }
         } else {
-            setAuthModalOpen(true);
+            setAuthModalOpen(true); // Open the auth modal if no user is logged in
         }
     };
+
+
     if (loading) return <Typography>Loading...</Typography>;
     if (error) return <Typography>{error}</Typography>;
     if (!opportunity) return <Typography>No opportunity found.</Typography>;
@@ -213,66 +259,81 @@ const OpportunityDetail = () => {
             <Grid container spacing={3} sx={{ paddingTop: 5, paddingX: 10 }}>
                 <Grid item xs={12}>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <Button
-                            onClick={() => navigate(-1)}
-                            color="secondary"
-                            sx={{ marginBottom: 1 }}
-                        >
-                            Back
-                        </Button>
-
-                        {/* Conditional Edit Button */}
-            
-                        {userDetails && opportunity.creatorId === userDetails.userId && (
-                            <Button
-                                onClick={handleEditButtonClick} // Open modal
-                                color="primary"
-                                sx={{
-                                    marginLeft: 2,
-                                    marginBottom: 1,
-                                    backgroundColor: '#4caf50',
-                                    '&:hover': {
-                                        backgroundColor: '#388e3c',
-                                    },
-                                }}
-                            >
-                                Edit
-                            </Button>
-                        )}
-
-                        {/* Modal for editing opportunity */}
-                        <UpdateOpportunityModal
-                            open={isModalOpen}
-                            onClose={handleCloseModal} // Close modal
-                            opportunity={opportunity}
-                        />
 
                     </Box>
                 </Grid>
+
 
                 {/* Opportunity Details Section */}
                 <Grid container spacing={3} sx={{ paddingTop: 5, paddingX: 5 }}>
                     <Grid item xs={12} md={7}>
                         <Paper elevation={0} sx={{ padding: 3, borderRadius: 2, marginBottom: 0.5 }}>
-                            <Typography variant="h4" sx={{
-                                marginBottom: 0.5, fontFamily: "'Montserrat', sans-serif",
-                                fontWeight: "bold",
-                                color: "#675bc8",
-                                marginBottom: 0.5
-                            }} color="#675bc8">
-                                {opportunity.title}
-                            </Typography>
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    marginBottom: 2,
+                                }}
+                            >
+                                <Typography
+                                    variant="h4"
+                                    sx={{
+                                        fontFamily: "'Montserrat', sans-serif",
+                                        fontWeight: "bold",
+                                        color: "#675bc8",
+                                    }}
+                                >
+                                    {opportunity.title}
+                                </Typography>
+                                {userDetails ? (
+                                    <Button
+                                        onClick={opportunity.creatorId === userDetails.userId ? handleEditButtonClick : null}
+                                        variant="text"
+                                        disabled={opportunity.creatorId !== userDetails.userId}
+                                        sx={{
+                                            marginLeft: 2,
+                                            minWidth: 0,
+                                            padding: 0,
+                                            '&:hover': {
+                                                background: 'transparent',
+                                                transform: opportunity.creatorId === userDetails.userId ? 'scale(1.1)' : 'none',
+                                            },
+                                        }}
+                                    >
+                                        <EditIcon
+                                            sx={{
+                                                fontSize: 32,
+                                                color: opportunity.creatorId === userDetails.userId ? '#675bc8' : 'gray',
+                                                transition: 'transform 0.2s',
+                                            }}
+                                        />
+                                    </Button>
+                                ) : (
+                                    <Typography variant="body2" sx={{ color: 'gray', fontStyle: 'italic' }}>
+                                        Loading user details...
+                                    </Typography>
+                                )}
+                            </Box>
+
+                            {/* Modal for editing opportunity */}
+                            <UpdateOpportunityModal
+                                open={isModalOpen}
+                                onClose={handleCloseModal} // Close modal
+                                opportunity={opportunity}
+                            />
                             <Typography variant="body1" sx={{ marginBottom: 0 }}>
                                 {opportunity.description}
                             </Typography>
                         </Paper>
                     </Grid>
 
+
                     <Grid item xs={12} md={7} sx={{ display: 'flex', flexDirection: 'column' }}>
                         <Paper elevation={0} sx={{ padding: 3, borderRadius: 2, flex: 1 }}>
                             <Box sx={{ marginBottom: 3 }}>
                                 <img
-                                    src={opportunity.volunteerImageUrl ? `http://localhost:8080${opportunity.volunteerImageUrl}` : "http://localhost:8080/images/default.png"}
+                                    src={opportunity.volunteerImageUrl ? `http://localhost:8080${opportunity.volunteerImageUrl}` : "http://localhost:3000/images/default.png"}
                                     alt="Opportunity"
                                     style={{ width: '100%', height: '550px', objectFit: 'cover', borderRadius: 8 }}
                                 />
@@ -343,12 +404,11 @@ const OpportunityDetail = () => {
                                     handleClose={() => setAuthModalOpen(false)} // Close the auth modal when the user cancels
                                 />
                             </Box>
-
                         </Paper>
                     </Grid>
 
-                    {/* Right Section: Reminders */}
-                    <Grid item xs={12} md={5} sx={{ display: 'flex', flexDirection: 'column', height: '800px', marginTop: 3 }}>
+                    {/* Reminder */}
+                    <Grid item xs={12} md={5} sx={{ display: 'flex', flexDirection: 'column', height: '300px', marginTop: 3 }}>
                         <Paper
                             elevation={0}
                             sx={{
@@ -362,13 +422,13 @@ const OpportunityDetail = () => {
                             }}
                         >
                             {/* Icon at the top */}
-                            <Box sx={{ marginTop: 7, marginBottom: 2 }}>
-                                <NotificationsActiveIcon sx={{ fontSize: 130, color: '#675bc8' }} /> {/* Match color to button */}
+                            <Box sx={{ marginTop: 2, marginBottom: 2 }}>
+                                <NotificationsActiveIcon sx={{ fontSize: 100, color: '#675bc8' }} /> {/* Match color to button */}
                             </Box>
 
                             {/* Title */}
                             <Typography
-                                variant="h4"
+                                variant="h5"
                                 gutterBottom
                                 align="center"
                                 sx={{
@@ -380,34 +440,34 @@ const OpportunityDetail = () => {
                             </Typography>
 
                             <Typography
-                                variant="body1"
+                                variant="body2"  // Changed from body1 to body2 for smaller text
                                 color="textPrimary"
                                 align="center"
                                 sx={{
-                                    marginTop: 3,
+                                    marginTop: 2,  // Reduced marginTop
                                     paddingX: 2,
                                     fontWeight: 'bold',
-                                    fontSize: '1rem',  // Smaller text size
-                                    lineHeight: 1.5,   // Maintaining line height for readability
+                                    fontSize: '0.875rem',  // Smaller text size
+                                    lineHeight: 1.4,  // Tighter line height for readability
                                 }}
                             >
                                 Don't forget to join the volunteer orientation on {formatDate(opportunity.volunteerDatetime)} at {opportunity.location}. During the session, we’ll cover the event schedule, team assignments, and safety protocols.
                                 <br />
                                 <Typography
-                                    variant="body1"
+                                    variant="body2"  // Changed from body1 to body2 for smaller text
                                     color="textSecondary"
                                     align="center"
                                     sx={{
-                                        marginTop: 2,
+                                        marginTop: 1,  // Reduced marginTop
                                         paddingX: 2,
-                                        fontSize: '1rem',  // Smaller text size for the reminder
+                                        fontSize: '0.875rem',  // Smaller text size for the reminder
                                         fontWeight: 'normal',
-                                        lineHeight: 1.6,
+                                        lineHeight: 1.5,  // Adjust lineHeight for readability
                                     }}
                                 >
                                     Here’s what to prepare:
                                 </Typography>
-                                <ul style={{ textAlign: 'left', margin: '10px auto', maxWidth: '500px', fontSize: '0.9rem', lineHeight: 1.7 }}>
+                                <ul style={{ textAlign: 'left', margin: '8px auto', maxWidth: '450px', fontSize: '0.8rem', lineHeight: 1.6 }}>
                                     <li>Review the volunteer code of conduct beforehand.</li>
                                     <li>Bring a valid ID for registration verification.</li>
                                     <li>Wear comfortable clothes and closed-toe shoes for safety.</li>
@@ -419,19 +479,35 @@ const OpportunityDetail = () => {
                                     align="center"
                                     sx={{
                                         marginTop: 2,
-                                        fontSize: '1rem',  // Smaller text for the concluding note
+                                        fontSize: '0.875rem',  // Smaller text for the concluding note
                                         fontWeight: 'bold',
                                     }}
                                 >
-                                    Remember, your dedication is what makes this event possible! If you have questions, feel free to reach out to the volunteer coordinator before the event. Let's make a difference together!
+                                    If you have questions, feel free to reach out to the volunteer coordinator below before the event. Let's make a difference together!
                                 </Typography>
                             </Typography>
-
-
-
-
                         </Paper>
+
+                        <Paper
+                            elevation={3}
+                            sx={{
+                                padding: 0, // Reduced padding inside the Paper
+                                borderRadius: 2,
+                                maxWidth: 700,
+                                margin: '0',
+                                backgroundColor: '#F4F4FB',
+                                marginTop: 4,  // Added marginTop for spacing
+                            }}
+                            
+                        >
+                            <Box sx={{ padding: 0 }}>
+                                  {/* Reduced padding inside Box */}
+                                <UserProfile />
+                            </Box>
+                        </Paper>
+
                     </Grid>
+
 
 
                 </Grid>

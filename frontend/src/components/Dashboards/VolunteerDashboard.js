@@ -3,7 +3,7 @@ import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, C
 import { Edit, Delete } from '@mui/icons-material';
 import axios from 'axios';
 
-const VolunteerOpportunities = () => {
+const VolunteerDashboard = () => {
     const [volunteerOpportunities, setVolunteerOpportunities] = useState([]);
     const [open, setOpen] = useState(false);
     const [selectedOpportunity, setSelectedOpportunity] = useState({
@@ -21,6 +21,7 @@ const VolunteerOpportunities = () => {
         volunteerImage: null // Added for the image
     });
     const [image, setImage] = useState(null); // New state to handle the image
+    const [errors, setErrors] = useState({}); // Error state to handle field errors
 
     useEffect(() => {
         fetchVolunteerOpportunities();
@@ -57,10 +58,29 @@ const VolunteerOpportunities = () => {
             volunteerImage: null // Reset image state
         });
         setImage(null); // Clear image on close
+        setErrors({}); // Clear errors on close
     };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
+        let validationErrors = { ...errors };
+
+        // Ensure registrationEndDate is not before registrationStartDate
+        if (name === 'registrationEndDate' && value < selectedOpportunity.registrationStartDate) {
+            validationErrors.registrationEndDate = 'Registration End Date cannot be before Registration Start Date';
+        } else {
+            delete validationErrors.registrationEndDate; // Clear error if valid
+        }
+
+        // Ensure volunteerDatetime is not before registrationStartDate or registrationEndDate
+        if (name === 'volunteerDatetime' && (value < selectedOpportunity.registrationStartDate || value < selectedOpportunity.registrationEndDate)) {
+            validationErrors.volunteerDatetime = 'Volunteer Date/Time cannot be before Registration Start Date or Registration End Date';
+        } else {
+            delete validationErrors.volunteerDatetime; // Clear error if valid
+        }
+
+        setErrors(validationErrors); // Set the updated errors
+
         setSelectedOpportunity((prev) => ({ ...prev, [name]: value }));
     };
 
@@ -233,6 +253,8 @@ const VolunteerOpportunities = () => {
                         value={selectedOpportunity.registrationStartDate}
                         onChange={handleChange}
                         inputProps={{ min: today }} // Set min to current date and time
+                        error={!!errors.registrationStartDate}
+                        helperText={errors.registrationStartDate}
                     />
 
                     {/* Registration End Date */}
@@ -246,6 +268,8 @@ const VolunteerOpportunities = () => {
                         value={selectedOpportunity.registrationEndDate}
                         onChange={handleChange}
                         inputProps={{ min: selectedOpportunity.registrationStartDate || today }} // Min is the registration start date or now
+                        error={!!errors.registrationEndDate}
+                        helperText={errors.registrationEndDate}
                     />
 
                     {/* Volunteer Date/Time */}
@@ -259,6 +283,8 @@ const VolunteerOpportunities = () => {
                         value={selectedOpportunity.volunteerDatetime}
                         onChange={handleChange}
                         inputProps={{ min: selectedOpportunity.registrationStartDate || today }} // Min is the registration start date or now
+                        error={!!errors.volunteerDatetime}
+                        helperText={errors.volunteerDatetime}
                     />
 
                     {/* Image Upload */}
@@ -282,4 +308,4 @@ const VolunteerOpportunities = () => {
     );
 };
 
-export default VolunteerOpportunities;
+export default VolunteerDashboard;

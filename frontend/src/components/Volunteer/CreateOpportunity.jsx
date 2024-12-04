@@ -5,7 +5,6 @@ import {
   Container,
   Typography,
   Box,
-  Fade,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -14,38 +13,90 @@ import {
   Stepper,
   Step,
   StepLabel,
-  StepConnector,
   styled,
 } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import StepConnector, { stepConnectorClasses } from '@mui/material/StepConnector';
 import PetsIcon from '@mui/icons-material/Pets'; // Icon for active steps
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'; // Completed step icon
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked'; // Inactive step icon
+import AddIcon from '@mui/icons-material/Add';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
-// Custom Step Connector
-const CustomConnector = styled(StepConnector)(({ theme }) => ({
-  '& .MuiStepConnector-line': {
-    borderColor: theme.palette.grey[300],
-    borderTopWidth: 2,
-    borderStyle: 'dotted',
+// Import your custom connector images
+import NotPassedLine from '../../assets/notpassed_stepper.png';
+import PassedLine from '../../assets/passed_stepper.png';
+import CurrentLine from '../../assets/current_stepper.png';
+
+const CustomConnector = styled(StepConnector)(({ theme, activeStep }) => ({
+  [`&.${stepConnectorClasses.alternativeLabel}`]: {
+    top: 12, // Adjust vertical alignment of connector
+    margin: 0, // No margin
+    padding: 0, // No padding
+  },
+  [`& .${stepConnectorClasses.line}`]: {
+    height: 20, // Increased height of the connector line
+    border: 'none', // No border
+    marginTop: 5, // No extra margin
+    padding: 0, // No extra padding
+    position: 'absolute',
+    top: '50%', // Keep vertical alignment centered
+    transform: 'translateY(-50%)', // Adjust vertical alignment precisely
+    width: '100%', // Line stretches fully between icons
+    backgroundSize: '150% 150%', // Enlarges the background image
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'center',
+    backgroundImage: `url(${NotPassedLine})`, // Default line image for steps that are not active or completed
+  },
+  [`&.${stepConnectorClasses.active} .${stepConnectorClasses.line}`]: {
+    backgroundImage: `url(${CurrentLine})`, // Active step line on the right side
+  },
+  [`&.${stepConnectorClasses.completed} .${stepConnectorClasses.line}`]: {
+    backgroundImage: `url(${PassedLine})`, // Completed step line
   },
 }));
 
-// Custom Step Icon
-const CustomStepIcon = styled('div')(({ theme, ownerState }) => ({
+
+
+// Custom Step Icon styled to appear inline with connector
+const CustomStepIconRoot = styled('div')(({ theme, ownerState }) => ({
   display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  backgroundColor: ownerState.active
-    ? theme.palette.primary.main
-    : theme.palette.grey[300],
-  color: ownerState.active ? '#fff' : theme.palette.grey[500],
-  width: 40,
-  height: 40,
-  borderRadius: '50%',
-  transition: 'background-color 0.3s ease, color 0.3s ease',
+  flexDirection: 'row', // Inline layout for icon and connector
+  alignItems: 'center', // Vertically align icon and connector
+  justifyContent: 'center', // Center the content horizontally
+  position: 'relative',
+  zIndex: 1,
+  margin: 0, // Remove any default margin
+  padding: 0, // Remove any default padding
+  '& .MuiSvgIcon-root': {
+    width: 36, // Increased icon size
+    height: 36, // Increased icon size
+    margin: 0, // Ensure no margin around the icon
+    padding: 0, // Ensure no padding inside the icon
+    color: ownerState.active
+      ? theme.palette.primary.main
+      : ownerState.completed
+        ? 'rgb(103, 91, 200)'
+        : theme.palette.grey[500], // Icon color based on state
+  },
 }));
+
+const CustomStepIcon = (props) => {
+  const { active, completed, className } = props;
+
+  return (
+    <CustomStepIconRoot ownerState={{ active, completed }} className={className}>
+      {completed ? (
+        <CheckCircleOutlineIcon />
+      ) : active ? (
+        <PetsIcon />
+      ) : (
+        <RadioButtonUncheckedIcon />
+      )}
+    </CustomStepIconRoot>
+  );
+};
+
 
 const CreateOpportunity = () => {
   const [formData, setFormData] = useState({
@@ -77,7 +128,8 @@ const CreateOpportunity = () => {
   const steps = [
     'Title and Description',
     'Dates',
-    'Hours, Volunteers, and Image',
+    'Location',
+    'Upload Images'
   ];
 
   useEffect(() => {
@@ -107,12 +159,19 @@ const CreateOpportunity = () => {
       );
     }
 
-    if (['registrationStartDate', 'registrationEndDate', 'volunteerDatetime'].includes(name)) {
+    if (
+      ['registrationStartDate', 'registrationEndDate', 'volunteerDatetime'].includes(
+        name
+      )
+    ) {
       const errors = { ...dateErrors };
 
       if (name === 'registrationStartDate' && value) {
         errors.registrationStartDate = '';
-        if (formData.registrationEndDate && new Date(value) >= new Date(formData.registrationEndDate)) {
+        if (
+          formData.registrationEndDate &&
+          new Date(value) >= new Date(formData.registrationEndDate)
+        ) {
           errors.registrationEndDate = 'Start date must be before the end date.';
         }
       }
@@ -122,15 +181,20 @@ const CreateOpportunity = () => {
         if (new Date(value) <= new Date(formData.registrationStartDate)) {
           errors.registrationEndDate = 'End date must be after the start date.';
         }
-        if (formData.volunteerDatetime && new Date(value) >= new Date(formData.volunteerDatetime)) {
-          errors.volunteerDatetime = 'End date must be before the volunteer date.';
+        if (
+          formData.volunteerDatetime &&
+          new Date(value) >= new Date(formData.volunteerDatetime)
+        ) {
+          errors.volunteerDatetime =
+            'End date must be before the volunteer date.';
         }
       }
 
       if (name === 'volunteerDatetime' && value) {
         errors.volunteerDatetime = '';
         if (new Date(value) <= new Date(formData.registrationEndDate)) {
-          errors.volunteerDatetime = 'Volunteer date must be after the registration end date.';
+          errors.volunteerDatetime =
+            'Volunteer date must be after the registration end date.';
         }
       }
 
@@ -148,22 +212,50 @@ const CreateOpportunity = () => {
   };
 
   const isStepValid = () => {
-    const { title, description, registrationStartDate, registrationEndDate, volunteerDatetime, hoursWorked, volunteersNeeded } = formData;
+    const {
+      title,
+      description,
+      registrationStartDate,
+      registrationEndDate,
+      volunteerDatetime,
+      location,
+      hoursWorked,
+      volunteersNeeded,
+      imageUrl,  // Image URL for the image upload step
+    } = formData;
 
     if (currentStep === 0) {
+      // Title and Description validation
       return title && description && !descriptionError;
     }
 
     if (currentStep === 1) {
-      return registrationStartDate && registrationEndDate && volunteerDatetime && !Object.values(dateErrors).some(Boolean);
+      // Date fields validation
+      return (
+        registrationStartDate &&
+        registrationEndDate &&
+        volunteerDatetime &&
+        !Object.values(dateErrors).some(Boolean)
+      );
     }
 
     if (currentStep === 2) {
-      return hoursWorked > 0 && volunteersNeeded > 0 && imageFile;
+      // Location, Hours Worked, and Volunteers Needed validation
+      return (
+        location &&
+        hoursWorked > 0 &&
+        volunteersNeeded > 0
+      );
+    }
+
+    if (currentStep === 3) {
+      // Image upload validation
+      return imageUrl !== null;
     }
 
     return true;
   };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -186,7 +278,9 @@ const CreateOpportunity = () => {
       setErrorMessage('');
 
       const requestData = new FormData();
-      Object.entries(formData).forEach(([key, value]) => requestData.append(key, value));
+      Object.entries(formData).forEach(([key, value]) =>
+        requestData.append(key, value)
+      );
       if (userId) requestData.append('creatorId', userId);
       if (imageFile) requestData.append('volunteerImage', imageFile);
 
@@ -195,7 +289,10 @@ const CreateOpportunity = () => {
       navigate('/volunteer', { replace: true });
       window.location.reload();
     } catch (error) {
-      setErrorMessage(error.response?.data?.message || 'Failed to create opportunity. Please try again.');
+      setErrorMessage(
+        error.response?.data?.message ||
+        'Failed to create opportunity. Please try again.'
+      );
     } finally {
       setIsSubmitting(false);
       setOpenDialog(false);
@@ -203,51 +300,38 @@ const CreateOpportunity = () => {
   };
 
   return (
-
     <Container
       maxWidth={false} // This disables the default maxWidth behavior
       style={{ maxWidth: '1500px', margin: '0 auto' }} // Adjust width and center the form
     >
-
       <form onSubmit={handleSubmit} style={{ width: '100%', marginTop: 10 }}>
         {/* Custom Stepper */}
         <Stepper
-      alternativeLabel
-      activeStep={currentStep}
-      connector={<CustomConnector />}
-    >
-      {steps.map((label, index) => (
-        <Step key={index}>
-          <StepLabel
-            StepIconComponent={(props) => (
-              <CustomStepIcon ownerState={props}>
-                {props.completed ? (
-                  <CheckCircleOutlineIcon />
-                ) : props.active ? (
-                  <PetsIcon />
-                ) : (
-                  <RadioButtonUncheckedIcon />
-                )}
-              </CustomStepIcon>
-            )}
-          >
-            <Typography
-              variant="body2"
-              style={{
-                fontWeight: index === currentStep ? 'bold' : 'normal',
-                color: index <= currentStep ? 'black' : '#888',
-              }}
-            >
-              {label}
-            </Typography>
-          </StepLabel>
-        </Step>
-      ))}
-    </Stepper>
+          activeStep={currentStep}
+          alternativeLabel
+          connector={<CustomConnector />}
+          style={{ overflow: 'visible' }} // Prevent clipping
+        >
+          {steps.map((label, index) => (
+            <Step key={label}>
+              <StepLabel StepIconComponent={CustomStepIcon}>
+                <Typography
+                  variant="body2"
+                  style={{
+                    fontWeight: index === currentStep ? 'bold' : 'normal',
+                    color: index <= currentStep ? 'black' : '#888',
+                  }}
+                >
+                  {label}
+                </Typography>
+              </StepLabel>
+            </Step>
+          ))}
+        </Stepper>
 
         {currentStep === 0 && (
           <Grid container spacing={2}>
-            <Grid item xs={12}>
+            <Grid item xs={12} mt={2}>
               <TextField
                 label="Title"
                 name="title"
@@ -255,7 +339,7 @@ const CreateOpportunity = () => {
                 value={formData.title}
                 onChange={handleChange}
                 required
-                margin="dense" 
+                margin="dense"
               />
             </Grid>
             <Grid item xs={12}>
@@ -266,22 +350,11 @@ const CreateOpportunity = () => {
                 value={formData.description}
                 onChange={handleChange}
                 required
-                margin="dense" 
+                margin="dense"
                 multiline
                 rows={4}
                 error={Boolean(descriptionError)}
                 helperText={descriptionError || 'Maximum 500 words'}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                label="Location"
-                name="location"
-                fullWidth
-                value={formData.location}
-                onChange={handleChange}
-                required
-                margin="dense" 
               />
             </Grid>
           </Grid>
@@ -289,7 +362,7 @@ const CreateOpportunity = () => {
 
         {currentStep === 1 && (
           <Grid container spacing={2}>
-            <Grid item xs={6}>
+            <Grid item xs={6} mt={5.8}>
               <TextField
                 label="Registration Start Date"
                 name="registrationStartDate"
@@ -305,7 +378,7 @@ const CreateOpportunity = () => {
                 helperText={dateErrors.registrationStartDate}
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={6} mt={5.8}>
               <TextField
                 label="Registration End Date"
                 name="registrationEndDate"
@@ -317,13 +390,15 @@ const CreateOpportunity = () => {
                 margin="normal"
                 InputLabelProps={{ shrink: true }}
                 inputProps={{
-                  min: formData.registrationStartDate || new Date().toISOString().slice(0, 16),
+                  min:
+                    formData.registrationStartDate ||
+                    new Date().toISOString().slice(0, 16),
                 }}
                 error={Boolean(dateErrors.registrationEndDate)}
                 helperText={dateErrors.registrationEndDate}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={12} mt={2} mb={2.9}>
               <TextField
                 label="Volunteer Date and Time"
                 name="volunteerDatetime"
@@ -335,7 +410,9 @@ const CreateOpportunity = () => {
                 margin="normal"
                 InputLabelProps={{ shrink: true }}
                 inputProps={{
-                  min: formData.registrationEndDate || new Date().toISOString().slice(0, 16),
+                  min:
+                    formData.registrationEndDate ||
+                    new Date().toISOString().slice(0, 16),
                 }}
                 error={Boolean(dateErrors.volunteerDatetime)}
                 helperText={dateErrors.volunteerDatetime}
@@ -346,7 +423,21 @@ const CreateOpportunity = () => {
 
         {currentStep === 2 && (
           <Grid container spacing={2}>
-            <Grid item xs={6}>
+            {/* Location - separate */}
+            <Grid item xs={12} mt={5.5}>
+              <TextField
+                label="Location"
+                name="location"
+                fullWidth
+                value={formData.location}
+                onChange={handleChange}
+                required
+                margin="dense"
+              />
+            </Grid>
+
+            {/* Hours Worked and Volunteers Needed - inline */}
+            <Grid item xs={6} mt={3}>
               <TextField
                 label="Hours Worked"
                 name="hoursWorked"
@@ -355,11 +446,11 @@ const CreateOpportunity = () => {
                 value={formData.hoursWorked}
                 onChange={handleChange}
                 required
-                margin="normal"
-                inputProps={{ min: 1 }}
+                margin="dense"
+                inputProps={{ min: 0 }}  // Prevent negative values
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={6} mt={3} mb={5.3}>
               <TextField
                 label="Volunteers Needed"
                 name="volunteersNeeded"
@@ -368,20 +459,67 @@ const CreateOpportunity = () => {
                 value={formData.volunteersNeeded}
                 onChange={handleChange}
                 required
-                margin="normal"
-                inputProps={{ min: 1 }}
+                margin="dense"
+                inputProps={{ min: 0 }}  // Prevent negative values
               />
-            </Grid>
-            <Grid item xs={12}>
-              <Box mt={1}>
-                {imageUrl && (
-                  <img src={imageUrl} alt="Preview" width="100%" style={{ margin: '10px 0' }} />
-                )}
-                <input type="file" accept="image/*" onChange={handleImageChange} />
-              </Box>
             </Grid>
           </Grid>
         )}
+        {currentStep === 3 && (
+          <Grid container spacing={2}>
+            <Grid item xs={12} mt={3.25} sx={{ position: 'relative', height: 250 }}>
+              {/* Display the upload prompt if no image is uploaded */}
+              {!imageUrl && (
+                <>
+                  <Box
+                    sx={{
+                      border: '2px dashed #888',  // Dashed border for outline
+                      height: '100%',
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      position: 'relative',
+                      cursor: 'pointer',
+                      backgroundColor: '#f9f9f9',  // Light background
+                    }}
+                  >
+                    <AddIcon sx={{ color: '#888', fontSize: 40 }} />
+                    <Typography variant="body2" sx={{ position: 'absolute', color: '#888', bottom: 10 }}>
+                      Click to upload or drag and drop
+                    </Typography>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      style={{
+                        opacity: 0,
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        cursor: 'pointer',
+                      }}
+                      onChange={handleImageChange}
+                    />
+                  </Box>
+                </>
+              )}
+
+              {/* Display the image preview if an image is uploaded */}
+              {imageUrl && (
+                <img
+                  src={imageUrl}
+                  alt="Preview"
+                  style={{ width: '100%', maxHeight: 200, objectFit: 'cover' }}
+                />
+              )}
+            </Grid>
+          </Grid>
+        )}
+
+
+
+        {/* Navigation Buttons */}
         <Box mt={3} display="flex" justifyContent="space-between" alignItems="center">
           {currentStep > 0 && (
             <Button
@@ -403,8 +541,6 @@ const CreateOpportunity = () => {
             {currentStep === steps.length - 1 ? 'Submit' : 'Next'}
           </Button>
         </Box>
-
-
       </form>
 
       {/* Confirmation Dialog */}
@@ -417,11 +553,7 @@ const CreateOpportunity = () => {
           <Button onClick={() => setOpenDialog(false)} color="secondary">
             Cancel
           </Button>
-          <Button
-            onClick={handleConfirm}
-            color="primary"
-            disabled={isSubmitting}
-          >
+          <Button onClick={handleConfirm} color="primary" disabled={isSubmitting}>
             Confirm
           </Button>
         </DialogActions>
@@ -435,7 +567,6 @@ const CreateOpportunity = () => {
         </Box>
       )}
     </Container>
-
   );
 };
 

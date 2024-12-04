@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface VolunteerSignUpRepository extends JpaRepository<VolunteerSignUp, Integer> {
     // Custom query methods can be added here if needed
+    boolean existsByEmailAndVolunteerOpportunity_OpportunityID(String email, int opportunityId);
 }

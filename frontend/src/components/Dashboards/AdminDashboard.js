@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Box, CssBaseline, Typography } from '@mui/material';
 import UserDashboard from './UserDashboard';
 import LostAndFoundDashboard from './LostAndFoundDashboard';
+import VolunteerDashboard from './VolunteerDashboard';
 import AdminNavbar from './AdminNavbar';
 
 const AdminDashboard = () => {
@@ -13,6 +14,8 @@ const AdminDashboard = () => {
                 return <UserDashboard />;
             case 'Lost and Found':
                 return <LostAndFoundDashboard />;
+            case 'Volunteers':
+                return <VolunteerDashboard/>;
             default:
                 return <UserDashboard />;
         }
