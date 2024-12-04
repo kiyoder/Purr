@@ -74,6 +74,7 @@ const AuthModal = ({ open, handleClose }) => {
 
             navigate("/profile");
             handleClose();
+            setLoginCredentials({ username: "", password: "" }); // Reset form data
         } catch (error) {
             setSnackbar({
                 open: true,
@@ -131,6 +132,15 @@ const AuthModal = ({ open, handleClose }) => {
                 severity: "success",
             });
             setIsLogin(true);
+            setSignupCredentials({
+                firstName: "",
+                lastName: "",
+                username: "",
+                email: "",
+                password: "",
+                address: "",
+                phoneNumber: "",
+            }); // Reset form data
             handleClose();
         } catch (error) {
             setSnackbar({
@@ -168,6 +178,22 @@ const AuthModal = ({ open, handleClose }) => {
         setSnackbar({ ...snackbar, open: false });
     };
 
+    const handleDialogClose = () => {
+        handleClose();
+        setSignupCredentials({
+            firstName: "",
+            lastName: "",
+            username: "",
+            email: "",
+            password: "",
+            address: "",
+            phoneNumber: "",
+        });
+        setLoginCredentials({ username: "", password: "" });
+        setUsernameExists(false);
+        setEmailExists(false);
+    };
+
     // Render Snackbar outside the Dialog to ensure visibility
     const snackbarPortal = createPortal(
         <Snackbar
@@ -176,7 +202,7 @@ const AuthModal = ({ open, handleClose }) => {
             onClose={handleCloseSnackbar}
             anchorOrigin={{ vertical: "top", horizontal: "center" }}
             sx={{
-                zIndex: 2000, // Ensure Snackbar is always visible
+                zIndex: 2000,
             }}
         >
             <Alert
@@ -187,7 +213,7 @@ const AuthModal = ({ open, handleClose }) => {
                 {snackbar.message}
             </Alert>
         </Snackbar>,
-        document.body // Attach to the body element
+        document.body
     );
 
     return (
@@ -196,7 +222,7 @@ const AuthModal = ({ open, handleClose }) => {
 
             <Dialog
                 open={open}
-                onClose={handleClose}
+                onClose={handleDialogClose}
                 fullWidth
                 maxWidth="sm"
                 sx={{
@@ -204,12 +230,20 @@ const AuthModal = ({ open, handleClose }) => {
                         backgroundColor: "rgba(0, 0, 0, 0.5)",
                         backdropFilter: "blur(8px)",
                     },
+                    "& .MuiPaper-root": {
+                        height: "650px",
+                        maxHeight: "650px",
+                        width: "90vw",
+                        maxWidth: "600px",
+                        borderRadius: 2,
+                    },
                 }}
             >
                 <Grid container component={Paper} elevation={3} sx={{ height: "100%" }}>
                     <Grid
                         item
-                        xs={12} md={4}
+                        xs={12}
+                        md={4}
                         sx={{
                             display: { xs: "none", md: "block" },
                             backgroundImage: `url(${authBg})`,
@@ -220,11 +254,11 @@ const AuthModal = ({ open, handleClose }) => {
 
                     <Grid
                         item
-                        xs={12} md={8}
+                        xs={12}
+                        md={8}
                         sx={{
                             display: "flex",
                             flexDirection: "column",
-                            position: "relative",
                             alignItems: "center",
                             justifyContent: "center",
                             padding: { xs: 2, md: 4 },
@@ -232,7 +266,7 @@ const AuthModal = ({ open, handleClose }) => {
                         }}
                     >
                         <IconButton
-                            onClick={handleClose}
+                            onClick={handleDialogClose}
                             sx={{
                                 position: "absolute",
                                 top: 16,
@@ -293,10 +327,7 @@ const AuthModal = ({ open, handleClose }) => {
                                                 </Button>
                                             </Grid>
                                         </Grid>
-                                        <Typography
-                                            variant="body2"
-                                            sx={{ mt: 2 }}
-                                        >
+                                        <Typography variant="body2" sx={{ mt: 2 }}>
                                             Don't have an account?{" "}
                                             <Box
                                                 component="span"
@@ -434,10 +465,7 @@ const AuthModal = ({ open, handleClose }) => {
                                                 </Button>
                                             </Grid>
                                         </Grid>
-                                        <Typography
-                                            variant="body2"
-                                            sx={{ mt: 2 }}
-                                        >
+                                        <Typography variant="body2" sx={{ mt: 2 }}>
                                             Already have an account?{" "}
                                             <Box
                                                 component="span"
