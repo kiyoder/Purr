@@ -6,8 +6,6 @@ import UserDashboard from "./components/Dashboards/UserDashboard";
 import Home from "./components/Home";
 import LostAndFound from "./components/LostAndFound";
 import Sponsor from "./components/Sponsor";
-import AdoptionForm from "./components/AdoptionForm";
-import AdoptionList from "./components/AdoptionList";
 import DonationForm from "./components/DonationForm";
 import DonationTable from "./components/DonationTable";
 
@@ -23,7 +21,7 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import NoMatch from "./components/NoMatch";
 import Profile from "./components/Profile";
 import Navbar from "./components/Navbar";
-import PetList from "./components/PetList";
+import PetList from "./components/PetRehome/PetList";
 import AdminDashboard from "./components/Dashboards/AdminDashboard";
 import { UserProvider } from "./components/UserContext";
 import User from "./components/User";
@@ -55,7 +53,7 @@ function App() {
         <Router>
           <div
             style={{
-              paddingTop: "120px", // Adjust based on your Navbar height
+              paddingTop: "120px", 
             }}
           ></div>
           <Navbar />
@@ -71,13 +69,11 @@ function App() {
             <Route path="/sponsor" element={<Sponsor />} />
             <Route path="/adopt" element={<PetList />} />
             <Route path="*" element={<NoMatch />} />
-            <Route path="/adopt_dash" element={<AdoptionList />} />
             <Route path="/donate" element={<DonationForm />} />
             <Route path="/donation_dash" element={<DonationTable />} />
             <Route path="/volunteer" element={<Volunteer />} />
             <Route path="/admin/manage-opportunities" element={<VolunteerOpportunities />}/>
             <Route path="/admin/manage-volunteers" element={<VolunteerSignUp />}/>
-            <Route path="/admin/adoption-list" element={<AdoptionList />} />
             <Route path="/opportunity/:id" element={<OpportunityDetail />} />
             <Route path="/update-opportunity/:id" element={<UpdateOpportunity />} />
             <Route path="/book" element={<CreateOpportunity />} />

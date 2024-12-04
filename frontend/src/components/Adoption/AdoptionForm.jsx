@@ -7,11 +7,11 @@ const AdoptionForm = ({ pet }) => {
         name: '',
         address: '',
         contactNumber: '',
-        submissionDate: '',
+        adoptionDate: '',
         breed: pet ? pet.breed : '',
-        petDescription: pet ? pet.description : '',
-        petType: pet ? pet.type : ''
-    });
+        description: pet ? pet.description : '', 
+        petType: pet ? pet.type : '',
+    });    
     const [successMessage, setSuccessMessage] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
 
@@ -58,8 +58,11 @@ const AdoptionForm = ({ pet }) => {
 
         const newAdoption = {
             ...formData,
+            adoptionDate: formData.adoptionDate || new Date().toISOString().split('T')[0],
+            description: pet ? pet.description : formData.description,
             status: 'PENDING',
             adoptionID: Date.now(),
+            photo: pet ? pet.photo : '',
         };
 
         resetForm();
@@ -77,7 +80,7 @@ const AdoptionForm = ({ pet }) => {
             name: '',
             address: '',
             contactNumber: '',
-            submissionDate: '',
+            adoptionDate: '',
             breed: pet ? pet.breed : '',
             petDescription: pet ? pet.description : '',
             petType: pet ? pet.type : ''
@@ -87,47 +90,71 @@ const AdoptionForm = ({ pet }) => {
     return (
         <div style={styles.container}>
             <form onSubmit={handleSubmit} style={styles.form}>
-                <div style={{ ...styles.leftColumn, ...styles.leftColumnBorder }}>
-                    {pet && pet.image && (
-                        <Box sx={{ textAlign: 'center', marginBottom: 2 }}>
-                            <img 
-                                src={pet.image} 
-                                alt={`${pet.type} - ${pet.breed}`} 
-                                style={{ maxHeight: '200px', maxWidth: '100%', borderRadius: '10px', boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)' }} 
-                            />
-                        </Box>
-                    )}
-                    <TextField
-                        label="Pet Type"
-                        name="type"
-                        value={formData.petType}
-                        variant="outlined"
-                        fullWidth
-                        disabled
-                        sx={{ marginBottom: 2 }}
-                    />
-                    <TextField
-                        label="Breed of Pet"
-                        name="breed"
-                        value={formData.breed}
-                        variant="outlined"
-                        fullWidth
-                        disabled
-                        sx={{ marginBottom: 2 }}
-                    />
-                    <TextField
-                        label="Pet Description"
-                        name="petDescription"
-                        value={formData.petDescription}
-                        variant="outlined"
-                        multiline
-                        rows={3}
-                        fullWidth
-                        disabled
-                        sx={{ marginBottom: 2 }}
-                    />
-                </div>
-
+                <Box 
+                    sx={{
+                        border: '2px solid #5A20A8',
+                        borderRadius: '10px',
+                        padding: '20px', 
+                        boxShadow: '0px 4px 10px rgba(90, 32, 168, 0.2)', 
+                    }}
+                >
+                    <div style={styles.leftColumn}>
+                        {pet && pet.photo ? ( 
+                            <Box sx={{ textAlign: 'center', marginBottom: 2 }}>
+                                <img 
+                                    src={pet.photo} 
+                                    alt={`${pet.type} - ${pet.breed}`} 
+                                    style={{ 
+                                        maxHeight: '200px', 
+                                        maxWidth: '100%', 
+                                        borderRadius: '10px', 
+                                        boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)' 
+                                    }} 
+                                />
+                            </Box>
+                        ) : (
+                            <Box sx={{ textAlign: 'center', marginBottom: 2 }}>
+                                <img 
+                                    src="path/to/placeholder/image.jpg" 
+                                    alt="No Image Available" 
+                                    style={{ 
+                                        maxHeight: '200px', 
+                                        maxWidth: '100%', 
+                                        borderRadius: '10px', 
+                                        boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)' 
+                                    }} 
+                                />
+                            </Box>
+                        )}
+                        <TextField
+                            label="Pet Type"
+                            name="type"
+                            value={formData.petType}
+                            variant="outlined"
+                            fullWidth
+                            disabled
+                            sx={{ marginBottom: 2 }}
+                        />
+                        <TextField
+                            label="Breed of Pet"
+                            name="breed"
+                            value={formData.breed}
+                            variant="outlined"
+                            fullWidth
+                            disabled
+                            sx={{ marginBottom: 2 }}
+                        />
+                        <TextField
+                            label="Pet Description"
+                            name="description" 
+                            value={formData.description}
+                            variant="outlined"
+                            fullWidth
+                            disabled
+                            sx={{ marginBottom: 2 }}
+                        />
+                    </div>
+                </Box>
                 <div style={styles.rightColumn}>
                     <Typography
                         variant="h4"
@@ -174,10 +201,13 @@ const AdoptionForm = ({ pet }) => {
                         label="Submission Date"
                         type="date"
                         name="submissionDate"
-                        value={formData.submissionDate}
+                        value={formData.adoptionDate || new Date().toISOString().split('T')[0]} 
                         onChange={handleChange}
                         InputLabelProps={{ shrink: true }}
-                        inputProps={{ min: new Date().toISOString().split('T')[0] }}
+                        inputProps={{
+                            min: new Date().toISOString().split('T')[0], // today's date as the minimum
+                            max: new Date().toISOString().split('T')[0]  // today's date as the maximum
+                        }}
                         variant="outlined"
                         required
                         fullWidth
@@ -202,6 +232,7 @@ const AdoptionForm = ({ pet }) => {
                     color: 'white',
                     marginTop: '20px',
                 }}
+                onClick={handleSubmit}
             >
                 Submit Adoption
             </Button>
@@ -248,7 +279,7 @@ const styles = {
         border: '2px solid #5A20A8',
         borderRadius: '10px',
         padding: '20px',
-        boxShadow: '0px 4px 10px rgba(90, 32, 168, 0.2)', // Optional shadow for depth
+        boxShadow: '0px 4px 10px rgba(90, 32, 168, 0.2)', 
     },
     rightColumn: {
         display: 'flex',
@@ -256,7 +287,7 @@ const styles = {
         justifyContent: 'flex-start',
     },
     errorContainer: {
-        height: '24px', // Reserve fixed height for error messages
+        height: '24px', 
         textAlign: 'left',
         marginTop: '10px',
     },
