@@ -12,6 +12,8 @@ import {
     InputAdornment,
     IconButton,
     Tooltip,
+    Snackbar,
+    Alert,
 } from "@mui/material";
 import { useUser } from "./UserContext";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
@@ -38,7 +40,14 @@ const Profile = () => {
     const [showOldPassword, setShowOldPassword] = useState(false);
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [usernameExists, setUsernameExists] = useState(false);
+    const [emailExists, setEmailExists] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
+    const [snackbar, setSnackbar] = useState({
+        open: false,
+        message: "",
+        severity: "success",
+    });
     const fileInputRef = useRef(null);
 
     useEffect(() => {
@@ -55,44 +64,87 @@ const Profile = () => {
         }
     }, [user]);
 
+    const handleSnackbarClose = () => {
+        setSnackbar({ ...snackbar, open: false });
+    };
+
     const handleEdit = () => setEditingUserId(user?.userId);
 
     const handleCancelEdit = () => {
         setEditingUserId(null);
+        setUsernameExists(false);
+        setEmailExists(false);
     };
 
-    const handleEditChange = (e) => {
-        setEditFormData({
-            ...editFormData,
-            [e.target.name]: e.target.value,
-        });
-    };
+    const handleEditChange = async (e) => {
+        const { name, value } = e.target;
+        setEditFormData({ ...editFormData, [name]: value });
 
-    const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            setProfilePicture(file);
+        if (name === "username" && value.trim() !== "") {
+            checkUsername(value.trim());
+        }
+        if (name === "email" && value.trim() !== "") {
+            checkEmail(value.trim());
         }
     };
 
-    const handleAvatarClick = () => {
-        if (editingUserId) {
-            fileInputRef.current.click();
+    const checkUsername = async (username) => {
+        try {
+            if (username !== user.username) {
+                const response = await axios.get(
+                    `http://localhost:8080/api/auth/check-username?username=${username}`
+                );
+                setUsernameExists(response.data);
+            } else {
+                setUsernameExists(false);
+            }
+        } catch (error) {
+            console.error("Error checking username:", error);
+        }
+    };
+
+    const checkEmail = async (email) => {
+        try {
+            if (email !== user.email) {
+                const response = await axios.get(
+                    `http://localhost:8080/api/auth/check-email?email=${email}`
+                );
+                setEmailExists(response.data);
+            } else {
+                setEmailExists(false);
+            }
+        } catch (error) {
+            console.error("Error checking email:", error);
         }
     };
 
     const handleSaveEdit = async () => {
+        if (usernameExists || emailExists) {
+            setSnackbar({
+                open: true,
+                message: "Please resolve the validation errors before saving.",
+                severity: "warning",
+            });
+            return;
+        }
+
         setIsSaving(true);
         const token = localStorage.getItem("token");
         if (!token) {
-            console.error("Token is missing. Please log in again.");
+            setSnackbar({
+                open: true,
+                message: "Token is missing. Please log in again.",
+                severity: "error",
+            });
             return;
         }
+
         const formData = new FormData();
         formData.append("user", JSON.stringify(editFormData));
         if (profilePicture) {
             formData.append("profilePicture", profilePicture);
         }
+
         try {
             const response = await axios.put(
                 `http://localhost:8080/api/users/${user.userId}`,
@@ -104,36 +156,66 @@ const Profile = () => {
                     },
                 }
             );
+
             if (response.status === 200) {
+                const { updatedUser, newToken } = response.data;
+
+                if (newToken) {
+                    localStorage.setItem("token", newToken);
+                }
+
                 const updatedResponse = await axios.get(
                     `http://localhost:8080/api/users/me`,
                     {
-                        headers: { Authorization: `Bearer ${token}` },
+                        headers: { Authorization: `Bearer ${newToken || token}` },
                     }
                 );
+
                 if (updatedResponse.status === 200) {
                     updateUser(updatedResponse.data);
                     setProfilePicture(updatedResponse.data.profilePicture);
                     setEditingUserId(null);
+                    setSnackbar({
+                        open: true,
+                        message: "Profile updated successfully!",
+                        severity: "success",
+                    });
                 }
             } else {
-                console.error("Failed to update user");
+                setSnackbar({
+                    open: true,
+                    message: "Failed to update profile.",
+                    severity: "error",
+                });
             }
         } catch (error) {
+            setSnackbar({
+                open: true,
+                message: "Error saving profile changes. Please try again.",
+                severity: "error",
+            });
             console.error("Error saving user:", error);
+        } finally {
+            setIsSaving(false);
         }
-
-        setIsSaving(false);
     };
 
     const handlePasswordChange = async () => {
         if (passwordData.newPassword !== passwordData.confirmPassword) {
-            alert("New passwords do not match!");
+            setSnackbar({
+                open: true,
+                message: "New passwords do not match!",
+                severity: "warning",
+            });
             return;
         }
         const token = localStorage.getItem("token");
         if (!token) {
-            console.error("Token is missing. Please log in again.");
+            setSnackbar({
+                open: true,
+                message: "Token is missing. Please log in again.",
+                severity: "error",
+            });
             return;
         }
         try {
@@ -148,15 +230,27 @@ const Profile = () => {
                 }
             );
             if (response.status === 200) {
-                alert("Password changed successfully!");
+                setSnackbar({
+                    open: true,
+                    message: "Password changed successfully!",
+                    severity: "success",
+                });
                 setPasswordChange(false);
                 setPasswordData({ oldPassword: "", newPassword: "", confirmPassword: "" });
             } else {
-                console.error("Failed to change password");
+                setSnackbar({
+                    open: true,
+                    message: "Failed to change password.",
+                    severity: "error",
+                });
             }
         } catch (error) {
+            setSnackbar({
+                open: true,
+                message: "Error changing password. Please try again.",
+                severity: "error",
+            });
             console.error("Error changing password:", error);
-            alert("An error occurred while changing the password.");
         }
     };
 
@@ -170,12 +264,19 @@ const Profile = () => {
 
     return (
         <Container>
+            <Snackbar
+                open={snackbar.open}
+                autoHideDuration={6000}
+                onClose={handleSnackbarClose}
+                anchorOrigin={{ vertical: "top", horizontal: "center" }}
+            >
+                <Alert onClose={handleSnackbarClose} severity={snackbar.severity} sx={{ width: "100%" }}>
+                    {snackbar.message}
+                </Alert>
+            </Snackbar>
             <Box sx={{ mt: 5, maxWidth: 500, mx: "auto" }}>
                 <Typography variant="h4" align="center" gutterBottom>
                     Profile
-                </Typography>
-                <Typography variant="subtitle1" align="center" gutterBottom>
-                    Manage your account
                 </Typography>
                 <Box
                     sx={{
@@ -192,7 +293,7 @@ const Profile = () => {
                         title={
                             editingUserId
                                 ? "Click to upload a new profile picture"
-                                : "Profile picture upload is disabled"
+                                : ""
                         }
                     >
                         <Avatar
@@ -212,7 +313,7 @@ const Profile = () => {
                                 fontSize: "48px",
                                 cursor: editingUserId ? "pointer" : "default",
                             }}
-                            onClick={handleAvatarClick}
+                            onClick={() => editingUserId && fileInputRef.current.click()}
                         >
                             {(!profilePicture && !user.profilePicture) &&
                                 (user.firstName ? user.firstName[0] : "")}
@@ -222,21 +323,19 @@ const Profile = () => {
                         type="file"
                         accept="image/*"
                         ref={fileInputRef}
-                        onChange={handleFileChange}
+                        onChange={(e) => setProfilePicture(e.target.files[0])}
                         style={{ display: "none" }}
                     />
                     <Stack spacing={2} sx={{ width: "100%" }}>
-                        <Grid container spacing={0}>
-                            <Grid
-                                item
-                                xs={6}
-                                sx={{ pl: 0, pr: 2, pt: 2 }}
+                        <Grid container >
+                            <Grid item xs={6}
+                                  sx={{ pl: 0, pr: 2, pt: 2 }}
                             >
                                 <TextField
                                     name="firstName"
                                     label="First Name"
-                                    value={editingUserId ? editFormData.firstName : user.firstName}
-                                    onChange={editingUserId ? handleEditChange : null}
+                                    value={editFormData.firstName}
+                                    onChange={handleEditChange}
                                     variant="outlined"
                                     fullWidth
                                     size="small"
@@ -245,16 +344,14 @@ const Profile = () => {
                                     }}
                                 />
                             </Grid>
-                            <Grid
-                                item
-                                xs={6}
-                                sx={{ pl: 0, pr: 0, pt: 2 }}
+                            <Grid item xs={6}
+                                  sx={{ pl: 0, pr: 0, pt: 2 }}
                             >
                                 <TextField
                                     name="lastName"
                                     label="Last Name"
-                                    value={editingUserId ? editFormData.lastName : user.lastName}
-                                    onChange={editingUserId ? handleEditChange : null}
+                                    value={editFormData.lastName}
+                                    onChange={handleEditChange}
                                     variant="outlined"
                                     fullWidth
                                     size="small"
@@ -267,32 +364,31 @@ const Profile = () => {
                         <TextField
                             name="username"
                             label="Username"
-                            value={editingUserId ? editFormData.username : user.username}
-                            onChange={editingUserId ? handleEditChange : null}
+                            value={editFormData.username}
+                            onChange={handleEditChange}
                             variant="outlined"
                             fullWidth
                             size="small"
-                            InputProps={{
-                                readOnly: !editingUserId,
-                            }}
+                            error={usernameExists}
+                            helperText={usernameExists ? "Username is already taken." : ""}
                         />
                         <TextField
                             name="email"
                             label="Email"
-                            value={editingUserId ? editFormData.email : user.email}
-                            onChange={editingUserId ? handleEditChange : null}
+                            value={editFormData.email}
+                            onChange={handleEditChange}
                             variant="outlined"
                             fullWidth
                             size="small"
-                            InputProps={{
-                                readOnly: !editingUserId,
-                            }}
+                            error={emailExists}
+                            helperText={emailExists ? "Email is already registered." : ""}
                         />
+
                         <TextField
                             name="address"
                             label="Address"
-                            value={editingUserId ? editFormData.address : user.address}
-                            onChange={editingUserId ? handleEditChange : null}
+                            value={editFormData.address}
+                            onChange={handleEditChange}
                             variant="outlined"
                             fullWidth
                             size="small"
@@ -303,8 +399,8 @@ const Profile = () => {
                         <TextField
                             name="phoneNumber"
                             label="Phone Number"
-                            value={editingUserId ? editFormData.phoneNumber : user.phoneNumber}
-                            onChange={editingUserId ? handleEditChange : null}
+                            value={editFormData.phoneNumber}
+                            onChange={handleEditChange}
                             variant="outlined"
                             fullWidth
                             size="small"
@@ -320,7 +416,7 @@ const Profile = () => {
                                     variant="contained"
                                     color="primary"
                                     onClick={handleSaveEdit}
-                                    disabled={isSaving}
+                                    disabled={isSaving || usernameExists || emailExists}
                                 >
                                     {isSaving ? "Saving..." : "Save"}
                                 </Button>
