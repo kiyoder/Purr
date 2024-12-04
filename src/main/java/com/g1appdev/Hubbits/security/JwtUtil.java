@@ -37,7 +37,7 @@ public class JwtUtil {
         return new SecretKeySpec(keyBytes, SignatureAlgorithm.HS256.getJcaName());
     }
 
-    private final long ACCESS_TOKEN_VALIDITY = 1000 * 60 * 15; // 15 minutes
+    private final long ACCESS_TOKEN_VALIDITY = 1000 * 60 * 30; // 15 minutes
     private final long REFRESH_TOKEN_VALIDITY = 1000 * 60 * 60 * 24 * 7; // 7 days
 
     public String extractUsername(String token) {
