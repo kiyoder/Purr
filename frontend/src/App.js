@@ -27,6 +27,10 @@ import { UserProvider } from "./components/UserContext";
 import ArticleDashboard from "./components/Dashboards/ArticleDashboard";
 import User from "./components/User";
 
+import Unauthorized from "./components/Unauthorized";
+import ProtectedRoute from "./components/ProtectedRoute";
+
+
 
 const theme = createTheme({
   palette: {
@@ -48,6 +52,15 @@ const theme = createTheme({
 
 
 function App() {
+  const user = (() => {
+    try {
+      const storedUser = JSON.parse(localStorage.getItem("user"));
+      return storedUser && storedUser.role ? storedUser : null; // Ensure role exists
+    } catch {
+      return null; // Handle invalid JSON gracefully
+    }
+  })();
+
   return (
     <UserProvider>
       <ThemeProvider theme={theme}>
@@ -79,7 +92,15 @@ function App() {
             <Route path="/opportunity/:id" element={<OpportunityDetail />} />
             <Route path="/update-opportunity/:id" element={<UpdateOpportunity />} />
             <Route path="/book" element={<CreateOpportunity />} />
-            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/unauthorized" element={<Unauthorized />} />
+            <Route
+                path="/admin"
+                element={
+                  <ProtectedRoute user={user}>
+                    <AdminDashboard />
+                  </ProtectedRoute>
+                }
+            />
             <Route path="/user/:id" element={<User />} />
           </Routes>
         </Router>
