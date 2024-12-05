@@ -17,28 +17,10 @@ const DonationForm = ({ onAdminClick, donationToEdit }) => {
   const [error, setError] = useState(''); // For error messages
   const [successMessage, setSuccessMessage] = useState('');
   const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [userId, setUserId] = useState(null);
 
   const navigate = useNavigate();
 
-  // Helper for authentication
-  const validateToken = () => {
-    const token = localStorage.getItem('token');
-    const userId = localStorage.getItem('userId');
-    if (!token || !userId) {
-      setError('You must be logged in to submit a donation.');
-      return null;
-    }
-    return { token, userId };
-  };
-
   useEffect(() => {
-    const userId = localStorage.getItem('userId');
-    if (!userId) {
-      setUserId(null);
-    } else {
-      setUserId(userId);
-    }
     if (donationToEdit) {
       setFormData({
         amount: donationToEdit.amount,
@@ -58,35 +40,24 @@ const DonationForm = ({ onAdminClick, donationToEdit }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate user authentication
-    const auth = validateToken();
-    if (!auth) return;
-
     // Validate all required fields
     if (
       !formData.firstName.trim() ||
       !formData.lastName.trim() ||
       !formData.amount ||
+      // !formData.donationDate ||
       !formData.frequency
     ) {
       setError('Please fill out all required fields.');
-      return;
+      return; // Prevent submission
     }
 
     try {
-      const { token } = auth;
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      };
-
       if (donationToEdit) {
-        await axios.put(`http://localhost:8080/api/donations/${donationToEdit.donationID}`, formData, config);
+        await axios.put(`http://localhost:8080/api/donations/${donationToEdit.donationID}`, formData);
         setSuccessMessage('Donation updated successfully!');
       } else {
-        await axios.post('http://localhost:8080/api/donations', formData, config);
+        await axios.post('http://localhost:8080/api/donations', formData);
         setSuccessMessage('Donation submitted successfully!');
       }
       setSnackbarOpen(true);
@@ -101,25 +72,25 @@ const DonationForm = ({ onAdminClick, donationToEdit }) => {
     setSnackbarOpen(false);
   };
 
+  const handleAdminClick = () => {
+    navigate('/donation_dash');
+  };
+
   return (
     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '20px', paddingTop: '50px' }}>
       <Box sx={{ flex: 5, display: 'flex', flexDirection: 'column', marginLeft: '100px' }}>
-        <Typography variant="h5" sx={{ paddingBottom: '8px', fontWeight: 'bold' }}>
-          FEATURED PET:
-        </Typography>
-        <Typography variant="h6" sx={{ paddingBottom: '8px' }}>
-          Say hello to <span style={{ color: '#675BC8' }}>Max</span>! He is a 2-month-old Golden Retriever!
-        </Typography>
+      <Typography variant="h5" sx={{ paddingBottom: '8px', fontWeight: 'bold' }}>
+        FEATURED PET:
+      </Typography>
+      <Typography variant="h6" sx={{ paddingBottom: '8px' }}>
+        Say hello to <span style={{ color: '#675BC8' }}>Max</span>! He is a 2-month-old Golden Retriever!
+      </Typography>
+
         <img src={FeaturedImage} alt="Featured Pet" style={{ width: '100%', height: 'auto', borderRadius: '10px' }} />
       </Box>
 
       <Box sx={{ flex: 5, display: 'flex', flexDirection: 'column', paddingTop: '20px' }}>
-        <Box
-          component="form"
-          onSubmit={handleSubmit}
-          sx={{
-            width: '800px',
-            display: 'flex',
+        <Box component="form" onSubmit={handleSubmit} sx={{width: '800px', display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
@@ -130,13 +101,12 @@ const DonationForm = ({ onAdminClick, donationToEdit }) => {
             flex: 5,
             backgroundColor: '#F9F9F9',
             borderRadius: '8px',
-            boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
-          }}
-        >
+            boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',}} >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
             <img src={Paw} alt="Paw" style={{ width: '20px', height: '20px' }} />
             <Typography variant="h6">{donationToEdit ? 'Update Donation' : 'Make a Donation'}</Typography>
           </Box>
+
 
           {error && (
             <Typography variant="body2" color="error" sx={{ marginBottom: '16px' }}>
@@ -144,9 +114,44 @@ const DonationForm = ({ onAdminClick, donationToEdit }) => {
             </Typography>
           )}
 
-          <TextField name="firstName" label="First Name" variant="outlined" sx={styles.textField} value={formData.firstName} onChange={handleChange} required />
-          <TextField name="lastName" label="Last Name" variant="outlined" sx={styles.textField} value={formData.lastName} onChange={handleChange} required />
-          <TextField name="amount" label="Amount" variant="outlined" sx={styles.textField} type="number" value={formData.amount} onChange={handleChange} required />
+          <TextField
+            name="firstName"
+            label="First Name"
+            variant="outlined"
+            sx={styles.textField}
+            value={formData.firstName}
+            onChange={handleChange}
+            required
+          />
+          <TextField
+            name="lastName"
+            label="Last Name"
+            variant="outlined"
+            sx={styles.textField}
+            value={formData.lastName}
+            onChange={handleChange}
+            required
+          />
+          <TextField
+            name="amount"
+            label="Amount"
+            variant="outlined"
+            sx={styles.textField}
+            type="number"
+            value={formData.amount}
+            onChange={handleChange}
+            required
+          />
+          {/* <TextField
+            name="donationDate"
+            label="Donation Date"
+            variant="outlined"
+            sx={styles.textField}
+            type="date"
+            InputLabelProps={{ shrink: true }}
+            value={formData.donationDate}
+            onChange={handleChange}
+          /> */}
           <FormControl variant="outlined" fullWidth sx={styles.textField}>
             <InputLabel id="frequency-label">Frequency</InputLabel>
             <Select
@@ -162,27 +167,60 @@ const DonationForm = ({ onAdminClick, donationToEdit }) => {
               <MenuItem value="Yearly">Yearly</MenuItem>
             </Select>
           </FormControl>
-          <TextField name="specialMessage" label="Special Message" variant="outlined" sx={styles.textField} multiline rows={3} value={formData.specialMessage} onChange={handleChange} />
+          <TextField
+            name="specialMessage"
+            label="Special Message"
+            variant="outlined"
+            sx={styles.textField}
+            multiline
+            rows={3}
+            value={formData.specialMessage}
+            onChange={handleChange}
+          />
 
           <ToggleButton
             type="submit"
             sx={{
-              border: '2px solid',
-              borderRadius: '8px',
-              padding: '12px 36px',
-              borderColor: 'primary.main',
-              backgroundColor: 'primary.main',
-              color: '#fff',
-              '&:hover': {
-                backgroundColor: 'white',
-                color: 'primary.main',
+              border: "2px solid",
+              borderRadius: "8px",
+              padding: "12px 36px",
+              borderColor: "primary.main",
+              backgroundColor: "primary.main",
+              color: "#fff",
+              "&:hover": {
+                backgroundColor: "white",
+                color: "primary.main",
               },
             }}
           >
             {donationToEdit ? 'UPDATE' : 'DONATE'}
           </ToggleButton>
 
-          <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={handleSnackbarClose} message={successMessage} />
+          <Snackbar
+            open={snackbarOpen}
+            autoHideDuration={6000}
+            onClose={handleSnackbarClose}
+            message={successMessage}
+          />
+          {/*
+          <ToggleButton
+            onClick={handleAdminClick}
+            sx={{
+              border: "2px solid",
+              borderRadius: "8px",
+              padding: "12px 36px",
+              borderColor: "primary.main",
+              backgroundColor: "primary.main",
+              color: "#fff",
+              "&:hover": {
+                backgroundColor: "white",
+                color: "primary.main",
+              },
+            }}
+          >
+            ADMIN
+          </ToggleButton>
+          */}
         </Box>
       </Box>
     </Box>
