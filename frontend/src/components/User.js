@@ -92,6 +92,7 @@ const User = () => {
                 </Typography>
                 <Typography color="textSecondary">{user.email}</Typography>
                 <Typography color="textSecondary">{user.address}</Typography>
+                <Typography color="textSecondary">{user.phoneNumber}</Typography>
 
                 {loggedInUserId === user.userId && (
                     <Button
