@@ -84,4 +84,11 @@ public class DonationEntity {
     public void setSpecialMessage(String specialMessage) {
         this.specialMessage = specialMessage;
     }
+
+    @PrePersist
+    public void donationDate() {
+        if (this.donationDate == null) {
+            this.donationDate = new Date();  // Set the current date and time
+        }
+    }
 }

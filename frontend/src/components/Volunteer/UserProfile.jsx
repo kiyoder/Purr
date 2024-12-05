@@ -45,9 +45,7 @@ return (
                         {/* Created by label */}
                         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginRight: 3 }}>
                             <Avatar alt={filteredUser.firstName} src={`data:image/jpeg;base64,${filteredUser.profilePicture}`} sx={{ width: 80, height: 80, borderRadius: '50%' }} />
-                            <Typography variant="body2" sx={{ marginTop: 1, fontWeight: 'bold' }}>
-                                User ID: {filteredUser.userId}
-                            </Typography>
+                            
                         </Box>
 
                         {/* User details on the right side */}

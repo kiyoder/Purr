@@ -46,10 +46,9 @@ const Volunteer = () => {
     setIsBlurred(false); // Remove blur effect when dialog is closed
     setOpenFormDialog(false);
 
-    // Fetch the userID from localStorage
-    const userId = JSON.parse(localStorage.getItem('user'));
-    console.log('User ID:', userId);
-
+  // Fetch the userID from localStorage
+  const userId = JSON.parse(localStorage.getItem('user'));
+  console.log('User ID:', userId);
   };
 
   // Function to handle form submission success
@@ -119,7 +118,6 @@ const Volunteer = () => {
       handleOpenFormDialog();
     }
   };
-
 
   return (
     <motion.div
@@ -208,12 +206,12 @@ const Volunteer = () => {
           variant="h4"
           gutterBottom
           sx={{
-            fontFamily: '"Roboto", "Arial", sans-serif', // Change font family to something modern
-            fontWeight: 700, // Make the text bold
-            fontSize: '2.2rem', // Increase the font size
-            textAlign: 'center', // Center align the text
-            letterSpacing: '0.4px', // Add some spacing between letters for a clean look
-            color: 'primary.main', // Change text color to the primary theme color
+            fontFamily: '"Roboto", "Arial", sans-serif', 
+            fontWeight: 700, 
+            fontSize: '2.2rem', 
+            textAlign: 'center', 
+            letterSpacing: '0.4px', 
+            color: 'primary.main',
             marginBottom: 4,
           }}
         >
@@ -229,9 +227,9 @@ const Volunteer = () => {
           >
             <Accordion
               style={{
-                marginBottom: '12px', // Reduced margin
+                marginBottom: '12px', 
                 borderRadius: '8px',
-                boxShadow: '0 2px 6px rgba(0, 0, 0, 0.1)', // Smaller shadow
+                boxShadow: '0 2px 6px rgba(0, 0, 0, 0.1)', 
               }}
             >
               <AccordionSummary
@@ -241,7 +239,7 @@ const Volunteer = () => {
                 sx={{
                   backgroundColor: 'white',
                   borderRadius: '8px',
-                  padding: '5px 18px', // Reduced padding
+                  padding: '5px 18px', 
                   '&:hover': { backgroundColor: '#f5f5f5' },
                 }}
               >
@@ -249,8 +247,8 @@ const Volunteer = () => {
                   variant="h6"
                   sx={{
                     fontWeight: 550,
-                    fontSize: '1rem', // Fix the font size so it doesn't change when expanded
-                    transition: 'font-size 0.3s', // Smooth transition for font size
+                    fontSize: '1rem', 
+                    transition: 'font-size 0.3s', 
                   }}
                 >
                   {item.question}
@@ -273,12 +271,12 @@ const Volunteer = () => {
           variant="h4"
           gutterBottom
           sx={{
-            fontFamily: '"Roboto", "Arial", sans-serif', // Change font family to something modern
-            fontWeight: 700, // Make the text bold
-            fontSize: '2.2rem', // Increase the font size
-            textAlign: 'center', // Center align the text
-            letterSpacing: '0.4px', // Add some spacing between letters for a clean look
-            color: 'primary.main', // Change text color to the primary theme color
+            fontFamily: '"Roboto", "Arial", sans-serif', 
+            fontWeight: 700, 
+            fontSize: '2.2rem',
+            textAlign: 'center', 
+            letterSpacing: '0.4px', 
+            color: 'primary.main', 
             marginBottom: 6,
           }}
         >
@@ -292,10 +290,10 @@ const Volunteer = () => {
                 sx={{
                   height: '100%',
                   borderWidth: '1px',
-                  boxShadow: 'none', // Removes card shadow
-                  borderRadius: '12px', // Custom border radius (adjust the value)
-                  display: 'flex', // Use flexbox to control the layout
-                  flexDirection: 'column', // Stack children vertically
+                  boxShadow: 'none', 
+                  borderRadius: '12px', 
+                  display: 'flex', 
+                  flexDirection: 'column', 
                 }}
               >
                 {/* Image Section */}
@@ -307,8 +305,6 @@ const Volunteer = () => {
                     opportunity.volunteerImageUrl
                       ? `http://localhost:8080${opportunity.volunteerImageUrl}`  // Use the volunteerImageUrl if available
                       : 'http://localhost:3000/images/default.png'
-
-                      // Fallback to default image
                   }
                   title={opportunity.title}
                 />
@@ -332,10 +328,10 @@ const Volunteer = () => {
                     size="small"
                     color="primary"
                     sx={{
-                      color: 'purple', // Set the text color to purple
-                      textTransform: 'none', // Removes uppercase text
-                      padding: '6px 16px', // Add padding to the button (vertical, horizontal)
-                      marginBottom: '4px', // Reduce bottom margin
+                      color: 'purple',
+                      textTransform: 'none', 
+                      padding: '6px 16px',
+                      marginBottom: '4px', 
                       '&:hover': {
                         color: '#675bc8',
                         borderRadius: '8px',
@@ -362,19 +358,19 @@ const Volunteer = () => {
               display: 'block',  // Center button horizontally
               marginLeft: 'auto',
               marginRight: 'auto',
-              borderColor: 'purple',  // Set the border color to purple
-              borderRadius: '8px',    // Match border radius to the first button's style
-              padding: '6px 16px',    // Match padding to the first button's style
-              color: 'purple',        // Set the text color to purple
-              textTransform: 'none',  // Removes uppercase text
-              marginBottom: '4px',    // Add margin-bottom to match the first button's margin
+              borderColor: 'purple',  
+              borderRadius: '8px',    
+              padding: '6px 16px',   
+              color: 'purple',       
+              textTransform: 'none',  
+              marginBottom: '4px',    
               '&:hover': {
-                borderColor: '#9b59b6', // Set a slightly darker purple for the border on hover
-                backgroundColor: '#f0e6f9', // Light purple background on hover
-                color: '#9b59b6',      // Set text color to darker purple on hover
+                borderColor: '#9b59b6', 
+                backgroundColor: '#f0e6f9', 
+                color: '#9b59b6',      
               },
               '&.MuiButton-root.Mui-focused': {
-                borderColor: 'purple',  // Keep purple border color when focused
+                borderColor: 'purple', 
               },
               '&.MuiButton-root.Mui-active': {
                 borderColor: 'purple',  // Keep purple border color when clicked (active state)

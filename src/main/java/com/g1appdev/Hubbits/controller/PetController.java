@@ -34,25 +34,36 @@ public PetEntity postPetRecord(@RequestParam("name") String name,
                                @RequestParam("gender") String gender,
                                @RequestParam("description") String description,
                                @RequestParam("photo") MultipartFile photo,
-                               @RequestParam("status") String status) {
+                               @RequestParam("status") String status,
+                               @RequestParam("userName") String userName,
+                               @RequestParam("address") String address,
+                               @RequestParam("contactNumber") String contactNumber,
+                               @RequestParam("submissionDate") String submissionDate) {
     try {
-        // Save photo to a directory (adjust the path as necessary)
+        if (photo == null || photo.isEmpty()) {
+            throw new IllegalArgumentException("Photo is required for pet rehome records.");
+        }
+
+        // Save photo to a directory
         String fileName = StringUtils.cleanPath(photo.getOriginalFilename());
         Path uploadDir = Paths.get("uploads/pets");
         if (!Files.exists(uploadDir)) {
-            Files.createDirectories(uploadDir); // Create directory if it doesn't exist
+            Files.createDirectories(uploadDir);
         }
 
         Path filePath = uploadDir.resolve(fileName);
-        photo.transferTo(filePath); // Save the file to the server
+        photo.transferTo(filePath);
 
-        // Create a new PetEntity and save it
-        PetEntity pet = new PetEntity(0, name, type, breed, age, gender, description, fileName, status);
+        // Generate file URL
+        String fileUrl = "http://localhost:8080/uploads/pets/" + fileName;
+
+        // Create and save PetEntity
+        PetEntity pet = new PetEntity(0, name, type, breed, age, gender, description, fileUrl, status, userName, address, contactNumber, submissionDate);
         return pserv.postPetRecord(pet);
 
     } catch (Exception e) {
         e.printStackTrace();
-        return null; // Handle the error appropriately
+        return null; // Handle and log this error appropriately
     }
 }
 
@@ -76,6 +87,5 @@ public PetEntity postPetRecord(@RequestParam("name") String name,
     public String deletePet(@PathVariable int pid){
         return pserv.deletePet(pid);
     }
-
 }
 

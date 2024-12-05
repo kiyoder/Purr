@@ -365,6 +365,24 @@ const CreatePostDialog = ({
                 height: "100%",
                 }}
             >
+              <TextField
+                label="Pet Type"
+                name="petcategory"
+                value={formData.petcategory}
+                onChange={handleInputChange}
+                fullWidth
+                margin="normal"
+                InputLabelProps={{
+                  shrink: true,
+                  style: {
+                    marginBottom: "8px",
+                  },
+                }}
+                sx={{
+                  fontSize: "1.2rem",
+                  padding: "10px",
+                }}
+              />
             <TextField
               label="Date Reported"
               type="date"

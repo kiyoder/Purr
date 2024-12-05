@@ -135,10 +135,6 @@ const VolunteerDashboard = () => {
 
     return (
         <Container maxWidth="lg">
-            <br />
-            <Typography variant="h4" gutterBottom>
-                Volunteer Opportunities Admin Dashboard
-            </Typography>
             <Grid container spacing={3} style={{ marginTop: '20px' }}>
                 {volunteerOpportunities.map((opportunity) => (
                     <Grid item xs={12} sm={6} md={4} key={opportunity.opportunityID}>

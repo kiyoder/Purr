@@ -1,14 +1,17 @@
 import React from 'react';
 import { Drawer, List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
-import { People, Favorite, Pets, Event, Settings, Logout } from '@mui/icons-material';
+import { People, Favorite, Pets, Event, Settings, Logout, AttachMoney, Article } from '@mui/icons-material';
 
 const sections = [
     { label: 'Users', icon: <People /> },
     { label: 'Adoptions', icon: <Favorite /> },
+    { label: 'Rehome', icon: <Favorite /> },
+    { label: 'Donations', icon: <AttachMoney /> },
     { label: 'Sponsorships', icon: <Pets /> },
     { label: 'Lost and Found', icon: <Event /> },
     { label: 'Volunteers', icon: <People /> },
     { label: 'Events', icon: <Event /> },
+    { label: 'Articles', icon: <Article /> },
     { label: 'Settings', icon: <Settings /> },
     { label: 'Logout', icon: <Logout /> },
 ];
@@ -19,12 +22,13 @@ const AdminNavbar = ({ selectedTab, setSelectedTab }) => (
         sx={{
             width: 240,
             flexShrink: 0,
-            position: 'fixed',
+            position: 'relative',
             top: 64,
             [`& .MuiDrawer-paper`]: {
+                paddingTop: 10,
                 width: 240,
                 boxSizing: 'border-box',
-                position: 'relative',
+                position: 'fixed',
                 top: 64,
             },
         }}

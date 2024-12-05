@@ -24,13 +24,16 @@ const PostCard = ({ item, fetchLostItems, onEdit }) => {
   const [userId, setUserId] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false); // Admin role check
   const [creatorUsername, setCreatorUsername] = useState("Unknown");
+  const [creatorPhoneNumber, setCreatorPhoneNumber] = useState("Unknown");
+  const [creatorEmail, setCreatorEmail] = useState("Unknown");
   const [openDialog, setOpenDialog] = useState(false);
 
   useEffect(() => {
-    // Fetch the creator's username
     const fetchCreatorUsername = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/api/users/${item.creatorid}`);
+        const response = await axios.get(
+          `http://localhost:8080/api/users/${item.creatorid}`
+        );
         if (response.status === 200) {
           setCreatorUsername(response.data.username);
         } else {
@@ -46,11 +49,51 @@ const PostCard = ({ item, fetchLostItems, onEdit }) => {
   }, [item.creatorid]);
 
   useEffect(() => {
+    const fetchCreatorPhoneNumber = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:8080/api/users/${item.creatorid}`
+        );
+        if (response.status === 200) {
+          setCreatorPhoneNumber(response.data.phoneNumber);
+        } else {
+          setCreatorPhoneNumber("Unknown");
+        }
+      } catch (error) {
+        console.error("Error fetching creator's details:", error);
+        setCreatorPhoneNumber("Unknown");
+      }
+    };
+
+    fetchCreatorPhoneNumber();
+  }, [item.creatorid]);
+
+  useEffect(() => {
+    const fetchCreatorEmail = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:8080/api/users/${item.creatorid}`
+        );
+        if (response.status === 200) {
+          setCreatorEmail(response.data.email);
+        } else {
+          setCreatorEmail("Unknown");
+        }
+      } catch (error) {
+        console.error("Error fetching creator's details:", error);
+        setCreatorEmail("Unknown");
+      }
+    };
+
+    fetchCreatorEmail();
+  }, [item.creatorid]);
+
+  useEffect(() => {
     // Retrieve user details from local storage
     const storedUser = JSON.parse(localStorage.getItem("user"));
     if (storedUser) {
       setUserId(storedUser.userId);
-      setIsAdmin(storedUser.role === "ROLE_ADMIN"); // Check if user is an admin
+      setIsAdmin(storedUser.role === "ROLE_ADMIN");
     } else {
       console.error("User details not found in local storage.");
     }
@@ -59,20 +102,29 @@ const PostCard = ({ item, fetchLostItems, onEdit }) => {
   const handleDelete = async () => {
     console.log("Attempting to delete report ID:", item.reportid);
     try {
-      await axios.delete(`http://localhost:8080/api/lostandfound/${item.reportid}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`, // Ensure token is sent
-        },
-      });
+      await axios.delete(
+        `http://localhost:8080/api/lostandfound/${item.reportid}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`, // Ensure token is sent
+          },
+        }
+      );
       alert("Item deleted successfully");
       fetchLostItems();
       setOpenDialog(false); // Close the confirmation dialog
     } catch (error) {
-      console.error("Error deleting item:", error.response?.data || error.message);
-      alert(`Failed to delete item: ${error.response?.data?.message || error.message}`);
+      console.error(
+        "Error deleting item:",
+        error.response?.data || error.message
+      );
+      alert(
+        `Failed to delete item: ${
+          error.response?.data?.message || error.message
+        }`
+      );
     }
   };
-
 
   const handleOpenDialog = () => {
     setOpenDialog(true); // Open the dialog when the delete button is clicked
@@ -110,13 +162,21 @@ const PostCard = ({ item, fetchLostItems, onEdit }) => {
           left: 0,
           right: 0,
           bottom: 0,
-          background: "linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 30%, rgba(0, 0, 0, 1) 100%)", // Gradient transition from image to black
+          background:
+            "linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 30%, rgba(0, 0, 0, 1) 100%)", // Gradient transition from image to black
           borderRadius: "8px",
-          zIndex: 1, 
+          zIndex: 1,
         }}
       />
-      <CardContent sx={{ flexGrow: 1, overflow: "hidden", position: "relative", zIndex: 10 }}>
-        <Stack direction="row" spacing={1} sx={{ mt: 32, mb: 2}}>
+      <CardContent
+        sx={{
+          flexGrow: 1,
+          overflow: "hidden",
+          position: "relative",
+          zIndex: 10,
+        }}
+      >
+        <Stack direction="row" spacing={1} sx={{ mt: 30, mb: 2 }}>
           <Chip
             label={item.reporttype === "lost" ? "Lost" : "Found"}
             variant="outlined"
@@ -125,7 +185,8 @@ const PostCard = ({ item, fetchLostItems, onEdit }) => {
               fontWeight: "bold",
               fontSize: "16px",
               borderWidth: 3,
-              borderColor: item.reporttype === "lost" ? "error.main" : "success.main",
+              borderColor:
+                item.reporttype === "lost" ? "error.main" : "success.main",
             }}
           />
           <Chip
@@ -157,12 +218,12 @@ const PostCard = ({ item, fetchLostItems, onEdit }) => {
           sx={{
             whiteSpace: "normal",
             overflowWrap: "break-word",
-            mt: 1
+            mt: 1,
           }}
         >
           {item.description}
         </Typography>
-        <Stack direction="row" spacing={1} alignItems="center" sx={{mt: 3}}>
+        <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 3 }}>
           <Typography color="#7f71f5" fontSize="14px">
             Posted by
           </Typography>
@@ -172,15 +233,50 @@ const PostCard = ({ item, fetchLostItems, onEdit }) => {
             color="secondary"
             fontWeight="bold"
             sx={{
-            whiteSpace: "nowrap",
-            textDecoration: "none",
-            "&:hover": {
-              textDecoration: "underline",
-              color: "primary.main",
-            },
-          }}
-            >
+              whiteSpace: "nowrap",
+              textDecoration: "none",
+              "&:hover": {
+                textDecoration: "underline",
+                color: "primary.main",
+              },
+            }}
+          >
             {creatorUsername}
+          </Typography>
+        </Stack>
+        <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1 }}>
+          <Typography
+            component={Link}
+            to={`/user/${item.creatorid}`} // Link to User.js
+            color="secondary"
+            fontWeight="bold"
+            sx={{
+              whiteSpace: "nowrap",
+              textDecoration: "none",
+              "&:hover": {
+                textDecoration: "underline",
+                color: "primary.main",
+              },
+            }}
+          >
+            {creatorPhoneNumber}
+          </Typography>
+          <Typography>-</Typography>
+          <Typography
+            component={Link}
+            to={`/user/${item.creatorid}`} // Link to User.js
+            color="secondary"
+            fontWeight="bold"
+            sx={{
+              whiteSpace: "nowrap",
+              textDecoration: "none",
+              "&:hover": {
+                textDecoration: "underline",
+                color: "primary.main",
+              },
+            }}
+          >
+            {creatorEmail}
           </Typography>
         </Stack>
       </CardContent>
@@ -188,7 +284,11 @@ const PostCard = ({ item, fetchLostItems, onEdit }) => {
       {/* Show edit and delete buttons for the creator or admin */}
       {(parseInt(userId) === item.creatorid || isAdmin) && (
         <div style={{ position: "fixed", top: 16, right: 16, zIndex: 10 }}>
-          <IconButton color="primary" onClick={handleEdit} sx={{ marginRight: 1 }}>
+          <IconButton
+            color="primary"
+            onClick={handleEdit}
+            sx={{ marginRight: 1 }}
+          >
             <EditIcon />
           </IconButton>
           <IconButton
@@ -245,7 +345,12 @@ const PostCard = ({ item, fetchLostItems, onEdit }) => {
             textAlign: "center",
           }}
         >
-          <Typography color="error" fontSize="18px" fontWeight="bold" sx={{ whiteSpace: "nowrap", mt: 5 }}>
+          <Typography
+            color="error"
+            fontSize="18px"
+            fontWeight="bold"
+            sx={{ whiteSpace: "nowrap", mt: 5 }}
+          >
             Are you sure you want to delete this post?
           </Typography>
           <Typography color="error" fontSize="18px">
@@ -258,7 +363,10 @@ const PostCard = ({ item, fetchLostItems, onEdit }) => {
             <Typography
               variant="h5"
               align="center"
-              sx={{ fontWeight: "regular", fontFamily: "'Caramel', sans-serif" }}
+              sx={{
+                fontWeight: "regular",
+                fontFamily: "'Caramel', sans-serif",
+              }}
             >
               Cancel
             </Typography>
@@ -267,7 +375,10 @@ const PostCard = ({ item, fetchLostItems, onEdit }) => {
             <Typography
               variant="h5"
               align="center"
-              sx={{ fontWeight: "regular", fontFamily: "'Caramel', sans-serif" }}
+              sx={{
+                fontWeight: "regular",
+                fontFamily: "'Caramel', sans-serif",
+              }}
             >
               Delete
             </Typography>

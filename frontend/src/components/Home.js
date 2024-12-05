@@ -1,26 +1,31 @@
-
 import React, { useState, useEffect } from 'react';
-import { TextField, Button, Box, Typography, Snackbar, Grid, Card, CardContent, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, ToggleButton } from '@mui/material';
+import { Button, Box, Typography, Snackbar, Grid, Card, CardContent, ToggleButton } from '@mui/material';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate for redirection
-import landingImage from '../assets/landing.png'; // Import the image
+import { useNavigate } from 'react-router-dom';
+import landingImage from '../assets/landing.png';
 import mockImage from '../assets/mock.png';
+import petPlaceholder from '../assets/petplaceholder.png';
+
+//ABOUT US IMAGES
+import AU_Lou from '../assets/AU_Lou.jpg';
+import AU_Jai from '../assets/AU_Jai.jpg';
+import AU_Stela from '../assets/AU_Stela.jpg';
+import AU_Nek from '../assets/AU_Nek.jpg';
+import AU_Kiyo from '../assets/AU_Kiyo.jpg';
+import AU_Selma from '../assets/AU_Selma.jpg';
 
 const Home = () => {
-  const [formData, setFormData] = useState({
-    title: '',
-    content: '',
-    author: '',
-  });
-  const [successMessage, setSuccessMessage] = useState('');
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
+    const [formData, setFormData] = useState({
+        title: '',
+        content: '',
+        author: '',
+        link: '', // Add link field
+        image: '',
+      });
+      
   const [articles, setArticles] = useState([]);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [deleteId, setDeleteId] = useState(null);
-  const [isEditing, setIsEditing] = useState(false);
-  const [currentId, setCurrentId] = useState(null);
 
-  const navigate = useNavigate(); // Initialize the navigate hook
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchArticles();
@@ -29,246 +34,182 @@ const Home = () => {
   const fetchArticles = async () => {
     try {
       const response = await axios.get('http://localhost:8080/api/newsfeed');
-      setArticles(response.data);
+      const updatedArticles = response.data.map((article) => ({
+        ...article,
+        image: article.imageUrl ? `http://localhost:8080${article.imageUrl}` : petPlaceholder,
+      }));
+      setArticles(updatedArticles);
     } catch (error) {
-      console.error("Error fetching articles:", error);
+      console.error('Error fetching articles:', error);
     }
   };
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      if (isEditing && currentId) {
-        await axios.put(`http://localhost:8080/api/newsfeed/${currentId}`, formData);
-        setSuccessMessage('Article updated successfully!');
-      } else if (!isEditing) {
-        await axios.post('http://localhost:8080/api/newsfeed', formData);
-        setSuccessMessage('Article posted successfully!');
-      } else {
-        setSuccessMessage('Update failed. Article ID is missing.');
-      }
-      setSnackbarOpen(true);
-      fetchArticles();
-      resetForm();
-    } catch (error) {
-      setSuccessMessage('Submission failed. Try again.');
-      setSnackbarOpen(true);
-    }
-  };
-
-  const resetForm = () => {
-    setFormData({ title: '', content: '', author: '' });
-    setIsEditing(false);
-    setCurrentId(null);
-  };
-
-  const handleEdit = (article) => {
-    setFormData(article);
-    setIsEditing(true);
-    setCurrentId(article.articleID);
-  };
-
-  const handleDeleteClick = (articleID) => {
-    setDeleteId(articleID);
-    setDeleteDialogOpen(true);
-  };
-
-  const confirmDelete = async () => {
-    try {
-      await axios.delete(`http://localhost:8080/api/newsfeed/${deleteId}`);
-      setArticles(articles.filter(article => article.articleID !== deleteId));
-      setDeleteDialogOpen(false);
-    } catch (error) {
-      setDeleteDialogOpen(false);
-    }
-  };
-
-  const handleSnackbarClose = () => {
-    setSnackbarOpen(false);
-  };
-
-  // Function to format the date to a readable format
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleString();
   };
 
-  // Redirect to the AdoptionForm page when 'Adopt Now' button is clicked
-  const handleAdoptNowClick = () => {
-    navigate('/adopt'); // Use navigate to redirect to the AdoptionForm page
-  };
-
   return (
-    <Box sx={{ padding: 3 }}>
-
-      {/* Page Layout */}
-      <Grid container spacing={3}>
-        {/* Left Side */}
+    <Box>
+      {/* Top Page Layout */}
+      <Grid container spacing={3} sx={{ padding: '50px' }}>
         <Grid item xs={5} container justifyContent="center" alignItems="center">
-          <Typography variant="h4" sx={{ mb: 2 }}>Give a New Life to PURR</Typography>
-          <Typography variant="body1" sx={{ mb: 3 }}>
-            Pet adoption and rehoming are both vital aspects of animal welfare, offering hope and a fresh start to pets in need.
-            Open your heart and your home to a shelter pet.
-          </Typography>
-          <Box sx={{ display: 'flex', gap: 4 }}>
-            <ToggleButton value="adopt"
-              onClick={handleAdoptNowClick} // Add the handleAdoptNowClick function here
-              sx={{
-                border: '2px solid',
-                borderRadius: '8px',
-                padding: '12px 36px',
-                borderColor: 'primary.main',
-                backgroundColor: 'primary.main',
-                color: '#fff',
-                '&:hover': {
-                  backgroundColor: 'white',
-                  color: 'primary.main',
-                },
-              }}
-            >
-              Adopt Now
-            </ToggleButton>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'center', textAlign: 'center' }}>
+            <Typography variant="h3" style={{ fontWeight: 'bold' }}>Give a New Life to PURR</Typography>
+            <Typography variant="h5">
+              Pet adoption and rehoming are vital aspects of animal welfare, offering hope and a fresh start to pets in need.
+              Open your heart and your home to a shelter pet.
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 4 }}>
+              <ToggleButton
+                value="adopt"
+                onClick={() => navigate('/adopt')}
+                sx={{
+                  border: '2px solid',
+                  borderRadius: '8px',
+                  padding: '12px 36px',
+                  borderColor: 'primary.main',
+                  backgroundColor: 'primary.main',
+                  color: '#fff',
+                  '&:hover': { backgroundColor: 'white', color: 'primary.main' },
+                }}
+              >
+                Adopt Now
+              </ToggleButton>
 
-            <ToggleButton value="adopt"
-              onClick={handleSubmit}
-              sx={{
-                border: '2px solid',
-                borderRadius: '8px',
-                padding: '12px 36px',
-                borderColor: 'secondary.main',
-                backgroundColor: 'secondary.main',
-                color: '#fff',
-                '&:hover': {
-                  backgroundColor: 'white',
-                  color: 'secondary.main',
-                },
-              }}
-            >
-              Rehome Now
-            </ToggleButton>
+              <ToggleButton
+                value="rehome"
+                onClick={() => navigate('/adopt')}
+                sx={{
+                  border: '2px solid',
+                  borderRadius: '8px',
+                  padding: '12px 36px',
+                  borderColor: 'secondary.main',
+                  backgroundColor: 'secondary.main',
+                  color: '#fff',
+                  '&:hover': { backgroundColor: 'white', color: 'secondary.main' },
+                }}
+              >
+                Rehome Now
+              </ToggleButton>
+            </Box>
           </Box>
 
         </Grid>
 
-        {/* Right Side */}
         <Grid item xs={7} container justifyContent="center" alignItems="center">
           <img src={landingImage} alt="Pet Adoption" style={{ width: '70%', height: 'auto' }} />
         </Grid>
       </Grid>
 
-      <img src={mockImage} alt="Mock" style={{ width: '80%', height: 'auto', display: 'block', margin: '0 auto'}} />
+      <img src={mockImage} alt="Mock" style={{ width: '80%', height: 'auto', display: 'block', margin: '0 auto' }} />
 
-      {/* News Article Form */}
-      <Box component="form" onSubmit={handleSubmit} sx={styles.container}>
-        <Typography variant="h6">{isEditing ? 'Update Article' : 'Post a News Article'}</Typography>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <TextField
-            name="title"
-            label="Title"
-            variant="outlined"
-            sx={styles.textField}
-            value={formData.title}
-            onChange={handleChange}
-            required
-          />
-          <TextField
-            name="content"
-            label="Content"
-            variant="outlined"
-            multiline
-            rows={4}
-            sx={styles.textField}
-            value={formData.content}
-            onChange={handleChange}
-            required
-          />
-          <TextField
-            name="author"
-            label="Author"
-            variant="outlined"
-            sx={styles.textField}
-            value={formData.author}
-            onChange={handleChange}
-          />
-        </Box>
-        <Button type="submit" variant="contained" color="primary" sx={styles.button}>
-          {isEditing ? 'Update' : 'Post'}
-        </Button>
-      </Box>
-
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={6000}
-        onClose={handleSnackbarClose}
-        message={successMessage}
-      />
 
       {/* News Feed Cards */}
-      <Typography variant="h4" sx={{ mb: 3 }}>News Feed</Typography>
-      <Grid container spacing={3}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', paddingTop: '50px' }}>
+        <Typography variant="h4" sx={{ my: 3, fontWeight: 'bold' }}>
+          Pet News
+        </Typography>
+      </Box>
+
+      <Grid container spacing={3} sx={{ padding: 3 }}>
         {articles.map((article) => (
           <Grid item xs={12} sm={6} md={4} key={article.articleID}>
-            <Card sx={{ padding: 2 }}>
-              <CardContent>
-                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>{article.title}</Typography>
-                <Typography variant="body2" sx={{ mb: 1 }}>{article.content}</Typography>
-                <Typography variant="body2" sx={{ fontWeight: 'bold' }} color="textSecondary">By {article.author}</Typography>
-                <Typography variant="body2" color="textSecondary">
-                  Posted on: {formatDate(article.createdAt)}
+            <Card sx={{ display: 'flex', flexDirection: 'column', position: 'relative', padding: 2, height: '100%' }}>
+              <Box
+                sx={{
+                  width: '100%',
+                  height: 180,
+                  backgroundImage: `url(${article.image})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  borderRadius: 1,
+                }}
+              />
+              <CardContent sx={{ flexGrow: 1 }}>
+                <Typography variant="h6" style={{ fontWeight: 'bold' }}>{article.title || 'Untitled'}</Typography>
+                <Typography variant="body2" sx={{ my: 1 }}>
+                  {article.content.length > 100 ? `${article.content.substring(0, 100)}...` : article.content || 'No content available.'}
                 </Typography>
-                <Box sx={{ mt: 2 }}>
-                  <Button color="primary" onClick={() => handleEdit(article)}>Edit</Button>
-                  <Button color="secondary" onClick={() => handleDeleteClick(article.articleID)}>Delete</Button>
-                </Box>
+                <Typography variant="body2" color="text.secondary">
+                  {`By ${article.author || 'Unknown'} | Published: ${article.publishedDate ? formatDate(article.publishedDate) : 'N/A'}`}
+                </Typography>
               </CardContent>
+
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  paddingTop: 1,
+                  marginTop: 'auto',
+                }}
+              >
+                {/* Learn More Button */}
+                <Button
+                    variant="outlined"
+                    color="primary"
+                    onClick={() => window.open(article.link, '_blank')} // Opens link in a new tab
+                    disabled={!article.link} // Disable if no link is provided
+                    >
+                    Learn More
+                    </Button>
+
+              </Box>
             </Card>
           </Grid>
         ))}
       </Grid>
 
-      {/* Confirmation Dialog */}
-      <Dialog
-        open={deleteDialogOpen}
-        onClose={() => setDeleteDialogOpen(false)}
-      >
-        <DialogTitle>Confirm Deletion</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Are you sure you want to delete this article?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeleteDialogOpen(false)} color="primary">Cancel</Button>
-          <Button onClick={confirmDelete} color="secondary">Delete</Button>
-        </DialogActions>
-      </Dialog>
+      <Box sx={{ padding: 25 }}>
+        <Typography
+          variant="h4"
+          align="center"
+          sx={{ mb: 4, fontWeight: 'bold', textTransform: 'uppercase' }}
+        >
+          About Us
+        </Typography>
+        <Grid container spacing={3} justifyContent="center" sx={{ paddingTop: '50px' }}>
+          {[
+            { name: 'Louie James Carbungco', position: 'Founder', image: AU_Lou },
+            { name: 'Jierelle Jane Ravanes', position: 'Founder', image: AU_Jai },
+            { name: 'Stela Maris Asufra', position: 'Founder', image: AU_Stela },
+            { name: 'Nick Carter Lacanglacang', position: 'Founder', image: AU_Nek },
+            { name: 'Yoshinori Kyono Jr.', position: 'Founder', image: AU_Kiyo },
+            { name: 'John Edward Selma', position: 'Founder', image: AU_Selma },
+          ].map((person, index) => (
+            <Grid
+              item
+              xs={12}
+              sm={6}
+              md={4}
+              key={index}
+              sx={{ textAlign: 'center' }}
+            >
+              <Box
+                sx={{
+                  width: 200,
+                  height: 200,
+                  borderRadius: '50%',
+                  backgroundImage: `url(${person.image})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  margin: '0 auto',
+                }}
+              />
+              <Typography variant="h6" sx={{ mt: 2 }}>
+                {person.name}
+              </Typography>
+              <Typography variant="body2">{person.position}</Typography>
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
 
     </Box>
-  );
-};
 
-const styles = {
-  container: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 3,
-    maxWidth: 600,
-    margin: '0 auto',
-    backgroundColor: 'white',
-    padding: 3,
-    borderRadius: 2,
-    boxShadow: 3,
-  },
-  textField: {
-    width: '100%',
-  },
-  button: {
-    width: '100%',
-  },
+    
+  );
 };
 
 export default Home;

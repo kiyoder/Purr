@@ -13,6 +13,7 @@ import {
     CardMedia,
 } from "@mui/material";
 import axios from "axios";
+import VolunteerDashboard from "../components/Volunteer/VolunteerDashboard";
 
 const User = () => {
     const { id } = useParams(); // Get userId from the URL
@@ -147,6 +148,8 @@ const User = () => {
                     </Grid>
                 ))}
             </Grid>
+
+            <VolunteerDashboard />
         </Container>
     );
 };

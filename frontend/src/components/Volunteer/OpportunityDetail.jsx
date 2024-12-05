@@ -26,6 +26,7 @@ import UpdateOpportunityModal from "./UpdateOpportunity";
 import Swal from 'sweetalert2';
 import EditIcon from '@mui/icons-material/Edit';
 import UserProfile from './UserProfile';
+import User from '../User';
 
 const OpportunityDetail = () => {
     const { id } = useParams();
@@ -64,6 +65,7 @@ const OpportunityDetail = () => {
         setIsModalOpen(false);
     };
 
+    //fetch number of sign-ups
     const fetchSignUpCount = async () => {
         try {
             const response = await axios.get(`http://localhost:8080/api/volunteer/opportunity/${id}/signups`);
@@ -122,11 +124,9 @@ const OpportunityDetail = () => {
         setFormData({ ...formData, [name]: value });
     };
 
-
     const handleFilterChange = (event) => {
         setFilter(event.target.value);
     };
-
 
     // Check if the form is valid
     const checkFormValidity = () => {
@@ -202,7 +202,6 @@ const OpportunityDetail = () => {
         }
     };
 
-
     const handleDialogClose = () => setOpenDialog(false);
     const handleConfirmDialogClose = () => setConfirmDialogOpen(false);
     const handleSnackbarClose = () => setSnackbarOpen(false);
@@ -254,6 +253,7 @@ const OpportunityDetail = () => {
         const formattedDate = new Date(date).toLocaleDateString('en-US', options);
         return formattedDate.replace(',', ' at');
     };
+    
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1 }}>
             <Grid container spacing={3} sx={{ paddingTop: 5, paddingX: 10 }}>
@@ -485,6 +485,7 @@ const OpportunityDetail = () => {
                                 >
                                     If you have questions, feel free to reach out to the volunteer coordinator below before the event. Let's make a difference together!
                                 </Typography>
+
                             </Typography>
                         </Paper>
 
