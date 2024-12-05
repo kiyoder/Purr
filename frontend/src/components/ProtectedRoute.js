@@ -8,8 +8,8 @@ const ProtectedRoute = ({ user, children }) => {
 
     // Check if user or user.roles is undefined
     if (!user || !user.role) {
-        console.log('Redirecting to login due to missing user or roles');
-        return <Navigate to="/login" />;
+        console.log('Redirecting to homepage due to missing user or roles');
+        return <Navigate to="/" />;
     }
 
     // Check if the user has the correct role (example: 'ROLE_ADMIN')
