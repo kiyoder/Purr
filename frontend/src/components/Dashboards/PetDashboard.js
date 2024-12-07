@@ -78,7 +78,6 @@ const PetDashboard = ({ onPetAdded = () => {} }) => {
                         }
                     });
 
-                    // Update the status in the local state without creating a new entry
                     setRehomes(prev => 
                         prev.map(rehome => 
                             rehome.pid === editRehome.pid 

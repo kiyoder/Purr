@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { TextField, Button, Snackbar, Typography, Box } from '@mui/material';
 import axios from 'axios';
+import { useUser } from '../UserContext';
 
 const AdoptionForm = ({ pet }) => {
+    const { user } = useUser();
     const [formData, setFormData] = useState({
         name: '',
         address: '',
@@ -17,14 +19,23 @@ const AdoptionForm = ({ pet }) => {
 
     useEffect(() => {
         if (pet) {
-            setFormData({
-                ...formData,
+            setFormData((prevData) => ({
+                ...prevData,
                 breed: pet.breed,
-                petDescription: pet.description,
+                description: pet.description,
                 petType: pet.type,
-            });
+            }));
         }
-    }, [pet]);
+
+        if (user) {
+            setFormData((prevData) => ({
+                ...prevData,
+                name: user.firstName + ' ' + user.lastName,
+                address: user.address,
+                contactNumber: user.phoneNumber,
+            }));
+        }
+    }, [pet, user]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -40,7 +51,7 @@ const AdoptionForm = ({ pet }) => {
         }
 
         setErrorMessage('');
-        setFormData({ ...formData, [name]: value });
+        setFormData ((prevData) => ({ ...formData, [name]: value }));
     };
 
     const handleSubmit = async (e) => {
@@ -168,35 +179,32 @@ const AdoptionForm = ({ pet }) => {
                         Adoption Form
                     </Typography>
                     <TextField
-                        label="Name"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        variant="outlined"
-                        required
-                        fullWidth
-                        sx={{ marginBottom: 2 }}
-                    />
-                    <TextField
-                        label="Address"
-                        name="address"
-                        value={formData.address}
-                        onChange={handleChange}
-                        variant="outlined"
-                        required
-                        fullWidth
-                        sx={{ marginBottom: 2 }}
-                    />
-                    <TextField
-                        label="Contact Number"
-                        name="contactNumber"
-                        value={formData.contactNumber}
-                        onChange={handleChange}
-                        variant="outlined"
-                        required
-                        fullWidth
-                        sx={{ marginBottom: 2 }}
-                    />
+                            label="Your Name"
+                            name="name"
+                            value={formData.name}
+                            variant="outlined"
+                            fullWidth
+                            onChange={handleChange}
+                            sx={{ marginBottom: 2 }}
+                        />
+                        <TextField
+                            label="Address"
+                            name="address"
+                            value={formData.address}
+                            variant="outlined"
+                            fullWidth
+                            onChange={handleChange}
+                            sx={{ marginBottom: 2 }}
+                        />
+                        <TextField
+                            label="Contact Number"
+                            name="contactNumber"
+                            value={formData.contactNumber}
+                            variant="outlined"
+                            fullWidth
+                            onChange={handleChange}
+                            sx={{ marginBottom: 2 }}
+                        />
                     <TextField
                         label="Submission Date"
                         type="date"

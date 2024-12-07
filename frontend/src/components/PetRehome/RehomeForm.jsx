@@ -1,20 +1,22 @@
-import React, { useState,useRef } from "react";
+import React, { useState,useRef, useEffect } from "react";
 import { TextField, Button, Typography, Snackbar, Box, Select, MenuItem, InputLabel, FormControl } from "@mui/material";
 import axios from "axios";
+import { useUser } from '../UserContext';
 
 const RehomeForm = () => {
+  const { user } = useUser();
   const [formData, setFormData] = useState({
+    name: "",
     petType: "",
     breed: "",
     description: "",
     image: null,  
-    name: "",
-    address: "",
-    contactNumber: "",
+    userName: user ? user.firstName + ' ' + user.lastName : '',
+    address: user ? user.address : '',
+    contactNumber: user ? user.phoneNumber : '',
     submissionDate: "",
     age: "",
     gender: "",  
-    userName: "", 
   });
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -22,6 +24,17 @@ const RehomeForm = () => {
   const [contactError, setContactError] = useState(""); 
 
   const fileInputRef = useRef(null); 
+
+  useEffect(() => {
+    if (user) {
+      setFormData((prevData) => ({
+        ...prevData,
+        userName: user.firstName + ' ' + user.lastName,
+        address: user.address,
+        contactNumber: user.phoneNumber,
+      }));
+    }
+  }, [user]);
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -234,8 +247,7 @@ const RehomeForm = () => {
             name="userName"
             fullWidth
             value={formData.userName}
-            onChange={handleChange}
-            required
+            onChange={(e) => setFormData({ ...formData, userName: e.target.value })}
             sx={{ marginBottom: 2 }}
           />
           <TextField
@@ -243,8 +255,7 @@ const RehomeForm = () => {
             name="address"
             fullWidth
             value={formData.address}
-            onChange={handleChange}
-            required
+            onChange={(e) => setFormData({ ...formData, address: e.target.value })}
             sx={{ marginBottom: 2 }}
           />
           <TextField
@@ -252,27 +263,23 @@ const RehomeForm = () => {
             name="contactNumber"
             fullWidth
             value={formData.contactNumber}
-            onChange={handleChange}
-            required
-            type="tel"
-            error={!!contactError} // Show error state
-            helperText={contactError} // Display error message
+            onChange={(e) => setFormData({ ...formData, contactNumber: e.target.value })}
             sx={{ marginBottom: 2 }}
           />
           <TextField
-  label="Submission Date"
-  type="date"
-  name="submissionDate"
-  value={formData.submissionDate || new Date().toISOString().split('T')[0]} 
-  inputProps={{
-    min: new Date().toISOString().split('T')[0], // today's date as the minimum
-    max: new Date().toISOString().split('T')[0]  // today's date as the maximum
-  }}
-  variant="outlined"
-  required
-  fullWidth
-  sx={{ marginBottom: 2 }}
-/>
+            label="Submission Date"
+            type="date"
+            name="submissionDate"
+            value={formData.submissionDate || new Date().toISOString().split('T')[0]} 
+            inputProps={{
+              min: new Date().toISOString().split('T')[0], 
+              max: new Date().toISOString().split('T')[0]  
+            }}
+            variant="outlined"
+            required
+            fullWidth
+            sx={{ marginBottom: 2 }}
+          />
 
         </div>
       </div>
@@ -294,7 +301,7 @@ const RehomeForm = () => {
       {/* Success Snackbar */}
       <Snackbar
         open={!!successMessage}
-        autoHideDuration={6000}
+        autoHideDuration={3000}
         onClose={() => setSuccessMessage("")}
         message={successMessage}
         sx={{

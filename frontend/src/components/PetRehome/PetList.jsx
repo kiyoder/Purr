@@ -13,21 +13,20 @@ import {
   DialogContent,
   IconButton,
 } from "@mui/material";
-import { useNavigate } from "react-router-dom";
 import CloseIcon from "@mui/icons-material/Close";
 import AdoptionForm from '../Adoption/AdoptionForm';
 import RehomeForm from '../PetRehome/RehomeForm';
 import axios from "axios";
 import { useUser } from '../UserContext';
+import AuthModal from '../AuthModal';
 
 const PetList = ({ onPetAdded }) => {
   const { user } = useUser();
   const [openAdoption, setOpenAdoption] = useState(false);
   const [openRehome, setOpenRehome] = useState(false);
   const [selectedPet, setSelectedPet] = useState(null);
-  const navigate = useNavigate();
   const [pets, setPets] = useState([]);
-  const [adoptions, setAdoptions] = useState([]);
+  const [openAuthModal, setOpenAuthModal] = useState(false);
 
   useEffect(() => {
     fetchRecords();
@@ -72,6 +71,7 @@ const PetList = ({ onPetAdded }) => {
         setOpenAdoption(true);
     } else {
         alert("You must be logged in to adopt a pet.");
+        setOpenAuthModal(true);
     }
   };
 
@@ -86,6 +86,10 @@ const PetList = ({ onPetAdded }) => {
 
   const handleRehomeClose = () => {
     setOpenRehome(false);
+  };
+
+  const handleAuthClose = () => {
+    setOpenAuthModal(false);
   };
 
   return (
@@ -251,7 +255,8 @@ const PetList = ({ onPetAdded }) => {
           <RehomeForm />
         </DialogContent>
       </Dialog>
-
+      
+      {user && (
       <Box
         sx={{
           width: "100vw",
@@ -266,10 +271,11 @@ const PetList = ({ onPetAdded }) => {
           justifyContent: "center",
           alignItems: "center",
         }}>
+          
         <Typography variant="h7" fontWeight="bold" sx={{ mr: 2 }}>
           Do you want to rehome your pet?
         </Typography>
-        {user && (
+        
           <ToggleButton
             onClick={handleRehomeClick}
             sx={{
@@ -286,8 +292,10 @@ const PetList = ({ onPetAdded }) => {
             }}>
             Rehome
           </ToggleButton>
-        )}
+        
       </Box>
+    )}
+    <AuthModal open={openAuthModal} handleClose={handleAuthClose} />
     </>
   );
 };
