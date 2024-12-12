@@ -1,14 +1,20 @@
 package com.g1appdev.Hubbits.entity;
 
+
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "pets")
-public class PetEntity {
+public class PetEntity{
     @Id 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int pid;
@@ -21,12 +27,16 @@ public class PetEntity {
     private String description;
     private String photo;
     private String status;
+    private boolean allowSponsorship;
+
+    @OneToOne(mappedBy = "pet", cascade = CascadeType.ALL, orphanRemoval = true)
+    private PetSponsorshipEntity pSE;
 
     public PetEntity(){
         super();
     }
     
-    public PetEntity(int pid, String name,String type, String breed, int age, String gender, String description, String photo, String status){
+    public PetEntity(int pid, String name,String type, String breed, int age, String gender, String description, String photo, String status, boolean allowSponsorship){
         super();
         this.pid = pid;
         this.name = name;
@@ -36,6 +46,7 @@ public class PetEntity {
         this.description = description;
         this.photo = photo;
         this.status = status;
+        this.allowSponsorship = allowSponsorship;
     }
 
     public int getPid(){
@@ -108,5 +119,22 @@ public class PetEntity {
 
     public void setStatus(String status){
         this.status = status;
+    }
+
+    public boolean getAllowSponsorship(){
+        return allowSponsorship;
+    }
+
+    public void setAllowSponsorship(boolean allowSponsorship){
+        this.allowSponsorship = allowSponsorship;
+    }
+
+    public PetSponsorshipEntity getPetSponsor(){
+        return pSE;
+    }
+
+    public void setPetSponsorship(PetSponsorshipEntity pSE){
+        this.pSE = pSE;
+        pSE.setPet(this);
     }
 }
