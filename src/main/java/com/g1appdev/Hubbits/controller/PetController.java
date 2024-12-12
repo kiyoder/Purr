@@ -3,9 +3,12 @@ package com.g1appdev.Hubbits.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.g1appdev.Hubbits.entity.PetEntity;
+import com.g1appdev.Hubbits.entity.PetSponsorshipEntity;
 import com.g1appdev.Hubbits.service.PetService;
 
 @RestController
@@ -33,6 +36,13 @@ public class PetController {
     public PetEntity getPetById(@PathVariable int id) {
         return pserv.getPetById(id);
     }
+
+    @GetMapping("/getPetSponsorByPet/{petId}")
+    public ResponseEntity<PetEntity> getPetSponsorByPetId(@PathVariable int petId) {
+        PetEntity pet = pserv.getPetSponsorByPetId(petId);
+        return ResponseEntity.ok(pet);  // Return the PetEntity, which includes petSponsorId
+    }
+
 
     @PutMapping("/putPetDetails")
     public PetEntity putPetDetails(@RequestParam int pid, @RequestBody PetEntity newPetDetails){

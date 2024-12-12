@@ -4,6 +4,8 @@ import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import com.g1appdev.Hubbits.entity.PetEntity;
 import com.g1appdev.Hubbits.entity.PetSponsorshipEntity;
@@ -24,28 +26,38 @@ public class PetSponsorshipService {
 
     //add record
     public PetSponsorshipEntity postPetSponsorRecord(PetSponsorshipEntity petSponsor, int petId) {
-    if (petSponsor == null) {
-        throw new IllegalArgumentException("PetSponsorshipEntity cannot be null");
+        if (petSponsor == null) {
+            throw new IllegalArgumentException("PetSponsorshipEntity cannot be null");
+        }
+        Optional<PetEntity> petOptional = prepo.findById(petId);
+        if (!petOptional.isPresent()) {
+            throw new IllegalArgumentException("Pet with ID " + petId + " not found.");
+        }
+        PetEntity pet = petOptional.get();
+        petSponsor.setPet(pet); // Assuming `pet` is a field in `PetSponsorshipEntity`
+        return psrepo.save(petSponsor);
     }
-    Optional<PetEntity> petOptional = prepo.findById(petId);
-    if (!petOptional.isPresent()) {
-        throw new IllegalArgumentException("Pet with ID " + petId + " not found.");
-    }
-    PetEntity pet = petOptional.get();
-    petSponsor.setPet(pet); // Assuming `pet` is a field in `PetSponsorshipEntity`
-    return psrepo.save(petSponsor);
-}
 
     //get all records
     public List<PetSponsorshipEntity> getAllPetSponsors(){
         return psrepo.findAll();
     }
 
+    //get by its ID
     public PetSponsorshipEntity getPetSponsor(int psid) {
         Optional<PetSponsorshipEntity> petSponsorship = psrepo.findById(psid);  // This should return Optional<PetSponsorshipEntity>
         return petSponsorship.orElse(null);  // Ensure this is Optional<PetSponsorshipEntity>
     }
     
+    //get by its pet ID
+    public PetSponsorshipEntity getPetSponsorByPetId(int petId) {
+        Optional<PetEntity> pet = prepo.findById(petId);  // Find pet by ID
+        if (pet.isPresent()) {
+            return pet.get().getPetSponsor();  // Return the associated PetSponsorshipEntity
+        } else {
+            throw new RuntimeException("No pet found with id: " + petId);
+        }
+    }
     //update a record
     public PetSponsorshipEntity putPetSponsorDetails(int psid, PetSponsorshipEntity petSponsor, int petId, double increment) {
         // Find existing sponsorship

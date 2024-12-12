@@ -168,7 +168,7 @@ const PetList = () => {
 
   const handleSponsorClose = () => {
     setOpenSponsor(false);
-    setSelectedPet(null);
+    setSelectedPetForSponsor(null);
   };
 
   const getPetImage = (type) => petTypeToImage[type] || defaultImage;
@@ -185,7 +185,7 @@ const PetList = () => {
               key={index}
               sx={{
                 width: 300,
-                height: 500,
+                height: 550,
                 display: 'flex',
                 flexDirection: 'column',
                 cursor: 'pointer',
@@ -247,21 +247,11 @@ const PetList = () => {
                 {/* Sponsor Button and Progress Bar */}
                 {pet.allowSponsorship && (
                   <Box mt={2}>
-                  <Typography>
-                    Sponsorship Progress:
-                  </Typography>
-                  <LinearProgress variant="determinate" value={calculateProgress(pet)} />
-                  <Button 
-                    variant="contained" 
-                    color="primary" 
-                    onClick={(e) => {
-                      e.stopPropagation();  // Prevent opening pet detail modal
-                      handleSponsorClick(pet) // Pass the selected pet
-                    }}
-                  >
-                    Sponsor
-                  </Button>
-                </Box>
+                   <Typography>
+                      Sponsorship Progress:
+                   </Typography>
+                   <LinearProgress variant="determinate" value={calculateProgress(pet)} />
+                  </Box>
                 )}
                 {/* Edit and Delete Buttons */}
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
@@ -285,6 +275,20 @@ const PetList = () => {
                   >
                     Delete
                   </Button>
+                  {pet.allowSponsorship && (
+                    <Button 
+                      variant="contained" 
+                      color="primary" 
+                      onClick={(e) => {
+                        e.stopPropagation();  // Prevent opening pet detail modal
+                        handleSponsorClick(pet) // Pass the selected pet
+                      }}
+                    >
+                      Sponsor
+                    </Button>
+                  )}
+                  
+
                 </Box>
               </CardContent>
             </Card>
@@ -417,7 +421,10 @@ const PetList = () => {
           </IconButton>
         </DialogTitle>
         <DialogContent>
-          <PetSponsorForm pet={selectedPetForSponsor} onClose={handleSponsorClose} />
+          <PetSponsorForm 
+            pet={selectedPetForSponsor}
+            refreshPets={fetchPets} 
+            onClose={handleSponsorClose} />
         </DialogContent>
       </Dialog>
 

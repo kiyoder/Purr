@@ -1,8 +1,6 @@
 package com.g1appdev.Hubbits.entity;
 
-
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -30,13 +28,14 @@ public class PetEntity{
     private boolean allowSponsorship;
 
     @OneToOne(mappedBy = "pet", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private PetSponsorshipEntity pSE;
 
     public PetEntity(){
         super();
     }
     
-    public PetEntity(int pid, String name,String type, String breed, int age, String gender, String description, String photo, String status, boolean allowSponsorship){
+    public PetEntity(int pid, String name,String type, String breed, int age, String gender, String description, String photo, String status, boolean allowSponsorship, PetSponsorshipEntity pSE){
         super();
         this.pid = pid;
         this.name = name;
@@ -47,6 +46,7 @@ public class PetEntity{
         this.photo = photo;
         this.status = status;
         this.allowSponsorship = allowSponsorship;
+        this.pSE = pSE;
     }
 
     public int getPid(){
@@ -129,12 +129,15 @@ public class PetEntity{
         this.allowSponsorship = allowSponsorship;
     }
 
-    public PetSponsorshipEntity getPetSponsor(){
-        return pSE;
+    public Integer getPetSponsorId(){
+        if(pSE != null){
+            return pSE.getPsid();
+        }
+        return null;
+        
     }
 
     public void setPetSponsorship(PetSponsorshipEntity pSE){
         this.pSE = pSE;
-        pSE.setPet(this);
     }
 }

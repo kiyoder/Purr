@@ -3,17 +3,23 @@ package com.g1appdev.Hubbits.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-
+import com.g1appdev.Hubbits.entity.PetEntity;
 import com.g1appdev.Hubbits.entity.PetSponsorshipEntity;
+import com.g1appdev.Hubbits.service.PetService;
 import com.g1appdev.Hubbits.service.PetSponsorshipService;
+
 
 @RestController
 @RequestMapping(method = RequestMethod.GET, path = "/api/petSponsor")
 public class PetSponsorshipController {
     @Autowired
     PetSponsorshipService psserv;
+    @Autowired
+    PetService pserv;
     
     @GetMapping("/test")
     public String print(){
@@ -30,14 +36,13 @@ public class PetSponsorshipController {
         return psserv.getAllPetSponsors();
     }
 
-    @GetMapping("/getPetSponsor/{psid}")
+    @GetMapping("/getPetSponsor/{psid}")//get deatils by its ID
     public PetSponsorshipEntity getPetSponsor(@PathVariable int psid) {
         return psserv.getPetSponsor(psid);  // Return the Optional directly
     }
-    
 
     @PutMapping("/putPetSponsorDetails")
-public PetSponsorshipEntity putPetSponsorDetails(@RequestParam int psid, @RequestBody PetSponsorshipEntity petSponsor, @RequestParam int petId, @RequestParam double increment) {
+    public PetSponsorshipEntity putPetSponsorDetails(@RequestParam int psid, @RequestBody PetSponsorshipEntity petSponsor, @RequestParam int petId, @RequestParam double increment) {
         return psserv.putPetSponsorDetails(psid, petSponsor, petId, increment);
     }
 

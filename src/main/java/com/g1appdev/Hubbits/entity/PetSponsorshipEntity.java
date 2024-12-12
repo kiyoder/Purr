@@ -1,9 +1,8 @@
 package com.g1appdev.Hubbits.entity;
 
-
 import java.time.LocalDate;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -25,22 +24,22 @@ public class PetSponsorshipEntity{
     allow sponsor that will popup the amount and end date, then 
     sponsor button on card to input amount. if date expire, inactive button. if ;   */
     
-    @JsonIgnore
+
     @OneToOne
     @JoinColumn(name = "pet_id", referencedColumnName = "pid")
+    @JsonBackReference
     private PetEntity pet;
 
     public PetSponsorshipEntity(){
         super();
     }
 
-    public PetSponsorshipEntity(int psid, double amount, LocalDate sponsorshipDate, PetEntity pet){
+    public PetSponsorshipEntity(int psid, double amount, LocalDate sponsorshipDate){
         super();
         this.psid = psid;
         this.amount = amount;
         this.sponsorshipDate = sponsorshipDate;
         this.amountGained = 0;
-        this.pet = pet;
     }
 
     public int getPsid(){
@@ -73,10 +72,6 @@ public class PetSponsorshipEntity{
 
     public void setAmountGained(double amountGained){
         this.amountGained += amountGained;
-    }
-
-    public PetEntity getPet(){
-        return pet;
     }
 
     public void setPet(PetEntity pet){
