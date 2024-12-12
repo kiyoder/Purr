@@ -1,7 +1,7 @@
 import React, { useState } from 'react'; 
 import { useNavigate } from 'react-router-dom'; 
 import axios from 'axios'; 
-import { Button, Snackbar, TextField, MenuItem } from '@mui/material'; 
+import { Button, Snackbar, TextField, MenuItem, FormControlLabel, Checkbox } from '@mui/material'; 
 
 const PetForm = ({ refreshPets, onClose }) => {
   const [formData, setFormData] = useState({
@@ -13,6 +13,9 @@ const PetForm = ({ refreshPets, onClose }) => {
     description: '',
     photo: '',
     status: '',
+    allowSponsorship: '',
+    amount: '',
+    sponsorshipDate: '',
   });
   const [successMessage, setSuccessMessage] = useState('');
   const navigate = useNavigate();
@@ -21,28 +24,41 @@ const PetForm = ({ refreshPets, onClose }) => {
   const petStatuses = ['Available', 'Adopted', 'Pending'];
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    const { name, value, type, checked } = e.target;
+    setFormData({
+      ...formData,
+      [name]: type === 'checkbox' ? checked : value,
+    });
   };
 
-  
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Send POST request to the Spring Boot backend
-      await axios.post('http://localhost:8080/api/pet/postpetrecord', formData);
-      setSuccessMessage('Pet added successfully!');
+        // Send POST request for pet details
+        const petResponse = await axios.post('http://localhost:8080/api/pet/postpetrecord', formData);
+        const petId = petResponse.data.pid; // Assuming the backend returns the pet's ID
 
-      // Refresh the pet list
-      refreshPets();
+        if (formData.allowSponsorship) {
+            // Prepare sponsorship data
+            const sponsorshipData = {
+                amount: formData.amount,
+                sponsorshipDate: formData.sponsorshipDate,
+            };
 
-      // Close the form dialog
-      if (onClose) onClose();
+            // Send POST request for sponsorship details
+            const sponsorshipResponse = await axios.post(`http://localhost:8080/api/petSponsor/postPetSponsorRecord?petId=${petId}`, sponsorshipData);
+            console.log('Sponsorship response:', sponsorshipResponse.data); // Log response for debugging
+        }
+
+        setSuccessMessage('Pet and sponsorship added successfully!');
+        refreshPets(); // Refresh the pet list
+        if (onClose) onClose(); // Close the form dialog
     } catch (error) {
-      console.error('Error saving pet data:', error);
-      setSuccessMessage('Failed to save pet data.');
+        console.error('Error saving pet or sponsorship data:', error);
+        const message = error.response ? error.response.data.message : 'Failed to save pet or sponsorship data.';
+        setSuccessMessage(message); // Display detailed error message
     }
-  };
+};
 
   const handleSnackbarClose = () => {
     setSuccessMessage('');
@@ -135,6 +151,45 @@ const PetForm = ({ refreshPets, onClose }) => {
             </MenuItem>
           ))}
         </TextField>
+
+        {/* Checkbox for allowing sponsorship */}
+        <div style={{ marginTop: '20px' }}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                name="allowSponsorship"
+                checked={formData.allowSponsorship}
+                onChange={handleChange} // This will toggle allowSponsorship correctly.
+              />
+            }
+            label="Allow Sponsorship"
+          />
+
+          {/* Conditionally render the amount and sponsorship date fields if allowSponsorship is true */}
+          {formData.allowSponsorship && (
+            <>
+              <TextField
+                label="Amount"
+                name="amount"
+                type="number"
+                value={formData.amount}
+                onChange={handleChange}
+                fullWidth
+                margin="normal"
+              />
+              <TextField
+                label="Sponsorship Date"
+                name="sponsorshipDate"
+                type="date"
+                value={formData.sponsorshipDate}
+                onChange={handleChange}
+                fullWidth
+                margin="normal"
+              />
+            </>
+          )}
+        </div>
+
         <div style={{ marginTop: '20px' }}>
           <Button type="submit" variant="contained" color="primary" sx={{ mr: 2 }}>
             Add Pet
@@ -148,6 +203,7 @@ const PetForm = ({ refreshPets, onClose }) => {
           </Button>
         </div>
       </form>
+
       <Snackbar
         open={!!successMessage}
         autoHideDuration={6000}
@@ -157,7 +213,6 @@ const PetForm = ({ refreshPets, onClose }) => {
     </div>
   );
 };
-
 
 const styles = {
   container: {

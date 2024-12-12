@@ -15,11 +15,16 @@ import {
   DialogContent,
   IconButton,
   ToggleButton,
+  LinearProgress,
+  TextField,
+  Checkbox,
+  FormControlLabel,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import AdoptionForm from './AdoptionForm';
 import PetForm from './PetForm';
 import PetFormUpdate from './PetFormUpdate';
+import PetSponsorForm from './PetSponsorForm'
 
 // Import predetermined images for each pet type
 import dogImage from '../assets/golden_retriever.jpg';
@@ -39,6 +44,8 @@ const PetList = () => {
   const [petToDelete, setPetToDelete] = useState(null); // State to hold pet that is selected for deletion
   const [openEdit, setOpenEdit] = useState(false); // State for edit modal
   const [petToEdit, setPetToEdit] = useState(null); // Pet data to edit
+  const [openSponsor, setOpenSponsor] = useState(false); //Sponsor amount tab
+  const [selectedPetForSponsor, setSelectedPetForSponsor] = useState(null);
   
   const staticPets = [
     {
@@ -86,6 +93,16 @@ const PetList = () => {
     fetchPets(); // Fetch the pet data on component mount
   }, []); // Empty dependency array to run only once
 
+  // Function to calculate sponsorship progress
+  const calculateProgress = (pet) => {
+    if (pet.allowSponsorship && pet.amount > 0) {
+      return (pet.amountGained / pet.amount) * 100;
+    }
+    return 0;
+  };
+
+
+  
   const petTypeToImage = {
     Dog: dogImage,
     Cat: catImage,
@@ -144,6 +161,16 @@ const PetList = () => {
     setPetToEdit(null); // Clear the selected pet
   };
   
+  const handleSponsorClick = (pet) => {
+    setSelectedPetForSponsor(pet);
+    setOpenSponsor(true);
+  };
+
+  const handleSponsorClose = () => {
+    setOpenSponsor(false);
+    setSelectedPet(null);
+  };
+
   const getPetImage = (type) => petTypeToImage[type] || defaultImage;
 
   return (
@@ -156,7 +183,14 @@ const PetList = () => {
           pets.map((pet, index) => (
             <Card
               key={index}
-              sx={{ width: 300, height: 400, display: 'flex', flexDirection: 'column', cursor: 'pointer' }}
+              sx={{
+                width: 300,
+                height: 500,
+                display: 'flex',
+                flexDirection: 'column',
+                cursor: 'pointer',
+                position: 'relative', // Ensure proper layout for the progress bar
+              }}
               onClick={() => handleAdoptionOpen(pet)}
             >
               <CardMedia
@@ -210,29 +244,48 @@ const PetList = () => {
                 <Typography color="#5A20A8" fontStyle="italic" fontWeight="bold" noWrap>
                   {pet.description}
                 </Typography>
-                <Button
-                  variant="outlined"
-                  color="primary"
-                  sx={{ marginTop: '8px', marginRight: '8px' }}
-                  onClick={(e) => {
-                    e.stopPropagation(); // Prevent opening the pet detail modal
-                    handleEditOpen(pet); // Pass the selected pet
-                  }}
-                >
-                  Edit
-                </Button>
-
-                <Button
-                  variant="outlined"
-                  color="secondary"
-                  sx={{ marginTop: '8px' }}
-                  onClick={(e) => {
-                    e.stopPropagation(); // Prevent opening the pet detail modal
-                    handleDeleteOpen(pet);
-                  }}
-                >
-                  Delete
-                </Button>
+                {/* Sponsor Button and Progress Bar */}
+                {pet.allowSponsorship && (
+                  <Box mt={2}>
+                  <Typography>
+                    Sponsorship Progress:
+                  </Typography>
+                  <LinearProgress variant="determinate" value={calculateProgress(pet)} />
+                  <Button 
+                    variant="contained" 
+                    color="primary" 
+                    onClick={(e) => {
+                      e.stopPropagation();  // Prevent opening pet detail modal
+                      handleSponsorClick(pet) // Pass the selected pet
+                    }}
+                  >
+                    Sponsor
+                  </Button>
+                </Box>
+                )}
+                {/* Edit and Delete Buttons */}
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent opening pet detail modal
+                      handleEditOpen(pet); // Pass the selected pet
+                    }}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    color="secondary"
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent opening pet detail modal
+                      handleDeleteOpen(pet);
+                    }}
+                  >
+                    Delete
+                  </Button>
+                </Box>
               </CardContent>
             </Card>
           ))
@@ -344,6 +397,27 @@ const PetList = () => {
             refreshPets={fetchPets} // Refresh pets list after update
             onClose={handleEditClose} // Close the modal when done
           />
+        </DialogContent>
+      </Dialog>
+
+      {/*Modal To Sponsor pet*/}
+      <Dialog open={openSponsor} onClose={handleSponsorClose} fullWidth maxWidth="md">
+        <DialogTitle>
+          <IconButton
+            aria-label="close"
+            onClick={handleSponsorClose}
+            sx={{
+              position: 'absolute',
+              right: 8,
+              top: 8,
+              color: (theme) => theme.palette.grey[500],
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent>
+          <PetSponsorForm pet={selectedPetForSponsor} onClose={handleSponsorClose} />
         </DialogContent>
       </Dialog>
 
