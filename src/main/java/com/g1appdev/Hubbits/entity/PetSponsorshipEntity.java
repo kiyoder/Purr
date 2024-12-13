@@ -89,8 +89,9 @@ public class PetSponsorshipEntity{
         return this.amountGained >= this.amount;
     }
 
-    public boolean addToAmountGainedAndCheckCompletion(double increment) {
-        addAmountGained(increment);
-        return isSponsorshipComplete();
+    public boolean isSponsorshipInactive() {
+        LocalDate today = LocalDate.now();
+        return isSponsorshipComplete() || (this.sponsorshipDate != null && this.sponsorshipDate.isBefore(today));
     }
+
 }

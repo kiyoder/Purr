@@ -3,11 +3,8 @@ package com.g1appdev.Hubbits.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.g1appdev.Hubbits.entity.PetEntity;
 import com.g1appdev.Hubbits.entity.PetSponsorshipEntity;
 import com.g1appdev.Hubbits.service.PetService;
 import com.g1appdev.Hubbits.service.PetSponsorshipService;
@@ -42,8 +39,13 @@ public class PetSponsorshipController {
     }
 
     @PutMapping("/putPetSponsorDetails")
-    public PetSponsorshipEntity putPetSponsorDetails(@RequestParam int psid, @RequestBody PetSponsorshipEntity petSponsor, @RequestParam int petId, @RequestParam double increment) {
-        return psserv.putPetSponsorDetails(psid, petSponsor, petId, increment);
+    public PetSponsorshipEntity putPetSponsorDetails(@RequestParam int psid, @RequestBody PetSponsorshipEntity petSponsorNDetails) {
+        return psserv.putPetSponsorDetails(psid, petSponsorNDetails);
+    }
+
+    @PutMapping("/addAmountToSponsor")
+    public PetSponsorshipEntity addAmountToSponsor(@RequestParam int psid, @RequestParam double amount) {
+        return psserv.addAmountToSponsor(psid, amount);
     }
 
     @DeleteMapping("/deletePetSponsorDetails/{psid}")

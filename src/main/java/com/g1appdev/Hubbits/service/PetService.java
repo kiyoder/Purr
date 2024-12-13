@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.g1appdev.Hubbits.entity.PetEntity;
+import com.g1appdev.Hubbits.entity.PetSponsorshipEntity;
 import com.g1appdev.Hubbits.repository.PetRepository;
 
 @Service
@@ -28,10 +29,23 @@ public class PetService {
         return prepo.findAll();
     }
 
+    //get by ID
     public PetEntity getPetById(int id) {
         Optional<PetEntity> pet = prepo.findById(id); // Assuming findById method exists
         return pet.orElse(null); // Return null if not found (handle this in the controller if needed)
-  
+    }
+
+    public PetEntity getPetSponsorByPetId(int petId){
+        Optional<PetEntity> petOptional = prepo.findById(petId);
+        if (petOptional.isPresent()) {
+            PetEntity pet = petOptional.get();
+            // Adding petSponsorId to the pet details
+            Integer petSponsorId = pet.getPetSponsorId();  // Get the petSponsorId
+
+            return pet;
+        } else {
+            return null;
+        }
     }
     // Update a record
     @SuppressWarnings("finally")

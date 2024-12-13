@@ -4,8 +4,6 @@ import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import com.g1appdev.Hubbits.entity.PetEntity;
 import com.g1appdev.Hubbits.entity.PetSponsorshipEntity;
@@ -49,41 +47,35 @@ public class PetSponsorshipService {
         return petSponsorship.orElse(null);  // Ensure this is Optional<PetSponsorshipEntity>
     }
     
-    //get by its pet ID
-    public PetSponsorshipEntity getPetSponsorByPetId(int petId) {
-        Optional<PetEntity> pet = prepo.findById(petId);  // Find pet by ID
-        if (pet.isPresent()) {
-            return pet.get().getPetSponsor();  // Return the associated PetSponsorshipEntity
-        } else {
-            throw new RuntimeException("No pet found with id: " + petId);
-        }
-    }
     //update a record
-    public PetSponsorshipEntity putPetSponsorDetails(int psid, PetSponsorshipEntity petSponsor, int petId, double increment) {
+    @SuppressWarnings("finally")
+    public PetSponsorshipEntity putPetSponsorDetails(int psid, PetSponsorshipEntity petSponsorNDetails) {
         // Find existing sponsorship
         PetSponsorshipEntity existingSponsor = psrepo.findById(psid)
                 .orElseThrow(() -> new RuntimeException("Sponsorship not found with ID: " + psid));
-    
-        // Find associated pet
-        PetEntity pet = prepo.findById(petId)
-                .orElseThrow(() -> new RuntimeException("Pet not found with ID: " + petId));
-    
-        // Update fields from the request
-        existingSponsor.setAmount(petSponsor.getAmount());
-        existingSponsor.setSponsorshipDate(petSponsor.getSponsorshipDate());
-        existingSponsor.setPet(pet);
-    
-        // Increment amountGained
-        existingSponsor.addAmountGained(increment);
-    
-        // Check if sponsorship is complete
-        if (existingSponsor.isSponsorshipComplete()) {
-            System.out.println("Sponsorship for Pet ID " + petId + " is complete.");
-            // Add any additional completion logic here
+        try{
+            existingSponsor = psrepo.findById(psid).get();
+
+            existingSponsor.setAmount(petSponsorNDetails.getAmount());
+            existingSponsor.setExpiryDate(petSponsorNDetails.getExpiryDate());
+            existingSponsor.setAmountGained(petSponsorNDetails.getAmountGained());
+        }catch(IllegalArgumentException nex){
+            System.out.println("Error updating sponsorship");
+        }finally{
+            return psrepo.save(existingSponsor);
         }
-    
-        // Save and return the updated sponsorship
-        return psrepo.save(existingSponsor);
+    }
+
+    public PetSponsorshipEntity addAmountToSponsor(int psid, double amount) {
+        // Retrieve the sponsorship record by its ID
+        PetSponsorshipEntity sponsorship = psrepo.findById(psid)
+                .orElseThrow(() -> new RuntimeException("Sponsorship not found with ID: " + psid));
+
+        // Add the inputted amount to the amountGained
+        sponsorship.addAmountGained(amount);
+
+        // Save the updated sponsorship record
+        return psrepo.save(sponsorship);
     }
 
     //delete a record
@@ -97,4 +89,6 @@ public class PetSponsorshipService {
         }
         return msg;
     }
+
+
 }

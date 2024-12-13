@@ -15,7 +15,7 @@ const PetForm = ({ refreshPets, onClose }) => {
     status: '',
     allowSponsorship: '',
     amount: '',
-    sponsorshipDate: '',
+    expiryDate: '',
   });
   const [successMessage, setSuccessMessage] = useState('');
   const navigate = useNavigate();
@@ -42,7 +42,7 @@ const PetForm = ({ refreshPets, onClose }) => {
             // Prepare sponsorship data
             const sponsorshipData = {
                 amount: formData.amount,
-                sponsorshipDate: formData.sponsorshipDate,
+                expiryDate: formData.expiryDate,
             };
 
             // Send POST request for sponsorship details
@@ -178,10 +178,10 @@ const PetForm = ({ refreshPets, onClose }) => {
                 margin="normal"
               />
               <TextField
-                label="Sponsorship Date"
-                name="sponsorshipDate"
+                label="Expiration Date"
+                name="expiryDate"
                 type="date"
-                value={formData.sponsorshipDate}
+                value={formData.expiryDate}
                 onChange={handleChange}
                 fullWidth
                 margin="normal"

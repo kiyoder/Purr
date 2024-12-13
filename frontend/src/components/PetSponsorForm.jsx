@@ -4,7 +4,7 @@ import axios from 'axios';
 
 const PetSponsorForm = ({ pet, refreshPets, onClose }) => {
     // Initialize sponsorship details only once when pet details are available
-    const [sponsorAmount, setSponsorAmount] = useState(0); // Store the input amount for sponsorship
+    const [sponsorAmount, setSponsorAmount] = useState('');
     const [sponsorshipDetails, setSponsorshipDetails] = useState({
       amountGained: 0, // Default to 0
       amount: 0,
@@ -17,7 +17,7 @@ const PetSponsorForm = ({ pet, refreshPets, onClose }) => {
             setSponsorshipDetails({
                 amountGained: pet.pSE?.amountGained || 0,
                 amount: pet.pSE?.amount || 0,
-                expiryDate: pet.pSE?.sponsorshipDate || "Not Set",
+                expiryDate: pet.pSE?.expiryDate || "Not Set",
             });
         }
     }, [pet]); // Run only when pet details change
@@ -33,26 +33,31 @@ const PetSponsorForm = ({ pet, refreshPets, onClose }) => {
     };
 
     const handleSponsorSubmit = () => {
-        const newAmountGained = sponsorshipDetails.amountGained + sponsorAmount;
-        setSponsorshipDetails((prevDetails) => ({
-            ...prevDetails,
-            amountGained: newAmountGained,
-        }));
-
-        // Send the updated sponsorship details to the server
         axios
-            .post('http://localhost:8080/api/pet/updateSponsor', {
-                petId: pet.pid,
-                amountGained: newAmountGained,
+            .put('http://localhost:8080/api/petSponsor/addAmountToSponsor', null, {
+                params: {
+                    psid: pet.pSE.psid, // Sponsorship ID
+                    amount: sponsorAmount, // Amount to add
+                },
             })
             .then((response) => {
-                console.log('Sponsor update response:', response.data);
+                console.log('Updated sponsorship details:', response.data);
                 refreshPets(); // Refresh the pets list after successful update
-                onClose(); // Close the dialog after sponsorship
+                onClose(); // Close the dialog
             })
             .catch((error) => {
-                console.error('Error sponsoring the pet', error);
+                console.error('Error updating sponsorship amount:', error);
             });
+    };
+
+    // Disable the button if the sponsorship is inactive (expired or complete)
+    const isSponsorshipInactive = () => {
+        const { amount, amountGained, expiryDate } = sponsorshipDetails;
+        const today = new Date();
+        const expiry = new Date(expiryDate);
+
+        // Check if the sponsorship has expired or is complete
+        return amountGained >= amount || (expiryDate !== "Not Set" && expiry < today);
     };
 
     return (
@@ -77,7 +82,12 @@ const PetSponsorForm = ({ pet, refreshPets, onClose }) => {
                 <Button onClick={onClose} variant="outlined" color="secondary">
                     Cancel
                 </Button>
-                <Button onClick={handleSponsorSubmit} variant="contained" color="primary">
+                <Button 
+                    onClick={handleSponsorSubmit} 
+                    variant="contained" 
+                    color="primary"
+                    disabled={isSponsorshipInactive()} // Disable button if sponsorship is inactive
+                >
                     Sponsor
                 </Button>
             </Box>

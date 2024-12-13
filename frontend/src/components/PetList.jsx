@@ -93,13 +93,14 @@ const PetList = () => {
     fetchPets(); // Fetch the pet data on component mount
   }, []); // Empty dependency array to run only once
 
-  // Function to calculate sponsorship progress
+  // Function to calculate sponsorship progress as a percentage
   const calculateProgress = (pet) => {
-    if (pet.allowSponsorship && pet.amount > 0) {
-      return (pet.amountGained / pet.amount) * 100;
+    if (pet?.allowSponsorship && pet?.pSE?.amount > 0) {
+      return Math.min((pet.pSE.amountGained / pet.pSE.amount) * 100, 100); // Clamp at 100%
     }
-    return 0;
+    return 0; // Default to 0%
   };
+  
 
 
   
@@ -247,10 +248,17 @@ const PetList = () => {
                 {/* Sponsor Button and Progress Bar */}
                 {pet.allowSponsorship && (
                   <Box mt={2}>
-                   <Typography>
+                    <Typography>
                       Sponsorship Progress:
-                   </Typography>
-                   <LinearProgress variant="determinate" value={calculateProgress(pet)} />
+                    </Typography>
+                    <LinearProgress 
+                      variant="determinate" 
+                      value={calculateProgress(pet)} 
+                      sx={{ mt: 1 }} // Add some spacing
+                    />
+                    <Typography variant="body2" sx={{ mt: 1, fontSize: '12px', color: '#5A20A8' }}>
+                      ${pet.pSE.amountGained} raised of ${pet.pSE.amount} goal
+                    </Typography>
                   </Box>
                 )}
                 {/* Edit and Delete Buttons */}
