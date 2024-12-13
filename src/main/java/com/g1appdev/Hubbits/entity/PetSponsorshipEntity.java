@@ -18,7 +18,7 @@ public class PetSponsorshipEntity{
     private int psid;
 
     private double amount;
-    private LocalDate sponsorshipDate;
+    private LocalDate expiryDate;
     private double amountGained;
  /*add checkmark on Rehome form to 
     allow sponsor that will popup the amount and end date, then 
@@ -34,11 +34,11 @@ public class PetSponsorshipEntity{
         super();
     }
 
-    public PetSponsorshipEntity(int psid, double amount, LocalDate sponsorshipDate){
+    public PetSponsorshipEntity(int psid, double amount, LocalDate expiryDate){
         super();
         this.psid = psid;
         this.amount = amount;
-        this.sponsorshipDate = sponsorshipDate;
+        this.expiryDate = expiryDate;
         this.amountGained = 0;
     }
 
@@ -58,12 +58,12 @@ public class PetSponsorshipEntity{
         this.amount = amount;
     }
 
-    public LocalDate getSponsorshipDate(){
-        return sponsorshipDate;
+    public LocalDate getExpiryDate(){
+        return expiryDate;
     }
 
-    public void setSponsorshipDate(LocalDate sponsorshipDate){
-        this.sponsorshipDate = sponsorshipDate;
+    public void setExpiryDate(LocalDate expiryDate){
+        this.expiryDate = expiryDate;
     }
 
     public double getAmountGained(){
@@ -91,7 +91,7 @@ public class PetSponsorshipEntity{
 
     public boolean isSponsorshipInactive() {
         LocalDate today = LocalDate.now();
-        return isSponsorshipComplete() || (this.sponsorshipDate != null && this.sponsorshipDate.isBefore(today));
+        return isSponsorshipComplete() || (this.expiryDate != null && this.expiryDate.isBefore(today));
     }
 
 }
