@@ -13,7 +13,7 @@ const PetForm = ({ refreshPets, onClose }) => {
     description: '',
     photo: '',
     status: '',
-    allowSponsorship: '',
+    allowSponsorship: false,
     amount: '',
     expiryDate: '',
   });
@@ -31,8 +31,33 @@ const PetForm = ({ refreshPets, onClose }) => {
     });
   };
 
+  const validateForm = () => {
+    // Ensure age and amount are not negative
+    if (formData.age < 0) {
+      setSuccessMessage('Age cannot be negative.');
+      return false;
+    }
+    if (formData.amount < 0) {
+      setSuccessMessage('Sponsorship amount cannot be negative.');
+      return false;
+    }
+
+    // Ensure expiry date is today or in the future
+    const currentDate = new Date();
+    const expiryDate = new Date(formData.expiryDate);
+    if (formData.allowSponsorship && formData.expiryDate && expiryDate < currentDate) {
+      setSuccessMessage('Expiry date cannot be in the past.');
+      return false;
+    }
+
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!validateForm()) return; // Validate before proceeding
+
     try {
         // Send POST request for pet details
         const petResponse = await axios.post('http://localhost:8080/api/pet/postpetrecord', formData);
@@ -58,7 +83,7 @@ const PetForm = ({ refreshPets, onClose }) => {
         const message = error.response ? error.response.data.message : 'Failed to save pet or sponsorship data.';
         setSuccessMessage(message); // Display detailed error message
     }
-};
+  };
 
   const handleSnackbarClose = () => {
     setSuccessMessage('');
