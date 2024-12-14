@@ -13,7 +13,6 @@ import {
   DialogContent,
   IconButton,
 } from "@mui/material";
-import { useNavigate } from "react-router-dom";
 import CloseIcon from "@mui/icons-material/Close";
 import AdoptionForm from '../Adoption/AdoptionForm';
 import RehomeForm from '../PetRehome/RehomeForm';
@@ -26,9 +25,7 @@ const PetList = ({ onPetAdded }) => {
   const [openAdoption, setOpenAdoption] = useState(false);
   const [openRehome, setOpenRehome] = useState(false);
   const [selectedPet, setSelectedPet] = useState(null);
-  const navigate = useNavigate();
   const [pets, setPets] = useState([]);
-  const [adoptions, setAdoptions] = useState([]);
   const [openAuthModal, setOpenAuthModal] = useState(false);
 
   useEffect(() => {
@@ -93,6 +90,10 @@ const PetList = ({ onPetAdded }) => {
 
   const handleRehomeClose = () => {
     setOpenRehome(false);
+  };
+
+  const handleAuthClose = () => {
+    setOpenAuthModal(false);
   };
 
   return (
@@ -258,7 +259,7 @@ const PetList = ({ onPetAdded }) => {
           <RehomeForm />
         </DialogContent>
       </Dialog>
-
+      
       {user && (
       <Box
         sx={{

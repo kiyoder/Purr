@@ -108,7 +108,7 @@ const AdoptionDashboard = () => {
             <Grid item xs={12} sm={6} md={4} key={adoption.adoptionID}>
                 <Card style={styles.card}>
                     <CardContent>
-                        {adoption.photo && ( // Check if photo exists
+                        {adoption.photo && ( 
                             <div style={styles.imageContainer}>
                                 <img 
                                     src={adoption.photo} 
@@ -130,7 +130,7 @@ const AdoptionDashboard = () => {
                             <IconButton
                                 color="primary"
                                 onClick={() => handleEditClick(adoption)}
-                                disabled={adoption.status !== 'PENDING'} // Disable if status is not PENDING
+                                disabled={adoption.status !== 'PENDING'} 
                             >
                                 <EditIcon />
                             </IconButton>

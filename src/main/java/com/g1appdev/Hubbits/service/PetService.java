@@ -59,7 +59,4 @@ public class PetService {
         return msg;
     }
 
-   /*  public List<PetEntity> findPetsByName(String name){
-        return prepo.findPetsByName(name);
-    }*/
 }
