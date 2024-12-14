@@ -92,9 +92,7 @@ const PetList = ({ onPetAdded }) => {
     setOpenRehome(false);
   };
 
-  const handleAuthClose = () => {
-    setOpenAuthModal(false);
-  };
+
 
   return (
     <>

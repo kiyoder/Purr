@@ -77,29 +77,37 @@ const RehomeForm = () => {
   
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     const form = new FormData();
     form.append("name", formData.name);
     form.append("type", formData.petType);
     form.append("breed", formData.breed);
-    form.append("age", formData.age); 
+    form.append("age", formData.age);
     form.append("gender", formData.gender);
     form.append("description", formData.description);
-    form.append("photo", formData.image);  
-    form.append("userName", formData.userName); 
+    form.append("photo", formData.image);
+    form.append("userName", formData.userName);
     form.append("address", formData.address);
     form.append("contactNumber", formData.contactNumber);
-    form.append("submissionDate", new Date().toISOString().split('T')[0]); 
-    form.append("status", "PENDING_REHOME"); 
-
-    resetForm();
-
+    form.append("submissionDate", new Date().toISOString().split('T')[0]);
+    form.append("status", "PENDING_REHOME");
+  
     try {
-        await axios.post("http://localhost:8080/api/pet/postpetrecord", form, {
+      await axios.post("http://localhost:8080/api/pet/postpetrecord", form, {
         headers: { "Content-Type": "multipart/form-data" },
       });
+  
+      // Set success message
       setSuccessMessage("Pet successfully rehomed!");
       setErrorMessage("");
+  
+      // Reset the form
+      resetForm();
+  
+      // Reload after delay
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000); // Reload after 3 seconds
     } catch (error) {
       setSuccessMessage("");
       setErrorMessage("There was an error rehoming the pet. Please try again.");
